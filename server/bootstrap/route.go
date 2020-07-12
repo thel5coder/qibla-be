@@ -32,6 +32,13 @@ func (boot *Bootstrap) RegisterRouters() {
 	 }
 	 authenticationRoute.RegisterRoute()
 
+	 //roleroute
+	 roleRoute := routes.RoleRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 roleRoute.RegisterRoute()
+
 	 //userRoute
 	 userRoute := routes.UserRoutes{
 		 RouteGroup: apiV1,
