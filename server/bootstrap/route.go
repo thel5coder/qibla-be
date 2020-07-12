@@ -45,4 +45,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		 Handler:    handlerType,
 	 }
 	 userRoute.RegisterRoute()
+
+	 //term condition route
+	 termConditionRoute := routes.TermConditionRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 termConditionRoute.RegisterRoute()
 }
