@@ -216,6 +216,7 @@ func (uc UserUseCase) Add(input *requests.UserRequest) (err error) {
 
 func (uc UserUseCase) Delete(ID string) (error error) {
 	repository := actions.NewUserRepository(uc.DB)
+	menuPermissionUserUc := MenuPermissionUserUseCase{UcContract:uc.UcContract}
 	now := time.Now().UTC()
 
 	count, err := uc.CountByPk(ID)
@@ -236,6 +237,13 @@ func (uc UserUseCase) Delete(ID string) (error error) {
 			transaction.Rollback()
 
 			return err
+		}
+
+		err = menuPermissionUserUc.DeleteByUser(ID,transaction)
+		if err != nil {
+			transaction.Rollback()
+
+			return error
 		}
 		transaction.Commit()
 	}

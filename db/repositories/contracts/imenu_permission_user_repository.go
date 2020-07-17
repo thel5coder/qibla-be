@@ -11,4 +11,6 @@ type IMenuPermissionUserRepository interface {
 	Add(userID, menuPermissionID, createdAt, updatedAt string, tx *sql.Tx) (err error)
 
 	Delete(userID, menuPermissionID, updatedAt, deletedAt string, tx *sql.Tx) (err error)
+
+	DeleteByUser(userID, updatedAt, deletedAt string, tx *sql.Tx) (err error)
 }

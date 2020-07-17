@@ -69,3 +69,11 @@ func (uc MenuPermissionUserUseCase) Store(userID string, menuPermissionUsers []s
 
 	return nil
 }
+
+func (uc MenuPermissionUserUseCase) DeleteByUser(userID string, tx *sql.Tx) (err error) {
+	repository := actions.NewMenuPermissionUserRepository(uc.DB)
+	now := time.Now().UTC().Format(time.RFC3339)
+	err = repository.DeleteByUser(userID, now, now, tx)
+
+	return err
+}

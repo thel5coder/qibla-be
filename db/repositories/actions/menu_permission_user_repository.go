@@ -62,3 +62,10 @@ func (MenuPermissionUserRepository) Delete(userID, menuPermissionID, updatedAt, 
 
 	return err
 }
+
+func (MenuPermissionUserRepository) DeleteByUser(userID, updatedAt, deletedAt string, tx *sql.Tx) (err error) {
+	statement := `update "menu_permission_users" set "updated_at"=$1,"deleted_at"=$2 where "user_id"=$3 `
+	_, err = tx.Exec(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), userID)
+
+	return err
+}
