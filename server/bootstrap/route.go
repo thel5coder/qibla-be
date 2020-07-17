@@ -32,6 +32,13 @@ func (boot *Bootstrap) RegisterRouters() {
 	 }
 	 authenticationRoute.RegisterRoute()
 
+	 //enum options route
+	 enumOptionsRoute := routes.EnumOptionRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 enumOptionsRoute.RegisterRoute()
+
 	 //roleroute
 	 roleRoute := routes.RoleRoutes{
 		 RouteGroup: apiV1,
@@ -52,4 +59,10 @@ func (boot *Bootstrap) RegisterRouters() {
 		 Handler:    handlerType,
 	 }
 	 termConditionRoute.RegisterRoute()
+
+	 menuRoute := routes.MenuRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 menuRoute.RegisterRoute()
 }

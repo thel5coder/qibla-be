@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS "term_conditions"
     "term_type"   varchar(30)          NOT NULL,
     "description" text                 NOT NULL,
     "created_at"  timestamp            NOT NULL,
-    "deleted_at"  timestamp            NOT NULL,
-    "updated_at"  timestamp
+    "updated_at"  timestamp            NOT NULL,
+    "deleted_at"  timestamp
 );
 -- +migrate Down
 DROP TABLE IF EXISTS "term_conditions";
