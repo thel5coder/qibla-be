@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -23,7 +22,6 @@ func (repository TermConditionRepository) Browse(search, order, sort string, lim
 	statement := `select * from "term_conditions" where (lower("term_name") like $1 or lower("description") like $1) and "deleted_at" is null order by ` + order + ` ` + sort + ` limit $2 offset $3`
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
 	if err != nil {
-		fmt.Println(err)
 		return data, count, err
 	}
 

@@ -60,7 +60,7 @@ func (MenuPermissionRepository) Edit(ID, permission, updatedAt string, tx *sql.T
 }
 
 func (MenuPermissionRepository) Delete(ID, updatedAt, deletedAt string, tx *sql.Tx) (err error) {
-	statement := `update "menu_permissions" set "updated_at"=$1, "deleted_at"=$2, where "id"=$3`
+	statement := `update "menu_permissions" set "updated_at"=$1, "deleted_at"=$2 where "id"=$3`
 	_,err = tx.Exec(statement,datetime.StrParseToTime(updatedAt,time.RFC3339),datetime.StrParseToTime(deletedAt,time.RFC3339),ID)
 
 	return err

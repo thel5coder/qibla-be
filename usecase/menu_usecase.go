@@ -73,7 +73,6 @@ func (uc MenuUseCase) ReadBy(column, value string) (res viewmodel.MenuVm, err er
 			childMenus[i].MenuPermissions = append(childMenus[i].MenuPermissions,childMenuPermission.ID)
 		}
 	}
-	fmt.Println(childMenus)
 
 	res = viewmodel.MenuVm{
 		ID:              menu.ID,
@@ -105,6 +104,7 @@ func (uc MenuUseCase) Edit(inputs *requests.EditMenuRequest) (err error) {
 	repository := actions.NewMenuRepository(uc.DB)
 	menuPermissionUc := MenuPermissionUseCase{UcContract: uc.UcContract}
 	now := time.Now().UTC().Format(time.RFC3339)
+	var selectedMenuPermissionBody []viewmodel.MenuPermissionVm
 
 	transaction, err := uc.DB.Begin()
 	if err != nil {
@@ -142,7 +142,6 @@ func (uc MenuUseCase) Edit(inputs *requests.EditMenuRequest) (err error) {
 	}
 
 	if len(inputs.SelectedPermissions) > 0 {
-		var selectedMenuPermissionBody []viewmodel.MenuPermissionVm
 		for _, menuPermission := range inputs.SelectedPermissions {
 			selectedMenuPermissionBody = append(selectedMenuPermissionBody, viewmodel.MenuPermissionVm{
 				MenuID:     menuPermission.MenuID,
@@ -150,13 +149,12 @@ func (uc MenuUseCase) Edit(inputs *requests.EditMenuRequest) (err error) {
 				Permission: menuPermission.Permission,
 			})
 		}
+	}
+	err = menuPermissionUc.Store(selectedMenuPermissionBody, inputs.DeletedPermissions, transaction)
+	if err != nil {
+		transaction.Rollback()
 
-		err = menuPermissionUc.Store(selectedMenuPermissionBody, inputs.DeletedPermissions, transaction)
-		if err != nil {
-			transaction.Rollback()
-
-			return err
-		}
+		return err
 	}
 	transaction.Commit()
 
