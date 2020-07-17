@@ -50,16 +50,9 @@ func (uc MenuPermissionUseCase) Add(menuID,permission string,tx *sql.Tx) (err er
 
 func (uc MenuPermissionUseCase) Store(selectedPermissions []viewmodel.MenuPermissionVm,deletedPermissions []string,tx *sql.Tx) (err error){
 	for _,input := range selectedPermissions {
-		if input.ID == ""{
-			err = uc.Add(input.MenuID,input.Permission,tx)
-			if err != nil {
-				return err
-			}
-		}else{
-			err = uc.Edit(input.ID,input.Permission,tx)
-			if err != nil {
-				return err
-			}
+		err = uc.Add(input.MenuID,input.Permission,tx)
+		if err != nil {
+			return err
 		}
 	}
 
