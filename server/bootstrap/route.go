@@ -65,4 +65,10 @@ func (boot *Bootstrap) RegisterRouters() {
 		 Handler:    handlerType,
 	 }
 	 menuRoute.RegisterRoute()
+
+	 globalInfoCategoryMasterRoute := routes.GlobalInfoRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 globalInfoCategoryMasterRoute.RegisterRoute()
 }
