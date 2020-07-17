@@ -18,4 +18,5 @@ func (route EnumOptionRoutes) RegisterRoute(){
 	enumRoute := route.RouteGroup.Group("/options")
 	enumRoute.Use(jwtMiddleware.JWTWithConfig)
 	enumRoute.GET("/menu-permissions",handler.GetMenuPermissions)
+	enumRoute.GET("/web-comprof-category",handler.GetWebComprofCategori)
 }

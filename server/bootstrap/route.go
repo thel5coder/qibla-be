@@ -60,15 +60,24 @@ func (boot *Bootstrap) RegisterRouters() {
 	 }
 	 termConditionRoute.RegisterRoute()
 
+	 //menu route
 	 menuRoute := routes.MenuRoutes{
 		 RouteGroup: apiV1,
 		 Handler:    handlerType,
 	 }
 	 menuRoute.RegisterRoute()
 
+	 //global info route
 	 globalInfoCategoryMasterRoute := routes.GlobalInfoRoutes{
 		 RouteGroup: apiV1,
 		 Handler:    handlerType,
 	 }
 	 globalInfoCategoryMasterRoute.RegisterRoute()
+
+	 //web comprof route
+	 webComprofRoute := routes.WebComprofRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 webComprofRoute.RegisterRoute()
 }

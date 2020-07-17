@@ -37,3 +37,27 @@ func (uc EnumOptionsUseCase) GetMenuPermissionsEnums() (res []viewmodel.EnumVm){
 
 	return res
 }
+
+func (uc EnumOptionsUseCase) GetWebComprofCategoryEnums() (res []viewmodel.EnumVm){
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.Gallery,
+		Value: enums.Gallery,
+	})
+
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.Faq,
+		Value: enums.Faq,
+	})
+
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.Testimoni,
+		Value: enums.Testimoni,
+	})
+
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.Article,
+		Value: enums.Article,
+	})
+
+	return res
+}
