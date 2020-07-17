@@ -1,17 +1,21 @@
 package requests
 
-type AddMenuRequest struct {
+type addMenuRequest struct {
 	MenuID   string `json:"menu_id" validate:"required"`
 	Name     string `json:"name" validate:"required"`
 	Url      string `json:"url" validate:"required"`
 	ParentID string `json:"parent_id"`
 }
 
-type MenuRequest struct {
-	Menus []AddMenuRequest `json:"menus"`
+type AddMenuRequest struct {
+	Menus []addMenuRequest `json:"menus"`
 }
 
 type EditMenuRequest struct {
+	Menus []editMenuRequest `json:"menus"`
+}
+
+type editMenuRequest struct {
 	ID                  string                  `json:"id"`
 	Name                string                  `json:"name"`
 	Url                 string                  `json:"url"`

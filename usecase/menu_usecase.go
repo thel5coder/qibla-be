@@ -91,7 +91,7 @@ func (uc MenuUseCase) ReadByPk(ID string) (res viewmodel.MenuVm, err error) {
 	return res, err
 }
 
-func (uc MenuUseCase) Edit(inputs *[]requests.EditMenuRequest) (err error) {
+func (uc MenuUseCase) Edit(inputs *requests.EditMenuRequest) (err error) {
 	repository := actions.NewMenuRepository(uc.DB)
 	menuPermissionUc := MenuPermissionUseCase{UcContract: uc.UcContract}
 	now := time.Now().UTC().Format(time.RFC3339)
@@ -103,7 +103,7 @@ func (uc MenuUseCase) Edit(inputs *[]requests.EditMenuRequest) (err error) {
 		return err
 	}
 
-	for _, input := range *inputs {
+	for _, input := range inputs.Menus {
 		isExist, err := uc.isMenuExist(input.ID, "name", input.Name)
 		if err != nil {
 			transaction.Rollback()
@@ -151,7 +151,7 @@ func (uc MenuUseCase) Edit(inputs *[]requests.EditMenuRequest) (err error) {
 	return err
 }
 
-func (uc MenuUseCase) Add(inputs *requests.MenuRequest) (err error) {
+func (uc MenuUseCase) Add(inputs *requests.AddMenuRequest) (err error) {
 	repository := actions.NewMenuRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 

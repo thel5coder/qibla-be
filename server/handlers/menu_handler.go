@@ -19,9 +19,10 @@ func (handler MenuHandler) Browse(ctx echo.Context) error {
 	sort := ctx.QueryParam("sort")
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
+	parentId := ctx.QueryParam("parentId")
 
 	uc := usecase.MenuUseCase{UcContract: handler.UseCaseContract}
-	res, pagination, err := uc.Browse("", search, order, sort, page, limit)
+	res, pagination, err := uc.Browse(parentId, search, order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
 }
@@ -36,12 +37,12 @@ func (handler MenuHandler) Read(ctx echo.Context) error {
 }
 
 func (handler MenuHandler) Edit(ctx echo.Context) error {
-	inputs := new([]requests.EditMenuRequest)
+	inputs := new(requests.EditMenuRequest)
 
-	for _, input := range *inputs {
-		if err := ctx.Bind(input); err != nil {
-			return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
-		}
+	if err := ctx.Bind(inputs); err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	for _,input := range inputs.Menus{
 		if err := handler.Validate.Struct(input); err != nil {
 			return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 		}
@@ -54,7 +55,7 @@ func (handler MenuHandler) Edit(ctx echo.Context) error {
 }
 
 func (handler MenuHandler) Add(ctx echo.Context) error {
-	inputs := new(requests.MenuRequest)
+	inputs := new(requests.AddMenuRequest)
 
 	if err := ctx.Bind(inputs); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
