@@ -45,7 +45,7 @@ func (uc MenuUseCase) Browse(parentID, search, order, sort string, page, limit i
 func (uc MenuUseCase) ReadBy(column, value string) (res viewmodel.MenuVm, err error) {
 	repository := actions.NewMenuRepository(uc.DB)
 	menuPermissionUc := MenuPermissionUseCase{UcContract: uc.UcContract}
-	var permissions []string
+	var permissions []viewmodel.SelectedMenuPermissionVm
 
 	menu, err := repository.ReadBy(column, value)
 	if err != nil {
@@ -57,7 +57,10 @@ func (uc MenuUseCase) ReadBy(column, value string) (res viewmodel.MenuVm, err er
 		return res, err
 	}
 	for _, menuPermission := range rootMenuPermissions {
-		permissions = append(permissions, menuPermission.ID)
+		permissions = append(permissions, viewmodel.SelectedMenuPermissionVm{
+			ID:         menuPermission.ID,
+			Permission: menuPermission.Permission,
+		})
 	}
 
 	childMenus, _, err := uc.Browse(menu.ID, "", "", "", 0, 0)
@@ -70,7 +73,10 @@ func (uc MenuUseCase) ReadBy(column, value string) (res viewmodel.MenuVm, err er
 			return res,err
 		}
 		for _,childMenuPermission := range childMenuPermissions{
-			childMenus[i].MenuPermissions = append(childMenus[i].MenuPermissions,childMenuPermission.ID)
+			childMenus[i].MenuPermissions = append(childMenus[i].MenuPermissions,viewmodel.SelectedMenuPermissionVm{
+				ID:         childMenuPermission.ID,
+				Permission: childMenuPermission.Permission,
+			})
 		}
 	}
 
