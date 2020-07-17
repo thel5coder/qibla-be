@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/usecase/viewmodel"
 	"time"
@@ -47,14 +48,16 @@ func (uc MenuPermissionUseCase) Add(menuID,permission string,tx *sql.Tx) (err er
 	return err
 }
 
-func (uc MenuPermissionUseCase) Store(menuID string,selectedPermissions []viewmodel.MenuPermissionVm,deletedPermissions []string,tx *sql.Tx) (err error){
+func (uc MenuPermissionUseCase) Store(selectedPermissions []viewmodel.MenuPermissionVm,deletedPermissions []string,tx *sql.Tx) (err error){
 	for _,input := range selectedPermissions {
 		if input.ID == ""{
-			err = uc.Add(menuID,input.Permission,tx)
+			fmt.Print("add")
+			err = uc.Add(input.MenuID,input.Permission,tx)
 			if err != nil {
 				return err
 			}
 		}else{
+			fmt.Println(input.ID)
 			err = uc.Edit(input.ID,input.Permission,tx)
 			if err != nil {
 				return err

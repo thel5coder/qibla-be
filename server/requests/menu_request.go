@@ -12,14 +12,14 @@ type AddMenuRequest struct {
 }
 
 type EditMenuRequest struct {
-	Menus []editMenuRequest `json:"menus"`
+	Menus               []editMenuRequest       `json:"menus"`
+	SelectedPermissions []MenuPermissionRequest `json:"selected_permissions"`
+	DeletedPermissions  []string                `json:"deleted_permissions"`
 }
 
 type editMenuRequest struct {
-	ID                  string                  `json:"id"`
-	Name                string                  `json:"name"`
-	Url                 string                  `json:"url"`
-	IsActive            bool                    `json:"is_active"`
-	SelectedPermissions []MenuPermissionRequest `json:"selected_permissions"`
-	DeletedPermissions  []string                `json:"deleted_permissions"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Url      string `json:"url"`
+	IsActive bool   `json:"is_active"`
 }

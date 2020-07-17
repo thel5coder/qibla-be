@@ -52,18 +52,28 @@ func (uc MenuUseCase) ReadBy(column, value string) (res viewmodel.MenuVm, err er
 		return res, err
 	}
 
-	menuPermissions, err := menuPermissionUc.Browse(menu.ID)
+	rootMenuPermissions, err := menuPermissionUc.Browse(menu.ID)
 	if err != nil {
 		return res, err
 	}
-	for _, menuPermission := range menuPermissions {
-		permissions = append(permissions, menuPermission.Permission)
+	for _, menuPermission := range rootMenuPermissions {
+		permissions = append(permissions, menuPermission.ID)
 	}
 
 	childMenus, _, err := uc.Browse(menu.ID, "", "", "", 0, 0)
 	if err != nil {
 		return res, err
 	}
+	for i:=0;i<len(childMenus);i++{
+		childMenuPermissions,err := menuPermissionUc.Browse(childMenus[i].ID)
+		if err != nil {
+			return res,err
+		}
+		for _,childMenuPermission := range childMenuPermissions{
+			childMenus[i].MenuPermissions = append(childMenus[i].MenuPermissions,childMenuPermission.ID)
+		}
+	}
+	fmt.Println(childMenus)
 
 	res = viewmodel.MenuVm{
 		ID:              menu.ID,
@@ -129,21 +139,23 @@ func (uc MenuUseCase) Edit(inputs *requests.EditMenuRequest) (err error) {
 
 			return err
 		}
+	}
 
-		if len(input.SelectedPermissions) > 0 {
-			var selectedMenuPermissionBody []viewmodel.MenuPermissionVm
-			for _, menuPermission := range input.SelectedPermissions {
-				selectedMenuPermissionBody = append(selectedMenuPermissionBody, viewmodel.MenuPermissionVm{
-					ID:         menuPermission.ID,
-					Permission: menuPermission.Permission,
-				})
-			}
-			err = menuPermissionUc.Store(input.ID, selectedMenuPermissionBody, input.DeletedPermissions, transaction)
-			if err != nil {
-				transaction.Rollback()
+	if len(inputs.SelectedPermissions) > 0 {
+		var selectedMenuPermissionBody []viewmodel.MenuPermissionVm
+		for _, menuPermission := range inputs.SelectedPermissions {
+			selectedMenuPermissionBody = append(selectedMenuPermissionBody, viewmodel.MenuPermissionVm{
+				MenuID:     menuPermission.MenuID,
+				ID:         menuPermission.ID,
+				Permission: menuPermission.Permission,
+			})
+		}
 
-				return err
-			}
+		err = menuPermissionUc.Store(selectedMenuPermissionBody, inputs.DeletedPermissions, transaction)
+		if err != nil {
+			transaction.Rollback()
+
+			return err
 		}
 	}
 	transaction.Commit()
@@ -199,16 +211,16 @@ func (uc MenuUseCase) Add(inputs *requests.AddMenuRequest) (err error) {
 	return err
 }
 
-func (uc MenuUseCase) Delete(ID string) (err error){
+func (uc MenuUseCase) Delete(ID string) (err error) {
 	repository := actions.NewMenuRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	count,err := uc.countByPk(ID)
+	count, err := uc.countByPk(ID)
 	if err != nil {
 		return err
 	}
 
-	transaction,err := uc.DB.Begin()
+	transaction, err := uc.DB.Begin()
 	if err != nil {
 		transaction.Rollback()
 
@@ -216,16 +228,16 @@ func (uc MenuUseCase) Delete(ID string) (err error){
 	}
 
 	if count > 0 {
-		err = repository.Delete(ID,now,now, transaction)
+		err = repository.Delete(ID, now, now, transaction)
 		if err != nil {
 			transaction.Rollback()
 
 			return err
 		}
 
-		count,_ = uc.countBy("","parent_id",ID)
+		count, _ = uc.countBy("", "parent_id", ID)
 		if count > 0 {
-			err = repository.DeleteChild(ID,now,now, transaction)
+			err = repository.DeleteChild(ID, now, now, transaction)
 			if err != nil {
 				transaction.Rollback()
 

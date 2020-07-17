@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -28,9 +27,8 @@ func (repository MenuRepository) Browse(parentID,search, order, sort string, lim
                      where "deleted_at" is null and "parent_id"=$1`
 		rows,err = repository.DB.Query(statement,parentID)
 	}else{
-		fmt.Print("kosong")
 		statement = `select * from "menus" 
-                     where ("menu_id" like $1 or lower("name") like $1 or lower("url") like $1) and "deleted_at" is null
+                     where ("menu_id" like $1 or lower("name") like $1 or lower("url") like $1) and "deleted_at" is null and "parent_id" is null
                      order by `+order+` `+sort+` limit $2 offset $3`
 		rows,err = repository.DB.Query(statement,"%"+strings.ToLower(search)+"%",limit,offset)
 	}
@@ -95,12 +93,11 @@ func (repository MenuRepository) ReadBy(column, value string) (data models.Menu,
 }
 
 func (repository MenuRepository) Edit(input viewmodel.MenuVm, tx *sql.Tx) (err error) {
-	statement := `update "menus" set "name"=$1, "url"=$2, "parent_id"=$3, "is_active"=$4, "updated_at"=$5 where "id"=$6 and "deleted_at" is null returning "id"`
+	statement := `update "menus" set "name"=$1, "url"=$2, "is_active"=$3, "updated_at"=$4 where "id"=$5 and "deleted_at" is null returning "id"`
 	_,err = tx.Exec(
 		statement,
 		input.Name,
 		input.Url,
-		str.EmptyString(input.ParentID),
 		input.IsActive,
 		datetime.StrParseToTime(input.UpdatedAt,time.RFC3339),
 		input.ID,

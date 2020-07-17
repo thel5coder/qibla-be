@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -44,6 +45,7 @@ func (repository MenuPermissionRepository) Browse(menuID string) (data []models.
 }
 
 func (MenuPermissionRepository) Add(menuID, permission, createdAt, updatedAt string, tx *sql.Tx) (err error) {
+	fmt.Print(menuID)
 	statement := `insert into "menu_permissions" ("menu_id","permission","created_at","updated_at") values($1,$2,$3,$4)`
 	_,err = tx.Exec(statement,menuID,permission,datetime.StrParseToTime(createdAt,time.RFC3339),datetime.StrParseToTime(updatedAt,time.RFC3339))
 
