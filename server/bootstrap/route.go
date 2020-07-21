@@ -94,4 +94,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		 Handler:    handlerType,
 	 }
 	 galleryRoute.RegisterRoute()
+
+	 //testimonial route
+	 testimonialRoute := routes.TestimonialRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 testimonialRoute.RegisterRoute()
 }
