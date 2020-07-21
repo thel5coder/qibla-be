@@ -101,4 +101,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		 Handler:    handlerType,
 	 }
 	 testimonialRoute.RegisterRoute()
+
+	 //faq route
+	 faqRoute := routes.FaqRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 faqRoute.RegisterRoute()
 }
