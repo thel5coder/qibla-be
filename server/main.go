@@ -109,13 +109,14 @@ func main() {
 		JwtCred:         jwtCred,
 	}
 
+	bootApp.E.Static("/","")
+	//bootApp.E.Use(echoMiddleware.Static("statics"))
 	bootApp.E.Use(echoMiddleware.Logger())
 	bootApp.E.Use(echoMiddleware.Recover())
 	bootApp.E.Use(echoMiddleware.CORS())
 	bootApp.E.Use(middleware.HeaderXRequestID())
 
 	bootApp.RegisterRouters()
-
 	bootApp.E.Logger.Fatal(bootApp.E.Start(os.Getenv("APP_HOST_SERVER")))
 }
 

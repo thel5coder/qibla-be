@@ -80,4 +80,18 @@ func (boot *Bootstrap) RegisterRouters() {
 		 Handler:    handlerType,
 	 }
 	 webComprofRoute.RegisterRoute()
+
+	 //file route
+	 fileRoute := routes.FileRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 fileRoute.RegisterRoute()
+
+	 //gallery route
+	 galleryRoute := routes.GalleryRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 galleryRoute.RegisterRoute()
 }

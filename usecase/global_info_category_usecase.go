@@ -20,7 +20,6 @@ func (uc GlobalInfoCategoryUseCase) Browse(search,order,sort string,page, limit 
 
 	globalInfoCategories, count, err := repository.Browse(search, order, sort, limit, offset)
 	if err != nil {
-		fmt.Println(1)
 		return res, pagination, err
 	}
 

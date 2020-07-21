@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/appleboy/go-fcm v0.1.5
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-chi/chi v4.0.3+incompatible
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0

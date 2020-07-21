@@ -30,6 +30,7 @@ const (
 	defaultLastPage   = 0
 	OtpLifeTime       = "3m"
 	MaxOtpSubmitRetry = 3
+	StaticBaseUrl = "/statics"
 )
 
 //globalsmscounter
