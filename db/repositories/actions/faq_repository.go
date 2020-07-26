@@ -61,7 +61,7 @@ func (repository FaqRepository) Browse(search, order, sort string, limit, offset
 func (repository FaqRepository) ReadBy(column, value string) (data []models.Faq, err error) {
 	statement := `select f."id",f."faq_category_name",fi."id",fi."question",fi."answer",fi."created_at",fi."updated_at",fi."deleted_at" from "faqs" f
                  inner join "faq_lists" fi on fi."faq_id"=f."id"
-                where fi.`+column+`=$1 and fi."deleted_at" is null`
+                where `+column+`=$1 and fi."deleted_at" is null`
 	rows,err := repository.DB.Query(statement,value)
 	if err != nil {
 		return data,err

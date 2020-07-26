@@ -107,6 +107,7 @@ func (uc FaqUseCase) Add(input *requests.FaqRequest) (err error) {
 
 	isExist, err := uc.isExist("", input.FaqCategoryName)
 	if err != nil {
+		fmt.Println(1)
 		return err
 	}
 
@@ -120,13 +121,14 @@ func (uc FaqUseCase) Add(input *requests.FaqRequest) (err error) {
 	if isExist {
 		faqs,err := uc.readBy("faq_category_name",input.FaqCategoryName)
 		if err != nil {
+			fmt.Println(2)
 			transaction.Rollback()
 
 			return err
 		}
 
 		if len(faqs) > 0 {
-			faqID = faqs[1].ID
+			faqID = faqs[0].ID
 		}
 	}else{
 		body := viewmodel.FaqVm{
@@ -136,6 +138,7 @@ func (uc FaqUseCase) Add(input *requests.FaqRequest) (err error) {
 		}
 		faqID,err = repository.Add(body,input.WebContentCategoryID,transaction)
 		if err != nil {
+			fmt.Println(3)
 			transaction.Rollback()
 
 			return err
@@ -152,6 +155,7 @@ func (uc FaqUseCase) Add(input *requests.FaqRequest) (err error) {
 
 	err = faqListUc.Store(faqID, faqLists, transaction)
 	if err != nil {
+		fmt.Println(4)
 		transaction.Rollback()
 
 		return err
