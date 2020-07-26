@@ -61,7 +61,7 @@ func (uc FaqUseCase) readBy(column,value string) (res []viewmodel.FaqVm,err erro
 }
 
 func (uc FaqUseCase) ReadByPk(ID string) (res []viewmodel.FaqVm, err error) {
-	res,err = uc.readBy("faq_id",ID)
+	res,err = uc.readBy("fi.faq_id",ID)
 	if err != nil {
 		return res,err
 	}
@@ -119,7 +119,7 @@ func (uc FaqUseCase) Add(input *requests.FaqRequest) (err error) {
 	}
 
 	if isExist {
-		faqs,err := uc.readBy("faq_category_name",input.FaqCategoryName)
+		faqs,err := uc.readBy("f.faq_category_name",input.FaqCategoryName)
 		if err != nil {
 			fmt.Println(2)
 			transaction.Rollback()
