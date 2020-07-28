@@ -6,7 +6,7 @@ type Testimonial struct {
 	ID                   string         `db:"id"`
 	WebContentCategoryID string         `db:"web_content_category_id"`
 	FileID               string         `db:"file_id"`
-	Path                 string         `db:"path"`
+	Path                 sql.NullString `db:"path"`
 	CustomerName         string         `db:"customer_name"`
 	JobPosition          string         `db:"job_position"`
 	Testimony            string         `db:"testimony"`
