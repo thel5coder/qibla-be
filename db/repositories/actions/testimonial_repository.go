@@ -53,7 +53,7 @@ func (repository TestimonialRepository) Browse(search, order, sort string, limit
 	}
 
 	statement = `select count(t."id") from "testimonials" t
-                 inner join "files" file on file."id"=t."file_id"
+                 left join "files" file on file."id"=t."file_id"
                 where (lower(t."customer_name") like $1 or lower(t."job_position") like $1 or lower(t."testimony") like $1)
                 and t."deleted_at" is null`
 	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
@@ -66,7 +66,7 @@ func (repository TestimonialRepository) Browse(search, order, sort string, limit
 
 func (repository TestimonialRepository) ReadBy(column, value string) (data models.Testimonial, err error) {
 	statement := `select t.*,file."path" from "testimonials" t
-                 inner join "files" file on file."id"=t."file_id"
+                 left join "files" file on file."id"=t."file_id"
                 where t.` + column + `=$1 and t."deleted_at" is null`
 	err = repository.DB.QueryRow(statement, value).Scan(
 		&data.ID,
