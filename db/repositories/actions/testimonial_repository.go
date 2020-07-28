@@ -20,7 +20,7 @@ func NewTestimonialRepository(DB *sql.DB) contracts.ITestimonialRepository {
 
 func (repository TestimonialRepository) Browse(search, order, sort string, limit, offset int) (data []models.Testimonial, count int, err error) {
 	statement := `select t.*, file."path" from "testimonials" t
-                 inner join "files" file on file."id"=t."file_id"
+                 left join "files" file on file."id"=t."file_id"
                 where (lower(t."customer_name") like $1 or lower(t."job_position") like $1 or lower(t."testimony") like $1)
                 and t."deleted_at" is null order by ` + order + ` ` + sort + ` limit $2 offset $3`
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
