@@ -11,7 +11,7 @@ type Promotion struct {
 	EndDate            string         `db:"end_date"`
 	Platform           string         `db:"platform"`
 	Position           string         `db:"position"`
-	Price              string         `db:"price"`
+	Price              int            `db:"price"`
 	Description        string         `db:"description"`
 	IsActive           bool           `db:"is_active"`
 	CreatedAt          string         `db:"created_at"`

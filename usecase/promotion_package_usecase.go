@@ -111,7 +111,7 @@ func (uc PromotionPackageUseCase) Add(input *requests.PromotionPackageRequest) (
 	body := viewmodel.PromotionPackageVm{
 		Slug:        slug.Make(input.PackageName),
 		PackageName: input.PackageName,
-		IsActive:    input.IsActive,
+		IsActive:    true,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}

@@ -24,19 +24,20 @@ func (uc PromotionUseCase) Browse(search, order, sort string, page, limit int) (
 
 	for _, promotion := range promotions {
 		res = append(res, viewmodel.PromotionVm{
-			ID:                 promotion.ID,
-			PromotionPackageID: promotion.PromotionPackageID,
-			PackagePromotion:   promotion.PackagePromotion,
-			StartDate:          promotion.StartDate,
-			EndDate:            promotion.EndDate,
-			Platform:           promotion.Platform,
-			Position:           promotion.Position,
-			Price:              promotion.Price,
-			Description:        promotion.Description,
-			IsActive:           promotion.IsActive,
-			CreatedAt:          promotion.CreatedAt,
-			UpdatedAt:          promotion.UpdatedAt,
-			DeletedAt:          promotion.DeletedAt.String,
+			ID:                   promotion.ID,
+			PromotionPackageID:   promotion.PromotionPackageID,
+			PromotionPackageName: promotion.PackageName,
+			PackagePromotion:     promotion.PackagePromotion,
+			StartDate:            promotion.StartDate,
+			EndDate:              promotion.EndDate,
+			Platform:             promotion.Platform,
+			Position:             promotion.Position,
+			Price:                promotion.Price,
+			Description:          promotion.Description,
+			IsActive:             promotion.IsActive,
+			CreatedAt:            promotion.CreatedAt,
+			UpdatedAt:            promotion.UpdatedAt,
+			DeletedAt:            promotion.DeletedAt.String,
 		})
 	}
 
@@ -50,26 +51,27 @@ func (uc PromotionUseCase) ReadBy(column, value string) (res viewmodel.Promotion
 	promotion, err := repository.ReadBy(column, value)
 
 	res = viewmodel.PromotionVm{
-		ID:                 promotion.ID,
-		PromotionPackageID: promotion.PromotionPackageID,
-		PackagePromotion:   promotion.PackagePromotion,
-		StartDate:          promotion.StartDate,
-		EndDate:            promotion.EndDate,
-		Platform:           promotion.Platform,
-		Position:           promotion.Position,
-		Price:              promotion.Price,
-		Description:        promotion.Description,
-		IsActive:           promotion.IsActive,
-		CreatedAt:          promotion.CreatedAt,
-		UpdatedAt:          promotion.UpdatedAt,
-		DeletedAt:          promotion.DeletedAt.String,
+		ID:                   promotion.ID,
+		PromotionPackageID:   promotion.PromotionPackageID,
+		PromotionPackageName: promotion.PackageName,
+		PackagePromotion:     promotion.PackagePromotion,
+		StartDate:            promotion.StartDate,
+		EndDate:              promotion.EndDate,
+		Platform:             promotion.Platform,
+		Position:             promotion.Position,
+		Price:                promotion.Price,
+		Description:          promotion.Description,
+		IsActive:             promotion.IsActive,
+		CreatedAt:            promotion.CreatedAt,
+		UpdatedAt:            promotion.UpdatedAt,
+		DeletedAt:            promotion.DeletedAt.String,
 	}
 
 	return res, err
 }
 
 func (uc PromotionUseCase) ReadByPk(ID string) (res viewmodel.PromotionVm, err error) {
-	res, err = uc.ReadBy("id", ID)
+	res, err = uc.ReadBy("p.id", ID)
 	if err != nil {
 		return res, err
 	}
@@ -81,7 +83,7 @@ func (uc PromotionUseCase) Edit(ID string, input *requests.PromotionRequest) (er
 	repository := actions.NewPromotionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	count, err := uc.CountBy(ID, "promotion_package_id", input.PromotionPackageID)
+	count, err := uc.CountBy(ID, "p.promotion_package_id", input.PromotionPackageID)
 	if err != nil {
 		return err
 	}
@@ -114,7 +116,7 @@ func (uc PromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
 	repository := actions.NewPromotionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	count, err := uc.CountBy("", "promotion_package_id", input.PromotionPackageID)
+	count, err := uc.CountBy("", "p.promotion_package_id", input.PromotionPackageID)
 	if err != nil {
 		return err
 	}
@@ -131,7 +133,7 @@ func (uc PromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
 		Position:           input.Position,
 		Price:              input.Price,
 		Description:        input.Description,
-		IsActive:           input.IsActive,
+		IsActive:           true,
 		CreatedAt:          now,
 		UpdatedAt:          now,
 	}
@@ -143,16 +145,16 @@ func (uc PromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
 	return nil
 }
 
-func (uc PromotionUseCase) Delete(ID string) (err error){
+func (uc PromotionUseCase) Delete(ID string) (err error) {
 	repository := actions.NewPromotionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	count, err := uc.CountBy("", "id", ID)
+	count, err := uc.CountBy("", "p.id", ID)
 	if err != nil {
 		return err
 	}
 	if count > 0 {
-		_,err = repository.Delete(ID,now,now)
+		_, err = repository.Delete(ID, now, now)
 		if err != nil {
 			return err
 		}

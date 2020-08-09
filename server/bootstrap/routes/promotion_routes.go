@@ -20,6 +20,6 @@ func (route PromotionRoutes) RegisterRoute(){
 	promotionRoute.GET("",handler.Browse)
 	promotionRoute.GET("/:id",handler.Read)
 	promotionRoute.PUT("/:id",handler.Edit)
-	promotionRoute.POST("/:id",handler.Add)
+	promotionRoute.POST("",handler.Add)
 	promotionRoute.DELETE("/:id",handler.Delete)
 }

@@ -7,7 +7,7 @@ type PromotionRequest struct {
 	EndDate            string `json:"end_date"`
 	Platform           string `json:"platform"`
 	Position           string `json:"position"`
-	Price              string `json:"price"`
+	Price              int `json:"price"`
 	Description        string `json:"description"`
 	IsActive           bool   `json:"is_active"`
 }

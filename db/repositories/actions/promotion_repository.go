@@ -19,11 +19,11 @@ func NewPromotionRepository(DB *sql.DB) contracts.IPromotionRepository {
 }
 
 func (repository PromotionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Promotion, count int, err error) {
-	statement := `select p.*, pp."package_name" from "promotions" 
+	statement := `select p.*, pp."package_name" from "promotions" p
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where (lower(p."package_name") like $1 or lower(p."package_promotion") or p."price" like $1 or lower(p."platform") like $1 or lower(p."position") or lower("description") like $1) 
-                 and "deleted_at" is null 
-                 order by ` + order + " " + sort + " limit $1 offset $2"
+                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower(p."platform") like $1 or lower(p."position") like $1 or lower("description") like $1) 
+                 and p."deleted_at" is null 
+                 order by ` + order + " " + sort + " limit $2 offset $3"
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
 	if err != nil {
 		return data, count, err
@@ -44,8 +44,8 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 			&dataTemp.CreatedAt,
 			&dataTemp.UpdatedAt,
 			&dataTemp.DeletedAt,
-			&dataTemp.PackageName,
 			&dataTemp.IsActive,
+			&dataTemp.PackageName,
 		)
 		if err != nil {
 			return data, count, err
@@ -55,8 +55,8 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 
 	statement = `select count(p."id") from "promotions" p 
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or p."price" like $1 or lower(p."platform") like $1 or lower(p."position") like $1 or lower("description") like $1) 
-                 and "deleted_at" is null`
+                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower(p."platform") like $1 or lower(p."position") like $1 or lower("description") like $1) 
+                 and p."deleted_at" is null`
 	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
 	if err != nil {
 		return data, count, err
@@ -66,10 +66,10 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 }
 
 func (repository PromotionRepository) ReadBy(column, value string) (data models.Promotion, err error) {
-	statement := `select count(p."id") from "promotions" p 
+	statement := `select p.*, pp."package_name" from "promotions" p 
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
                  where `+column+`=$1
-                 and "deleted_at" is null`
+                 and p."deleted_at" is null`
 	err = repository.DB.QueryRow(statement,value).Scan(
 		&data.ID,
 		&data.PromotionPackageID,
@@ -83,8 +83,8 @@ func (repository PromotionRepository) ReadBy(column, value string) (data models.
 		&data.CreatedAt,
 		&data.UpdatedAt,
 		&data.DeletedAt,
-		&data.PackageName,
 		&data.IsActive,
+		&data.PackageName,
 		)
 
 	return data,err
@@ -98,7 +98,7 @@ func (repository PromotionRepository) Edit(input viewmodel.PromotionVm) (res str
 		input.PromotionPackageID,
 		input.PackagePromotion,
 		datetime.StrParseToTime(input.StartDate,"2006-01-02"),
-		datetime.StrParseToTime(input.EndDate,"2005-01-02"),
+		datetime.StrParseToTime(input.EndDate,"2006-01-02"),
 		input.Platform,
 		input.Position,
 		input.Price,
@@ -119,7 +119,7 @@ func (repository PromotionRepository) Add(input viewmodel.PromotionVm) (res stri
 		input.PromotionPackageID,
 		input.PackagePromotion,
 		datetime.StrParseToTime(input.StartDate,"2006-01-02"),
-		datetime.StrParseToTime(input.EndDate,"2005-01-02"),
+		datetime.StrParseToTime(input.EndDate,"2006-01-02"),
 		input.Platform,
 		input.Position,
 		input.Price,
@@ -143,12 +143,12 @@ func (repository PromotionRepository) CountBy(ID, column, value string) (res int
 	if ID == "" {
 		statement := `select count(p."id") from "promotions" p 
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where `+column+`=$1 and "deleted_at" is null`
+                 where `+column+`=$1 and p."deleted_at" is null`
 		err = repository.DB.QueryRow(statement,value).Scan(&res)
 	}else{
 		statement := `select count(p."id") from "promotions" p 
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where (`+column+`=$1 and "deleted_at" is null) and "id"<>$2`
+                 where (`+column+`=$1 and p."deleted_at" is null) and p."id"<>$2`
 		err = repository.DB.QueryRow(statement,value,ID).Scan(&res)
 	}
 

@@ -60,6 +60,7 @@ func (repository PromotionPackageRepository) ReadBy(column, value string) (data 
 		&data.ID,
 		&data.Slug,
 		&data.PackageName,
+		&data.IsActive,
 		&data.CreatedAt,
 		&data.UpdatedAt,
 		&data.DeletedAt,
@@ -89,7 +90,7 @@ func (repository PromotionPackageRepository) Add(input viewmodel.PromotionPackag
 }
 
 func (repository PromotionPackageRepository) Delete(ID, updatedAt, deletedAt string) (res string, err error) {
-	statement := `update "promotion_packages" set "updated_at"=$1, "deleted_at"=$2 where "id" returning "id"`
+	statement := `update "promotion_packages" set "updated_at"=$1, "deleted_at"=$2 where "id"=$3 returning "id"`
 	err = repository.DB.QueryRow(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), ID).Scan(&res)
 
 	return res, err
