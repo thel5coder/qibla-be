@@ -64,13 +64,13 @@ func (uc EnumOptionsUseCase) GetWebComprofCategoryEnums() (res []viewmodel.EnumV
 
 func (uc EnumOptionsUseCase) GetPromotionPackageEnum() (res []viewmodel.EnumVm){
 	res = append(res ,viewmodel.EnumVm{
-		Key:   enums.PackagePromotionEnum1,
-		Value: enums.PackagePromotionEnum1,
+		Key:   enums.KeyPackagePromotionEnum1,
+		Value: enums.ValuePackagePromotionEnum1,
 	})
 
 	res = append(res ,viewmodel.EnumVm{
-		Key:   enums.PackagePromotionEnum2,
-		Value: enums.PackagePromotionEnum2,
+		Key:   enums.KeyPackagePromotionEnum1,
+		Value: enums.ValuePackagePromotionEnum2,
 	})
 
 	return res
@@ -78,18 +78,18 @@ func (uc EnumOptionsUseCase) GetPromotionPackageEnum() (res []viewmodel.EnumVm){
 
 func (uc EnumOptionsUseCase) GetPlatformEnum() (res []viewmodel.EnumVm){
 	res = append(res ,viewmodel.EnumVm{
-		Key:   enums.PlatformEnum1,
-		Value: enums.PlatformEnum1,
+		Key:   enums.KeyPlatformEnum1,
+		Value: enums.ValuePlatformEnum1,
 	})
 
 	res = append(res ,viewmodel.EnumVm{
-		Key:   enums.PlatformEnum2,
-		Value: enums.PlatformEnum2,
+		Key:   enums.KeyPlatformEnum2,
+		Value: enums.ValuePlatformEnum2,
 	})
 
 	res = append(res ,viewmodel.EnumVm{
-		Key:   enums.PlatformEnum3,
-		Value: enums.PlatformEnum2,
+		Key:   enums.KeyPlatformEnum3,
+		Value: enums.ValuePlatformEnum2,
 	})
 
 	return res
@@ -97,28 +97,28 @@ func (uc EnumOptionsUseCase) GetPlatformEnum() (res []viewmodel.EnumVm){
 
 func (uc EnumOptionsUseCase) GetPositionPromotionEnum() (res []viewmodel.EnumVm){
 	res = append(res ,viewmodel.EnumVm{
-		Key:   enums.PromotionPositionEnum1,
-		Value: enums.PromotionPositionEnum1,
+		Key:   enums.KeyPromotionPositionEnum1,
+		Value: enums.ValuePromotionPositionEnum1,
 	})
 
 	res = append(res ,viewmodel.EnumVm{
-		Key:   enums.PromotionPositionEnum2,
-		Value: enums.PromotionPositionEnum2,
+		Key:   enums.KeyPromotionPositionEnum2,
+		Value: enums.ValuePromotionPositionEnum2,
 	})
 
 	res = append(res ,viewmodel.EnumVm{
-		Key:   enums.PromotionPositionEnum3,
-		Value: enums.PromotionPositionEnum3,
+		Key:   enums.KeyPromotionPositionEnum3,
+		Value: enums.ValuePromotionPositionEnum3,
 	})
 
 	res = append(res ,viewmodel.EnumVm{
-		Key:   enums.PromotionPositionEnum4,
-		Value: enums.PromotionPositionEnum4,
+		Key:   enums.KeyPromotionPositionEnum4,
+		Value: enums.ValuePromotionPositionEnum4,
 	})
 
 	res = append(res ,viewmodel.EnumVm{
-		Key:   enums.PromotionPositionEnum5,
-		Value: enums.PromotionPositionEnum5,
+		Key:   enums.KeyPromotionPositionEnum5,
+		Value: enums.ValuePromotionPositionEnum5,
 	})
 
 	return res
