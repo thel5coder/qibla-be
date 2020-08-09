@@ -108,4 +108,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		 Handler:    handlerType,
 	 }
 	 faqRoute.RegisterRoute()
+
+	 //promotion route
+	 promotionRoute := routes.PromotionPackageRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 promotionRoute.RegisterRoute()
 }
