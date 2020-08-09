@@ -3,6 +3,7 @@ package usecase
 import (
 	"database/sql"
 	"errors"
+	"github.com/skilld-labs/go-odoo"
 	"math/rand"
 	"os"
 	queue "qibla-backend/helpers/amqp"
@@ -30,7 +31,7 @@ const (
 	defaultLastPage   = 0
 	OtpLifeTime       = "3m"
 	MaxOtpSubmitRetry = 3
-	StaticBaseUrl = "/statics"
+	StaticBaseUrl     = "/statics"
 )
 
 //globalsmscounter
@@ -54,6 +55,7 @@ type UcContract struct {
 	Translator  ut.Translator
 	JwtConfig   middleware.JWTConfig
 	JwtCred     jwt.JwtCredential
+	Odoo        *odoo.Client
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {
@@ -156,6 +158,15 @@ func (uc UcContract) PushToQueue(queueBody map[string]interface{}, queueType, de
 	mqueue := queue.NewQueue(AmqpConnection, AmqpChannel)
 
 	_, _, err = mqueue.PushQueueReconnect(os.Getenv("AMQP_URL"), queueBody, queueType, deadLetterType)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (uc UcContract) Read(object string, criteria *odoo.Criteria, options *odoo.Options, res interface{}) (err error) {
+	err = uc.Odoo.SearchRead(object, criteria, odoo.NewOptions().Limit(1), res)
 	if err != nil {
 		return err
 	}

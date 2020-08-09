@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 	echoMiddleware "github.com/labstack/echo/middleware"
+	"github.com/skilld-labs/go-odoo"
 	"log"
 	"os"
 	"qibla-backend/db"
@@ -82,6 +83,14 @@ func main() {
 	pong, err := redisClient.Client.Ping().Result()
 	fmt.Println("Redis ping status: "+pong, err)
 
+	//odo
+	c, err := odoo.NewClient(&odoo.ClientConfig{
+		Admin:    "admin",
+		Password: "admin",
+		Database: "him",
+		URL:      "https://demo.garudea.com",
+	})
+
 	//init validator
 	validatorInit()
 
@@ -96,6 +105,7 @@ func main() {
 		Translator:  translator,
 		JwtConfig:   jwtConfig,
 		JwtCred:     jwtCred,
+		Odoo:        c,
 	}
 
 	bootApp := bootstrap.Bootstrap{
@@ -107,9 +117,10 @@ func main() {
 		Validator:       validatorDriver,
 		JwtConfig:       jwtConfig,
 		JwtCred:         jwtCred,
+		Odoo:            c,
 	}
 
-	bootApp.E.Static("/","")
+	bootApp.E.Static("/", "")
 	//bootApp.E.Use(echoMiddleware.Static("statics"))
 	bootApp.E.Use(echoMiddleware.Logger())
 	bootApp.E.Use(echoMiddleware.Recover())

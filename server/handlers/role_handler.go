@@ -13,7 +13,7 @@ type RoleHandler struct {
 	Handler
 }
 
-func (handler RoleHandler) Browse(ctx echo.Context) error{
+func (handler RoleHandler) Browse(ctx echo.Context) error {
 	search := ctx.QueryParam("search")
 	order := ctx.QueryParam("order")
 	sort := ctx.QueryParam("sort")
@@ -26,7 +26,7 @@ func (handler RoleHandler) Browse(ctx echo.Context) error{
 	return handler.SendResponse(ctx, res, pagination, err)
 }
 
-func (handler RoleHandler) Read(ctx echo.Context) error{
+func (handler RoleHandler) Read(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
 	uc := usecase.RoleUseCase{UcContract: handler.UseCaseContract}
@@ -35,7 +35,7 @@ func (handler RoleHandler) Read(ctx echo.Context) error{
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
-func (handler RoleHandler) Edit(ctx echo.Context) error{
+func (handler RoleHandler) Edit(ctx echo.Context) error {
 	ID := ctx.Param("id")
 	input := new(requests.RoleRequest)
 
@@ -52,7 +52,7 @@ func (handler RoleHandler) Edit(ctx echo.Context) error{
 	return handler.SendResponse(ctx, nil, nil, err)
 }
 
-func (handler RoleHandler) Add(ctx echo.Context) error{
+func (handler RoleHandler) Add(ctx echo.Context) error {
 	input := new(requests.RoleRequest)
 
 	if err := ctx.Bind(input); err != nil {
@@ -68,11 +68,18 @@ func (handler RoleHandler) Add(ctx echo.Context) error{
 	return handler.SendResponse(ctx, nil, nil, err)
 }
 
-func (handler RoleHandler) Delete(ctx echo.Context) error{
+func (handler RoleHandler) Delete(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
 	uc := usecase.RoleUseCase{UcContract: handler.UseCaseContract}
 	err := uc.Delete(ID)
 
 	return handler.SendResponse(ctx, nil, nil, err)
+}
+
+func (handler RoleHandler) GetRes(ctx echo.Context) error {
+	uc := usecase.RoleUseCase{UcContract: handler.UseCaseContract}
+	res, err := uc.GetRes()
+
+	return handler.SendResponse(ctx, res, nil, err)
 }

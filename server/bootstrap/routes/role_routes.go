@@ -22,4 +22,5 @@ func (route RoleRoutes) RegisterRoute(){
 	roleRoute.PUT("/:id",handler.Edit)
 	roleRoute.POST("",handler.Add)
 	roleRoute.DELETE("/:id",handler.Delete)
+	roleRoute.GET("/res",handler.GetRes)
 }

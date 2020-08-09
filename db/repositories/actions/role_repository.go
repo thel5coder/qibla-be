@@ -34,6 +34,7 @@ func (repository RoleRepository) Browse(search, order, sort string, limit, offse
 			&dataTemp.CreatedAt,
 			&dataTemp.UpdatedAt,
 			&dataTemp.DeletedAt,
+			&dataTemp.Slug,
 		)
 		if err != nil {
 			return data, count, err
@@ -60,21 +61,22 @@ func (repository RoleRepository) ReadBy(column, value string) (data models.Role,
 		&data.CreatedAt,
 		&data.UpdatedAt,
 		&data.DeletedAt,
+		&data.Slug,
 	)
 
 	return data, err
 }
 
 func (repository RoleRepository) Edit(input viewmodel.RoleVm) (res string, err error) {
-	statement := `update "roles" set "name"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
-	err = repository.DB.QueryRow(statement, input.Name, datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),input.ID).Scan(&res)
+	statement := `update "roles" set "name"=$1, "slug"=$2, "updated_at"=$3 where "id"=$4 returning "id"`
+	err = repository.DB.QueryRow(statement, input.Name, input.Slug, datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID).Scan(&res)
 
 	return res, err
 }
 
 func (repository RoleRepository) Add(input viewmodel.RoleVm) (res string, err error) {
-	statement := `insert into "roles" ("name","created_at","updated_at") values($1,$2,$3) returning "id"`
-	err = repository.DB.QueryRow(statement, input.Name, datetime.StrParseToTime(input.CreatedAt, time.RFC3339), datetime.StrParseToTime(input.UpdatedAt, time.RFC3339)).Scan(&res)
+	statement := `insert into "roles" ("name","slug","created_at","updated_at") values($1,$2,$3,$4) returning "id"`
+	err = repository.DB.QueryRow(statement, input.Name,input.Slug, datetime.StrParseToTime(input.CreatedAt, time.RFC3339), datetime.StrParseToTime(input.UpdatedAt, time.RFC3339)).Scan(&res)
 
 	return res, err
 }
@@ -87,20 +89,20 @@ func (repository RoleRepository) Delete(ID, updatedAt, deletedAt string) (res st
 }
 
 func (repository RoleRepository) CountBy(ID, column, value string) (res int, err error) {
-	if ID == ""{
-		statement := `select count("id") from "roles" where `+column+`=$1 and "deleted_at" is null`
-		err = repository.DB.QueryRow(statement,value).Scan(&res)
-	}else{
-		statement := `select count("id") from "roles" where (`+column+`=$1 and "id"<>$2)and "deleted_at" is null`
-		err = repository.DB.QueryRow(statement,value,ID).Scan(&res)
+	if ID == "" {
+		statement := `select count("id") from "roles" where ` + column + `=$1 and "deleted_at" is null`
+		err = repository.DB.QueryRow(statement, value).Scan(&res)
+	} else {
+		statement := `select count("id") from "roles" where (` + column + `=$1 and "id"<>$2)and "deleted_at" is null`
+		err = repository.DB.QueryRow(statement, value, ID).Scan(&res)
 	}
 
-	return res,err
+	return res, err
 }
 
 func (repository RoleRepository) CountByPk(ID string) (res int, err error) {
 	statement := `select count("id") from "roles" where "id"=$1 and "deleted_at" is null`
-	err = repository.DB.QueryRow(statement,ID).Scan(&res)
+	err = repository.DB.QueryRow(statement, ID).Scan(&res)
 
-	return res,err
+	return res, err
 }

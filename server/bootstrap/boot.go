@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/skilld-labs/go-odoo"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
 	"qibla-backend/usecase"
@@ -20,4 +21,5 @@ type Bootstrap struct {
 	Translator      ut.Translator
 	JwtConfig       middleware.JWTConfig
 	JwtCred         jwt.JwtCredential
+	Odoo            *odoo.Client
 }
