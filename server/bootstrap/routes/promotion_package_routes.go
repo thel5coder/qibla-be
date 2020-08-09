@@ -15,11 +15,11 @@ func (route PromotionPackageRoutes) RegisterRoute(){
 	handler := handlers.PromotionPackageHandler{Handler:route.Handler}
 	jwtMiddleware := middleware.JwtVerify{UcContract:route.Handler.UseCaseContract}
 
-	promotionRoute := route.RouteGroup.Group("/promotion-package")
-	promotionRoute.Use(jwtMiddleware.JWTWithConfig)
-	promotionRoute.GET("",handler.Browse)
-	promotionRoute.GET("/:id",handler.Read)
-	promotionRoute.PUT("/:id",handler.Edit)
-	promotionRoute.POST("/:id",handler.Add)
-	promotionRoute.DELETE("/:id",handler.Delete)
+	promotionPackageRoute := route.RouteGroup.Group("/promotion-package")
+	promotionPackageRoute.Use(jwtMiddleware.JWTWithConfig)
+	promotionPackageRoute.GET("",handler.Browse)
+	promotionPackageRoute.GET("/:id",handler.Read)
+	promotionPackageRoute.PUT("/:id",handler.Edit)
+	promotionPackageRoute.POST("/:id",handler.Add)
+	promotionPackageRoute.DELETE("/:id",handler.Delete)
 }

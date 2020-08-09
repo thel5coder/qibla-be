@@ -109,10 +109,17 @@ func (boot *Bootstrap) RegisterRouters() {
 	 }
 	 faqRoute.RegisterRoute()
 
-	 //promotion route
-	 promotionRoute := routes.PromotionPackageRoutes{
+	 //promotion package route
+	 promotionPackageRoutes := routes.PromotionPackageRoutes{
 		 RouteGroup: apiV1,
 		 Handler:    handlerType,
 	 }
-	 promotionRoute.RegisterRoute()
+	 promotionPackageRoutes.RegisterRoute()
+
+	 //promotion route
+	 promotionRoutes := routes.PromotionRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 promotionRoutes.RegisterRoute()
 }
