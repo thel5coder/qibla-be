@@ -61,3 +61,65 @@ func (uc EnumOptionsUseCase) GetWebComprofCategoryEnums() (res []viewmodel.EnumV
 
 	return res
 }
+
+func (uc EnumOptionsUseCase) GetPromotionPackageEnum() (res []viewmodel.EnumVm){
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.PackagePromotionEnum1,
+		Value: enums.PackagePromotionEnum1,
+	})
+
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.PackagePromotionEnum2,
+		Value: enums.PackagePromotionEnum2,
+	})
+
+	return res
+}
+
+func (uc EnumOptionsUseCase) GetPlatformEnum() (res []viewmodel.EnumVm){
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.PlatformEnum1,
+		Value: enums.PlatformEnum1,
+	})
+
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.PlatformEnum2,
+		Value: enums.PlatformEnum2,
+	})
+
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.PlatformEnum3,
+		Value: enums.PlatformEnum2,
+	})
+
+	return res
+}
+
+func (uc EnumOptionsUseCase) GetPositionPromotionEnum() (res []viewmodel.EnumVm){
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.PromotionPositionEnum1,
+		Value: enums.PromotionPositionEnum1,
+	})
+
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.PromotionPositionEnum2,
+		Value: enums.PromotionPositionEnum2,
+	})
+
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.PromotionPositionEnum3,
+		Value: enums.PromotionPositionEnum3,
+	})
+
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.PromotionPositionEnum4,
+		Value: enums.PromotionPositionEnum4,
+	})
+
+	res = append(res ,viewmodel.EnumVm{
+		Key:   enums.PromotionPositionEnum5,
+		Value: enums.PromotionPositionEnum5,
+	})
+
+	return res
+}

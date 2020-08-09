@@ -19,4 +19,7 @@ func (route EnumOptionRoutes) RegisterRoute(){
 	enumRoute.Use(jwtMiddleware.JWTWithConfig)
 	enumRoute.GET("/menu-permissions",handler.GetMenuPermissions)
 	enumRoute.GET("/web-comprof-category",handler.GetWebComprofCategori)
+	enumRoute.GET("/promotion-package",handler.GetPromotionPackage)
+	enumRoute.GET("/platform",handler.GetPlatform)
+	enumRoute.GET("/position-promotion",handler.GetPositionPromotion)
 }
