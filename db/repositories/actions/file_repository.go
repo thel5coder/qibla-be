@@ -26,6 +26,8 @@ func (repository FileRepository) ReadBy(column, value string) (data models.File,
 		&data.CreatedAt,
 		&data.UpdatedAt,
 		&data.DeletedAt,
+		&data.UserID,
+		&data.Type,
 		)
 
 	return data,err
