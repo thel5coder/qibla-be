@@ -40,6 +40,9 @@ func (repository UserRepository) Browse(search, order, sort string, limit, offse
 			&dataTemp.CreatedAt,
 			&dataTemp.UpdatedAt,
 			&dataTemp.DeletedAt,
+			&dataTemp.OdooUserID,
+			&dataTemp.Name,
+			&dataTemp.ProfilePicture,
 			&dataTemp.RoleModel.ID,
 			&dataTemp.RoleModel.Name,
 			&dataTemp.RoleModel.CreatedAt,
@@ -78,6 +81,9 @@ func (repository UserRepository) ReadBy(column, value string) (data models.User,
 		&data.CreatedAt,
 		&data.UpdatedAt,
 		&data.DeletedAt,
+		&data.OdooUserID,
+		&data.Name,
+		&data.ProfilePicture,
 		&data.RoleModel.ID,
 		&data.RoleModel.Name,
 	)
@@ -87,24 +93,53 @@ func (repository UserRepository) ReadBy(column, value string) (data models.User,
 
 func (repository UserRepository) Edit(input viewmodel.UserVm, password string, tx *sql.Tx) (err error) {
 	if password != "" {
-		statement := `update "users" set "username"=$1, "email"=$2, "password"=$3, "is_active"=$4, "role_id"=$5, "updated_at"=$6 where "id"=$7`
-		_, err = tx.Exec(statement, input.UserName, input.Email, password, input.IsActive, input.Role.ID, datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID)
+		statement := `update "users" 
+                     set "username"=$1, "email"=$2, "password"=$3, "is_active"=$4, "role_id"=$5, "updated_at"=$6, "name"=$7, "profile_picture"=$8
+                     where "id"=$9`
+		_, err = tx.Exec(
+			statement,
+			input.UserName,
+			input.Email,
+			password,
+			input.IsActive,
+			input.Role.ID,
+			datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
+			input.Name,
+			input.ProfilePicture,
+			input.ID,
+			)
 	} else {
-		statement := `update "users" set "username"=$1, "email"=$2, "is_active"=$3, "role_id"=$4, "updated_at"=$5 where "id"=$6`
-		_, err = tx.Exec(statement, input.UserName, input.Email, input.IsActive, input.Role.ID, datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID)
+		statement := `update "users" 
+                      set "username"=$1, "email"=$2, "is_active"=$3, "role_id"=$4, "updated_at"=$5, "name"=$7, "profile_picture"=$8 where "id"=$6`
+		_, err = tx.Exec(
+			statement,
+			input.UserName,
+			input.Email,
+			input.IsActive,
+			input.Role.ID,
+			datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
+			input.Name,
+			input.ProfilePicture,
+			input.ID,
+			)
 	}
 
 	return err
 }
 
 func (repository UserRepository) Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error) {
-	statement := `insert into "users" ("username","email","password","role_id","is_active","created_at","updated_at") values($1,$2,$3,$4,$5,$6,$7) returning "id"`
+	statement := `insert into "users" 
+                 ("username","name","profile_picture","email","password","role_id","odo_user_id","is_active","created_at","updated_at") 
+                 values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) returning "id"`
 	err = tx.QueryRow(
 		statement,
 		input.UserName,
+		input.Name,
+		input.ProfilePicture,
 		input.Email,
 		password,
 		input.Role.ID,
+		input.OdooUserID,
 		input.IsActive,
 		datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
 		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
