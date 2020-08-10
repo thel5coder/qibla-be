@@ -22,4 +22,5 @@ func (route UserRoutes) RegisterRoute() {
 	userRoute.PUT("/:id", userHandler.Edit)
 	userRoute.POST("", userHandler.Add)
 	userRoute.DELETE("/:id", userHandler.Delete)
+	userRoute.GET("/current",userHandler.GetCurrentUser)
 }

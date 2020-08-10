@@ -4,6 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
+	"qibla-backend/helpers/jwt"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"
@@ -52,7 +53,7 @@ func (handler UserHandler) Edit(ctx echo.Context) error {
 	return handler.SendResponse(ctx, nil, nil, err)
 }
 
-func (handler UserHandler) Add(ctx echo.Context) error{
+func (handler UserHandler) Add(ctx echo.Context) error {
 	input := new(requests.UserRequest)
 
 	if err := ctx.Bind(input); err != nil {
@@ -68,11 +69,20 @@ func (handler UserHandler) Add(ctx echo.Context) error{
 	return handler.SendResponse(ctx, nil, nil, err)
 }
 
-func (handler UserHandler) Delete(ctx echo.Context) error{
+func (handler UserHandler) Delete(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
 	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
 	err := uc.Delete(ID)
 
 	return handler.SendResponse(ctx, nil, nil, err)
+}
+
+func (handler UserHandler) GetCurrentUser(ctx echo.Context) error {
+	user := ctx.Get("user").(*jwt.CustomClaims)
+
+	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
+	res, err := uc.ReadByPk(user.Id)
+
+	return handler.SendResponse(ctx, res, nil, err)
 }
