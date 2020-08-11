@@ -70,20 +70,21 @@ func (repository PromotionPackageRepository) ReadBy(column, value string) (data 
 }
 
 func (repository PromotionPackageRepository) Edit(input viewmodel.PromotionPackageVm) (res string, err error) {
-	statement := `update "promotion_packages" set "package_name"=$1, "slug"=$2, "updated_at"=$3 where "id"=$4 returning "id"`
-	err = repository.DB.QueryRow(statement, input.PackageName, input.Slug, datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID).Scan(&res)
+	statement := `update "promotion_packages" set "package_name"=$1, "slug"=$2, "updated_at"=$3, "is_active"=$4 where "id"=$5 returning "id"`
+	err = repository.DB.QueryRow(statement, input.PackageName, input.Slug, datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.IsActive, input.ID).Scan(&res)
 
 	return res, err
 }
 
 func (repository PromotionPackageRepository) Add(input viewmodel.PromotionPackageVm) (res string, err error) {
-	statement := `insert into "promotion_packages" ("package_name","slug","created_at","updated_at") values($1,$2,$3,$4) returning "id"`
+	statement := `insert into "promotion_packages" ("package_name","slug","created_at","updated_at","is_active") values($1,$2,$3,$4,$5) returning "id"`
 	err = repository.DB.QueryRow(
 		statement,
 		input.PackageName,
 		input.Slug,
 		datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
 		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
+		input.IsActive,
 	).Scan(&res)
 
 	return res, err

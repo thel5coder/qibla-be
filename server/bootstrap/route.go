@@ -23,110 +23,117 @@ func (boot *Bootstrap) RegisterRouters() {
 		return context.JSON(http.StatusOK, "Work")
 	})
 
-	 apiV1 := boot.E.Group("/api/v1")
+	apiV1 := boot.E.Group("/api/v1")
 
-	 //authentication route
-	 authenticationRoute := routes.AuthenticationRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 authenticationRoute.RegisterRoute()
+	//authentication route
+	authenticationRoute := routes.AuthenticationRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	authenticationRoute.RegisterRoute()
 
-	 //odoo route
-	 odooRoutes := routes.OdooRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 odooRoutes.RegisterRoute()
+	//odoo route
+	odooRoutes := routes.OdooRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	odooRoutes.RegisterRoute()
 
-	 //enum options route
-	 enumOptionsRoute := routes.EnumOptionRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 enumOptionsRoute.RegisterRoute()
+	//enum options route
+	enumOptionsRoute := routes.EnumOptionRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	enumOptionsRoute.RegisterRoute()
 
-	 //roleroute
-	 roleRoute := routes.RoleRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 roleRoute.RegisterRoute()
+	//roleroute
+	roleRoute := routes.RoleRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	roleRoute.RegisterRoute()
 
-	 //userRoute
-	 userRoute := routes.UserRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 userRoute.RegisterRoute()
+	//userRoute
+	userRoute := routes.UserRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	userRoute.RegisterRoute()
 
-	 //term condition route
-	 termConditionRoute := routes.TermConditionRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 termConditionRoute.RegisterRoute()
+	//term condition route
+	termConditionRoute := routes.TermConditionRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	termConditionRoute.RegisterRoute()
 
-	 //menu route
-	 menuRoute := routes.MenuRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 menuRoute.RegisterRoute()
+	//menu route
+	menuRoute := routes.MenuRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	menuRoute.RegisterRoute()
 
-	 //global info route
-	 globalInfoCategoryMasterRoute := routes.GlobalInfoRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 globalInfoCategoryMasterRoute.RegisterRoute()
+	//global info route
+	globalInfoCategoryMasterRoute := routes.GlobalInfoRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	globalInfoCategoryMasterRoute.RegisterRoute()
 
-	 //web comprof route
-	 webComprofRoute := routes.WebComprofRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 webComprofRoute.RegisterRoute()
+	//web comprof route
+	webComprofRoute := routes.WebComprofRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	webComprofRoute.RegisterRoute()
 
-	 //file route
-	 fileRoute := routes.FileRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 fileRoute.RegisterRoute()
+	//file route
+	fileRoute := routes.FileRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	fileRoute.RegisterRoute()
 
-	 //gallery route
-	 galleryRoute := routes.GalleryRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 galleryRoute.RegisterRoute()
+	//gallery route
+	galleryRoute := routes.GalleryRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	galleryRoute.RegisterRoute()
 
-	 //testimonial route
-	 testimonialRoute := routes.TestimonialRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 testimonialRoute.RegisterRoute()
+	//testimonial route
+	testimonialRoute := routes.TestimonialRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	testimonialRoute.RegisterRoute()
 
-	 //faq route
-	 faqRoute := routes.FaqRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 faqRoute.RegisterRoute()
+	//faq route
+	faqRoute := routes.FaqRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	faqRoute.RegisterRoute()
 
-	 //promotion package route
-	 promotionPackageRoutes := routes.PromotionPackageRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 promotionPackageRoutes.RegisterRoute()
+	//promotion package route
+	promotionPackageRoutes := routes.PromotionPackageRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	promotionPackageRoutes.RegisterRoute()
 
-	 //promotion route
-	 promotionRoutes := routes.PromotionRoutes{
-		 RouteGroup: apiV1,
-		 Handler:    handlerType,
-	 }
-	 promotionRoutes.RegisterRoute()
+	//promotion route
+	promotionRoutes := routes.PromotionRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	promotionRoutes.RegisterRoute()
+
+	//master product
+	masterProductRoutes := routes.MasterProductRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	masterProductRoutes.RegisterRoute()
 }
