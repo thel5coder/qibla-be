@@ -49,6 +49,7 @@ var xRequestID interface{}
 type UcContract struct {
 	E           *echo.Echo
 	DB          *sql.DB
+	TX          *sql.Tx
 	RedisClient redis.RedisClient
 	Jwe         jwe.Credential
 	Validate    *validator.Validate

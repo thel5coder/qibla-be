@@ -10,7 +10,7 @@ type UserVm struct {
 	CreatedAt       string                 `json:"created_at"`
 	UpdatedAt       string                 `json:"updated_at"`
 	DeletedAt       string                 `json:"deleted_at"`
-	OdooUserID      string                 `json:"odoo_user_id"`
+	OdooUserID      int                    `json:"odoo_user_id"`
 	Role            RoleVm                 `json:"role"`
 	MenuPermissions []MenuPermissionUserVm `json:"menu_permissions"`
 }

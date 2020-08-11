@@ -34,6 +34,7 @@ var (
 func main() {
 	err := godotenv.Load("../.env")
 	if err != nil {
+		fmt.Println(err.Error())
 		log.Fatal("Error loading ..env file")
 	}
 
@@ -110,7 +111,6 @@ func main() {
 
 	bootApp := bootstrap.Bootstrap{
 		E:               e,
-		Db:              database,
 		UseCaseContract: ucContract,
 		Jwe:             jweCredential,
 		Translator:      translator,

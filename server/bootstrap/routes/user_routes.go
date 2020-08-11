@@ -13,7 +13,7 @@ type UserRoutes struct {
 
 func (route UserRoutes) RegisterRoute() {
 	userHandler := handlers.UserHandler{Handler: route.Handler}
-	jwtMiddleware := middleware.JwtVerify{UcContract:route.Handler.UseCaseContract}
+	jwtMiddleware := middleware.JwtVerify{UcContract: route.Handler.UseCaseContract}
 
 	userRoute := route.RouteGroup.Group("/user")
 	userRoute.Use(jwtMiddleware.JWTWithConfig)
@@ -22,5 +22,5 @@ func (route UserRoutes) RegisterRoute() {
 	userRoute.PUT("/:id", userHandler.Edit)
 	userRoute.POST("", userHandler.Add)
 	userRoute.DELETE("/:id", userHandler.Delete)
-	userRoute.GET("/current",userHandler.GetCurrentUser)
+	userRoute.GET("/current", userHandler.GetCurrentUser)
 }

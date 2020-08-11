@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -15,7 +16,7 @@ type UserRepository struct {
 }
 
 func NewUserRepository(DB *sql.DB) contracts.IUserRepository {
-	return UserRepository{DB: DB}
+	return &UserRepository{DB: DB}
 }
 
 func (repository UserRepository) Browse(search, order, sort string, limit, offset int) (data []models.User, count int, err error) {
@@ -24,6 +25,7 @@ func (repository UserRepository) Browse(search, order, sort string, limit, offse
                  where (lower("users"."username") like $1 or lower("users"."email") like $1 or lower(r."name") like $1) and "users"."deleted_at" is null order by "users".` + order + ` ` + sort + ` limit $2 offset $3`
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
 	if err != nil {
+		fmt.Print(err)
 		return data,count,err
 	}
 
@@ -48,6 +50,7 @@ func (repository UserRepository) Browse(search, order, sort string, limit, offse
 			&dataTemp.RoleModel.CreatedAt,
 			&dataTemp.RoleModel.UpdatedAt,
 			&dataTemp.RoleModel.DeletedAt,
+			&dataTemp.RoleModel.Slug,
 		)
 		if err != nil {
 			return data, count, err

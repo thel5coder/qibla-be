@@ -32,6 +32,13 @@ func (boot *Bootstrap) RegisterRouters() {
 	 }
 	 authenticationRoute.RegisterRoute()
 
+	 //odoo route
+	 odooRoutes := routes.OdooRoutes{
+		 RouteGroup: apiV1,
+		 Handler:    handlerType,
+	 }
+	 odooRoutes.RegisterRoute()
+
 	 //enum options route
 	 enumOptionsRoute := routes.EnumOptionRoutes{
 		 RouteGroup: apiV1,
