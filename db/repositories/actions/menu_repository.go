@@ -16,7 +16,7 @@ type MenuRepository struct{
 }
 
 func NewMenuRepository(DB *sql.DB) contracts.IMenuRepository{
-	return MenuRepository{DB: DB}
+	return &MenuRepository{DB: DB}
 }
 
 func (repository MenuRepository) Browse(parentID,search, order, sort string, limit, offset int) (data []models.Menu, count int, err error) {

@@ -15,7 +15,7 @@ type TermConditionRepository struct {
 }
 
 func NewTermConditionRepository(DB *sql.DB) contracts.ITermConditionRepository {
-	return TermConditionRepository{DB: DB}
+	return &TermConditionRepository{DB: DB}
 }
 
 func (repository TermConditionRepository) Browse(search, order, sort string, limit, offset int) (data []models.TermConditions, count int, err error) {

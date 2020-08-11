@@ -15,7 +15,7 @@ type PromotionPackageRepository struct {
 }
 
 func NewPromotionPackageRepository(DB *sql.DB) contracts.IPackagePromotionRepository {
-	return PromotionPackageRepository{DB: DB}
+	return &PromotionPackageRepository{DB: DB}
 }
 
 func (repository PromotionPackageRepository) Browse(search, order, sort string, limit, offset int) (data []models.PromotionPackage, count int, err error) {

@@ -13,7 +13,7 @@ type FaqListRepository struct {
 }
 
 func NewFaqListRepository(DB *sql.DB) contracts.IFaqListRepository {
-	return FaqListRepository{DB: DB}
+	return &FaqListRepository{DB: DB}
 }
 
 func (repository FaqListRepository) Browse(faqID string) (data []models.FaqList, err error) {

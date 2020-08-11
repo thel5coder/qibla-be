@@ -16,7 +16,7 @@ type GlobalInfoCategorySettingRepository struct{
 }
 
 func NewGlobalInfoCategorySettingRepository(DB *sql.DB) contracts.IGlobalInfoCategorySettingRepository{
-	return GlobalInfoCategorySettingRepository{DB: DB}
+	return &GlobalInfoCategorySettingRepository{DB: DB}
 }
 
 func (repository GlobalInfoCategorySettingRepository) Browse(search, order, sort string, limit, offset int) (data []models.GlobalInfoCategorySetting, count int, err error) {

@@ -15,7 +15,7 @@ type GalleryRepository struct{
 }
 
 func NewGalleryRepository(DB *sql.DB) contracts.IGalleryRepository{
-	return GalleryRepository{DB: DB}
+	return &GalleryRepository{DB: DB}
 }
 
 func (repository GalleryRepository) Browse(search, order, sort string, limit, offset int) (data []models.Gallery, count int, err error) {

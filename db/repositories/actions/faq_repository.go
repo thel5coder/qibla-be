@@ -15,7 +15,7 @@ type FaqRepository struct{
 }
 
 func NewFaqRepository(DB *sql.DB) contracts.IFaqRepository{
-	return FaqRepository{DB: DB}
+	return &FaqRepository{DB: DB}
 }
 
 func (repository FaqRepository) Browse(search, order, sort string, limit, offset int) (data []models.Faq, count int, err error) {

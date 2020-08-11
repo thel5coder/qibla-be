@@ -14,7 +14,7 @@ type FileRepository struct{
 }
 
 func NewFileRepository(DB *sql.DB) contracts.IFileRepository{
-	return FileRepository{DB: DB}
+	return &FileRepository{DB: DB}
 }
 
 func (repository FileRepository) ReadBy(column, value string) (data models.File, err error) {

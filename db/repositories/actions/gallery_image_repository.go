@@ -14,7 +14,7 @@ type GalleryImageRepository struct {
 }
 
 func NewGalleryImageRepository(DB *sql.DB) contracts.IGalleryImageRepository {
-	return GalleryImageRepository{DB: DB}
+	return &GalleryImageRepository{DB: DB}
 }
 
 func (repository GalleryImageRepository) Browse(galleryID string) (data []models.GalleryImages, err error) {

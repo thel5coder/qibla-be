@@ -15,7 +15,7 @@ type PromotionRepository struct {
 }
 
 func NewPromotionRepository(DB *sql.DB) contracts.IPromotionRepository {
-	return PromotionRepository{DB: DB}
+	return &PromotionRepository{DB: DB}
 }
 
 func (repository PromotionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Promotion, count int, err error) {

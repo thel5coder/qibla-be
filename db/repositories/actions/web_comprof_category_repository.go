@@ -15,7 +15,7 @@ type WebComprofCategoryRepository struct{
 }
 
 func NewWebComprofCategoryRepository(DB *sql.DB) contracts.IWebComprofCategoryRepository{
-	return WebComprofCategoryRepository{DB: DB}
+	return &WebComprofCategoryRepository{DB: DB}
 }
 
 func (repository WebComprofCategoryRepository) Browse(search, order, sort string, limit, offset int) (data []models.WebComprofCategory, count int, err error) {

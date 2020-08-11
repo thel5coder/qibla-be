@@ -15,7 +15,7 @@ type RoleRepository struct {
 }
 
 func NewRoleRepository(DB *sql.DB) contracts.IRoleRepository {
-	return RoleRepository{DB: DB}
+	return &RoleRepository{DB: DB}
 }
 
 func (repository RoleRepository) Browse(search, order, sort string, limit, offset int) (data []models.Role, count int, err error) {

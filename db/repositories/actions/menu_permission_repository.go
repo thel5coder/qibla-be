@@ -14,7 +14,7 @@ type MenuPermissionRepository struct{
 }
 
 func NewMenuPermissionRepository(DB *sql.DB) contracts.IMenuPermissionRepository{
-	return MenuPermissionRepository{DB: DB}
+	return &MenuPermissionRepository{DB: DB}
 }
 
 func (repository MenuPermissionRepository) Browse(menuID string) (data []models.MenuPermission, err error) {

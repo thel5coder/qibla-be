@@ -15,7 +15,7 @@ type TestimonialRepository struct {
 }
 
 func NewTestimonialRepository(DB *sql.DB) contracts.ITestimonialRepository {
-	return TestimonialRepository{DB: DB}
+	return &TestimonialRepository{DB: DB}
 }
 
 func (repository TestimonialRepository) Browse(search, order, sort string, limit, offset int) (data []models.Testimonial, count int, err error) {
