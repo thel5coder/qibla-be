@@ -27,9 +27,9 @@ func (uc OdooUseCase) Browse(objectName, search string, limit, offset int, res i
 	return nil
 }
 
-func (uc OdooUseCase) Read(objectName string, ids []int64, res interface{}) (err error) {
+func (uc OdooUseCase) Read(objectName string, id int64, res interface{}) (err error) {
 	var odooOption *odoo.Options
-	err = uc.Odoo.Read(objectName, ids, odooOption, &res)
+	err = uc.Odoo.Read(objectName, []int64{id}, odooOption, res)
 	if err != nil {
 		return err
 	}

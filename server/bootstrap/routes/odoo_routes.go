@@ -19,4 +19,5 @@ func (route OdooRoutes) RegisterRoute(){
 	odooRoute.Use(jwtMiddleware.JWTWithConfig)
 	odooRoute.GET("/get-field/:objectName",handler.GetField)
 	odooRoute.GET("/:objectName",handler.Browse)
+	odooRoute.GET("/:objectName/:id",handler.Read)
 }

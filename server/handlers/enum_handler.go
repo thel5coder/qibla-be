@@ -23,23 +23,44 @@ func (handler EnumHandler) GetWebComprofCategori(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, nil, nil)
 }
 
-func (handler EnumHandler) GetPromotionPackage(ctx echo.Context) error{
-	uc := usecase.EnumOptionsUseCase{UcContract:handler.UseCaseContract}
+func (handler EnumHandler) GetPromotionPackage(ctx echo.Context) error {
+	uc := usecase.EnumOptionsUseCase{UcContract: handler.UseCaseContract}
 	res := uc.GetPromotionPackageEnum()
 
-	return handler.SendResponse(ctx,res,nil,nil)
+	return handler.SendResponse(ctx, res, nil, nil)
 }
 
-func (handler EnumHandler) GetPlatform(ctx echo.Context) error{
-	uc := usecase.EnumOptionsUseCase{UcContract:handler.UseCaseContract}
+func (handler EnumHandler) GetPlatform(ctx echo.Context) error {
+	uc := usecase.EnumOptionsUseCase{UcContract: handler.UseCaseContract}
 	res := uc.GetPlatformEnum()
 
-	return handler.SendResponse(ctx,res,nil,nil)
+	return handler.SendResponse(ctx, res, nil, nil)
 }
 
-func (handler EnumHandler) GetPositionPromotion(ctx echo.Context) error{
-	uc := usecase.EnumOptionsUseCase{UcContract:handler.UseCaseContract}
+func (handler EnumHandler) GetPositionPromotion(ctx echo.Context) error {
+	uc := usecase.EnumOptionsUseCase{UcContract: handler.UseCaseContract}
 	res := uc.GetPositionPromotionEnum()
 
-	return handler.SendResponse(ctx,res,nil,nil)
+	return handler.SendResponse(ctx, res, nil, nil)
+}
+
+func (handler EnumHandler) GetSubscription(ctx echo.Context) error {
+	uc := usecase.EnumOptionsUseCase{UcContract: handler.UseCaseContract}
+	res := uc.GetSubscriptionEnum()
+
+	return handler.SendResponse(ctx, res, nil, nil)
+}
+
+func (handler EnumHandler) GetPriceUnit(ctx echo.Context) error {
+	uc := usecase.EnumOptionsUseCase{UcContract: handler.UseCaseContract}
+	res := uc.GetPriceUnitEnum()
+
+	return handler.SendResponse(ctx, res, nil, nil)
+}
+
+func (handler EnumHandler) GetDiscountType(ctx echo.Context) error {
+	uc := usecase.EnumOptionsUseCase{UcContract: handler.UseCaseContract}
+	res := uc.GetDiscountTypeEnum()
+
+	return handler.SendResponse(ctx, res, nil, nil)
 }
