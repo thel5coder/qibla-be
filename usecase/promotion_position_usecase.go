@@ -37,14 +37,21 @@ func (uc PromotionPositionUseCase) Delete(promotionPlatformID string, tx *sql.Tx
 	return err
 }
 
-func (uc PromotionPositionUseCase) Store(promotionPlatformID string, positions []string, tx *sql.Tx) (err error){
-	err = uc.Delete(promotionPlatformID,tx)
+func (uc PromotionPositionUseCase) Store(promotionPlatformID string, positions []string, tx *sql.Tx) (err error) {
+	rows, err := uc.Browse(promotionPlatformID)
 	if err != nil {
 		return err
 	}
 
+	if len(rows) > 0 {
+		err = uc.Delete(promotionPlatformID, tx)
+		if err != nil {
+			return err
+		}
+	}
+
 	for _, position := range positions {
-		err = uc.Add(promotionPlatformID,position,tx)
+		err = uc.Add(promotionPlatformID, position, tx)
 		if err != nil {
 			return err
 		}

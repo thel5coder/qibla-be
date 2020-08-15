@@ -21,7 +21,7 @@ func NewPromotionRepository(DB *sql.DB) contracts.IPromotionRepository {
 func (repository PromotionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Promotion, count int, err error) {
 	statement := `select p.*, pp."package_name" from "promotions" p
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower(p."platform") like $1 or lower(p."position") like $1 or lower("description") like $1) 
+                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
                  and p."deleted_at" is null 
                  order by ` + order + " " + sort + " limit $2 offset $3"
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
@@ -55,7 +55,7 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 
 	statement = `select count(p."id") from "promotions" p 
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower(p."platform") like $1 or lower(p."position") like $1 or lower("description") like $1) 
+                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
                  and p."deleted_at" is null`
 	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
 	if err != nil {
@@ -90,38 +90,34 @@ func (repository PromotionRepository) ReadBy(column, value string) (data models.
 	return data,err
 }
 
-func (repository PromotionRepository) Edit(input viewmodel.PromotionVm) (res string, err error) {
-	statement := `update "promotions" set "promotion_package_id"=$1, "package_promotion"=$2, "start_date"=$3, "end_date"=$4, "platform"=$5, "position"=$6, "price"=$7, "description"=$8, "updated_at"=$9, "is_active"=$10
-                 where "id"=$11 returning "id"`
-	err = repository.DB.QueryRow(
+func (PromotionRepository) Edit(input viewmodel.PromotionVm,tx *sql.Tx) (res string, err error) {
+	statement := `update "promotions" set "promotion_package_id"=$1, "package_promotion"=$2, "start_date"=$3, "end_date"=$4, "price"=$5, "description"=$6, "updated_at"=$7, "is_active"=$8
+                 where "id"=$9 returning "id"`
+	_,err = tx.Exec(
 		statement,
 		input.PromotionPackageID,
 		input.PackagePromotion,
 		datetime.StrParseToTime(input.StartDate,"2006-01-02"),
 		datetime.StrParseToTime(input.EndDate,"2006-01-02"),
-		input.Platform,
-		input.Position,
 		input.Price,
 		input.Description,
 		datetime.StrParseToTime(input.UpdatedAt,time.RFC3339),
 		input.IsActive,
 		input.ID,
-		).Scan(&res)
+		)
 
 	return res,err
 }
 
-func (repository PromotionRepository) Add(input viewmodel.PromotionVm) (res string, err error) {
-	statement := `insert into "promotions" ("promotion_package_id","package_promotion","start_date","end_date","platform","position","price","description","created_at","updated_at","is_active")
-                 values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) returning "id"`
-	err = repository.DB.QueryRow(
+func (PromotionRepository) Add(input viewmodel.PromotionVm,tx *sql.Tx) (res string, err error) {
+	statement := `insert into "promotions" ("promotion_package_id","package_promotion","start_date","end_date","price","description","created_at","updated_at","is_active")
+                 values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning "id"`
+	err = tx.QueryRow(
 		statement,
 		input.PromotionPackageID,
 		input.PackagePromotion,
 		datetime.StrParseToTime(input.StartDate,"2006-01-02"),
 		datetime.StrParseToTime(input.EndDate,"2006-01-02"),
-		input.Platform,
-		input.Position,
 		input.Price,
 		input.Description,
 		datetime.StrParseToTime(input.CreatedAt,time.RFC3339),
@@ -132,9 +128,9 @@ func (repository PromotionRepository) Add(input viewmodel.PromotionVm) (res stri
 	return res,err
 }
 
-func (repository PromotionRepository) Delete(ID, updatedAt, deletedAt string) (res string, err error) {
+func (PromotionRepository) Delete(ID, updatedAt, deletedAt string,tx *sql.Tx) (res string, err error) {
 	statement := `update "promotions" set "updated_at"=$1, "deleted_at"=$2 where "id"=$3 returning "id"`
-	err = repository.DB.QueryRow(statement,datetime.StrParseToTime(updatedAt,time.RFC3339),datetime.StrParseToTime(deletedAt,time.RFC3339),ID).Scan(&res)
+	_,err = tx.Exec(statement,datetime.StrParseToTime(updatedAt,time.RFC3339),datetime.StrParseToTime(deletedAt,time.RFC3339),ID)
 
 	return res,err
 }
