@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
@@ -159,7 +158,6 @@ func (uc PromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
 
 	uc.TX, err = uc.DB.Begin()
 	if err != nil {
-		fmt.Println(3)
 		uc.TX.Rollback()
 
 		return err
@@ -178,7 +176,6 @@ func (uc PromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
 	}
 	body.ID, err = repository.Add(body, uc.TX)
 	if err != nil {
-		fmt.Println(4)
 		uc.TX.Rollback()
 
 		return err

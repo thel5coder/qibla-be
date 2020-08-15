@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 )
@@ -31,7 +30,6 @@ func (repository PromotionPlatformRepository) BrowseByPromotionID(promotionID st
 		)
 		data = append(data, dataTemp)
 	}
-	fmt.Print(data)
 
 	return data, err
 }

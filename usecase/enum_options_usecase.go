@@ -69,7 +69,7 @@ func (uc EnumOptionsUseCase) GetPromotionPackageEnum() (res []viewmodel.EnumVm) 
 	})
 
 	res = append(res, viewmodel.EnumVm{
-		Key:   enums.KeyPackagePromotionEnum1,
+		Key:   enums.KeyPackagePromotionEnum2,
 		Value: enums.ValuePackagePromotionEnum2,
 	})
 
