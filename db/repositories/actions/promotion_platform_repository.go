@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 )
@@ -30,12 +31,13 @@ func (repository PromotionPlatformRepository) BrowseByPromotionID(promotionID st
 		)
 		data = append(data, dataTemp)
 	}
+	fmt.Print(data)
 
 	return data, err
 }
 
 func (PromotionPlatformRepository) Add(promotionID, platform string, tx *sql.Tx) (res string, err error) {
-	statement := `insert into "promotion_platforms" ("promotion_id","platform") values($1,$2)`
+	statement := `insert into "promotion_platforms" ("promotion_id","platform") values($1,$2) returning "id"`
 	err = tx.QueryRow(statement, promotionID, platform).Scan(&res)
 
 	return res, err

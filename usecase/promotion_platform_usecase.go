@@ -47,10 +47,7 @@ func (uc PromotionPlatformUseCase) Delete(promotionID string, tx *sql.Tx) (err e
 
 func (uc PromotionPlatformUseCase) Store(promotionID string, promotionPositionPlatforms []viewmodel.PromotionPlatformPositionVm, tx *sql.Tx) (err error) {
 	promotionPositionUc := PromotionPositionUseCase{UcContract: uc.UcContract}
-	rows, err := uc.Browse(promotionID)
-	if err != nil {
-		return err
-	}
+	rows, _ := uc.Browse(promotionID)
 
 	if len(rows) > 0 {
 		err = uc.Delete(promotionID, tx)

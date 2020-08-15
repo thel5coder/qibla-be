@@ -1,9 +1,8 @@
 package usecase
 
 import (
-	"errors"
+	"fmt"
 	"qibla-backend/db/repositories/actions"
-	"qibla-backend/helpers/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"
@@ -86,19 +85,20 @@ func (uc PromotionUseCase) ReadByPk(ID string) (res viewmodel.PromotionVm, err e
 
 func (uc PromotionUseCase) Edit(ID string, input *requests.PromotionRequest) (err error) {
 	repository := actions.NewPromotionRepository(uc.DB)
-	promotionPlatformUc := PromotionPlatformUseCase{UcContract:uc.UcContract}
+	promotionPlatformUc := PromotionPlatformUseCase{UcContract: uc.UcContract}
 	now := time.Now().UTC().Format(time.RFC3339)
 	var promotionPlatformBody []viewmodel.PromotionPlatformPositionVm
 
-	count, err := uc.CountBy(ID, "p.promotion_package_id", input.PromotionPackageID)
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		return errors.New(messages.DataAlreadyExist)
-	}
+	//count, err := uc.CountBy("", input.PromotionPackageID, "p.package_promotion", input.PackagePromotion)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//if count > 0 {
+	//	return errors.New(messages.DataAlreadyExist)
+	//}
 
-	uc.TX,err = uc.DB.Begin()
+	uc.TX, err = uc.DB.Begin()
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -116,46 +116,50 @@ func (uc PromotionUseCase) Edit(ID string, input *requests.PromotionRequest) (er
 		IsActive:           input.IsActive,
 		UpdatedAt:          now,
 	}
-	_, err = repository.Edit(body,uc.TX)
+	_, err = repository.Edit(body, uc.TX)
 	if err != nil {
 		uc.TX.Rollback()
 
 		return err
 	}
 
-	for _, promotionPlatformPosition := range input.Position{
-		promotionPlatformBody = append(promotionPlatformBody,viewmodel.PromotionPlatformPositionVm{
+	for _, promotionPlatformPosition := range input.Position {
+		promotionPlatformBody = append(promotionPlatformBody, viewmodel.PromotionPlatformPositionVm{
 			ID:       ID,
 			Platform: promotionPlatformPosition.Platform,
 			Position: promotionPlatformPosition.Position,
 		})
-		err = promotionPlatformUc.Store(ID,promotionPlatformBody,uc.TX)
+		err = promotionPlatformUc.Store(ID, promotionPlatformBody, uc.TX)
 		if err != nil {
 			uc.TX.Rollback()
 
 			return err
 		}
 	}
+	uc.TX.Commit()
 
 	return nil
 }
 
 func (uc PromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
 	repository := actions.NewPromotionRepository(uc.DB)
-	promotionPlatformUc := PromotionPlatformUseCase{UcContract:uc.UcContract}
+	promotionPlatformUc := PromotionPlatformUseCase{UcContract: uc.UcContract}
 	now := time.Now().UTC().Format(time.RFC3339)
 	var promotionPlatformBody []viewmodel.PromotionPlatformPositionVm
 
-	count, err := uc.CountBy("", "p.promotion_package_id", input.PromotionPackageID)
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		return errors.New(messages.DataAlreadyExist)
-	}
+	//count, err := uc.CountBy("", input.PromotionPackageID, "p.package_promotion", input.PackagePromotion)
+	//if err != nil {
+	//	fmt.Println(1)
+	//	return err
+	//}
+	//
+	//if count > 0 {
+	//	return errors.New(messages.DataAlreadyExist)
+	//}
 
-	uc.TX,err = uc.DB.Begin()
+	uc.TX, err = uc.DB.Begin()
 	if err != nil {
+		fmt.Println(3)
 		uc.TX.Rollback()
 
 		return err
@@ -172,42 +176,45 @@ func (uc PromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
 		CreatedAt:          now,
 		UpdatedAt:          now,
 	}
-	body.ID, err = repository.Add(body,uc.TX)
+	body.ID, err = repository.Add(body, uc.TX)
+	if err != nil {
+		fmt.Println(4)
+		uc.TX.Rollback()
+
+		return err
+	}
+
+	for _, promotionPlatformPosition := range input.Position {
+		promotionPlatformBody = append(promotionPlatformBody, viewmodel.PromotionPlatformPositionVm{
+			ID:       body.ID,
+			Platform: promotionPlatformPosition.Platform,
+			Position: promotionPlatformPosition.Position,
+		})
+	}
+	err = promotionPlatformUc.Store(body.ID, promotionPlatformBody, uc.TX)
 	if err != nil {
 		uc.TX.Rollback()
 
 		return err
 	}
 
-	for _, promotionPlatformPosition := range input.Position{
-		promotionPlatformBody = append(promotionPlatformBody,viewmodel.PromotionPlatformPositionVm{
-			ID:       body.ID,
-			Platform: promotionPlatformPosition.Platform,
-			Position: promotionPlatformPosition.Position,
-		})
-		err = promotionPlatformUc.Store(body.ID,promotionPlatformBody,uc.TX)
-		if err != nil {
-			uc.TX.Rollback()
-
-			return err
-		}
-	}
+	uc.TX.Commit()
 
 	return nil
 }
 
 func (uc PromotionUseCase) Delete(ID string) (err error) {
 	repository := actions.NewPromotionRepository(uc.DB)
-	promotionPlatformUc := PromotionPlatformUseCase{UcContract:uc.UcContract}
-	promotionPositionUc := PromotionPositionUseCase{UcContract:uc.UcContract}
+	promotionPlatformUc := PromotionPlatformUseCase{UcContract: uc.UcContract}
+	promotionPositionUc := PromotionPositionUseCase{UcContract: uc.UcContract}
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	count, err := uc.CountBy("", "p.id", ID)
+	count, err := uc.CountBy("", "", "p.id", ID)
 	if err != nil {
 		return err
 	}
 
-	uc.TX,err = uc.DB.Begin()
+	uc.TX, err = uc.DB.Begin()
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -215,41 +222,42 @@ func (uc PromotionUseCase) Delete(ID string) (err error) {
 	}
 
 	if count > 0 {
-		_, err = repository.Delete(ID, now, now,uc.TX)
+		_, err = repository.Delete(ID, now, now, uc.TX)
 		if err != nil {
 			uc.TX.Rollback()
 
 			return err
 		}
 
-		promotionPlatforms,err := promotionPlatformUc.Browse(ID)
+		promotionPlatforms, err := promotionPlatformUc.Browse(ID)
 		if err != nil {
 			uc.TX.Rollback()
 
 			return err
 		}
 
-		for _, promotionPlatform := range promotionPlatforms{
-			err = promotionPositionUc.Delete(promotionPlatform.ID,uc.TX)
+		for _, promotionPlatform := range promotionPlatforms {
+			err = promotionPositionUc.Delete(promotionPlatform.ID, uc.TX)
 			if err != nil {
 				return err
 			}
 		}
 
-		err = promotionPlatformUc.Delete(ID,uc.TX)
+		err = promotionPlatformUc.Delete(ID, uc.TX)
 		if err != nil {
 			uc.TX.Rollback()
 
 			return err
 		}
 	}
+	uc.TX.Commit()
 
 	return nil
 }
 
-func (uc PromotionUseCase) CountBy(ID, column, value string) (res int, err error) {
+func (uc PromotionUseCase) CountBy(ID, promotionPackageID, column, value string) (res int, err error) {
 	repository := actions.NewPromotionRepository(uc.DB)
-	res, err = repository.CountBy(ID, column, value)
+	res, err = repository.CountBy(ID, promotionPackageID, column, value)
 	if err != nil {
 		return res, err
 	}

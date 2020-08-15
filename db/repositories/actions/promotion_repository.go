@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -37,8 +38,6 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 			&dataTemp.PackagePromotion,
 			&dataTemp.StartDate,
 			&dataTemp.EndDate,
-			&dataTemp.Platform,
-			&dataTemp.Position,
 			&dataTemp.Price,
 			&dataTemp.Description,
 			&dataTemp.CreatedAt,
@@ -68,16 +67,14 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 func (repository PromotionRepository) ReadBy(column, value string) (data models.Promotion, err error) {
 	statement := `select p.*, pp."package_name" from "promotions" p 
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where `+column+`=$1
+                 where ` + column + `=$1
                  and p."deleted_at" is null`
-	err = repository.DB.QueryRow(statement,value).Scan(
+	err = repository.DB.QueryRow(statement, value).Scan(
 		&data.ID,
 		&data.PromotionPackageID,
 		&data.PackagePromotion,
 		&data.StartDate,
 		&data.EndDate,
-		&data.Platform,
-		&data.Position,
 		&data.Price,
 		&data.Description,
 		&data.CreatedAt,
@@ -85,68 +82,86 @@ func (repository PromotionRepository) ReadBy(column, value string) (data models.
 		&data.DeletedAt,
 		&data.IsActive,
 		&data.PackageName,
-		)
+	)
 
-	return data,err
+	return data, err
 }
 
-func (PromotionRepository) Edit(input viewmodel.PromotionVm,tx *sql.Tx) (res string, err error) {
+func (PromotionRepository) Edit(input viewmodel.PromotionVm, tx *sql.Tx) (res string, err error) {
 	statement := `update "promotions" set "promotion_package_id"=$1, "package_promotion"=$2, "start_date"=$3, "end_date"=$4, "price"=$5, "description"=$6, "updated_at"=$7, "is_active"=$8
                  where "id"=$9 returning "id"`
-	_,err = tx.Exec(
+	_, err = tx.Exec(
 		statement,
 		input.PromotionPackageID,
 		input.PackagePromotion,
-		datetime.StrParseToTime(input.StartDate,"2006-01-02"),
-		datetime.StrParseToTime(input.EndDate,"2006-01-02"),
+		datetime.StrParseToTime(input.StartDate, "2006-01-02"),
+		datetime.StrParseToTime(input.EndDate, "2006-01-02"),
 		input.Price,
 		input.Description,
-		datetime.StrParseToTime(input.UpdatedAt,time.RFC3339),
+		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
 		input.IsActive,
 		input.ID,
-		)
+	)
 
-	return res,err
+	return res, err
 }
 
-func (PromotionRepository) Add(input viewmodel.PromotionVm,tx *sql.Tx) (res string, err error) {
+func (PromotionRepository) Add(input viewmodel.PromotionVm, tx *sql.Tx) (res string, err error) {
 	statement := `insert into "promotions" ("promotion_package_id","package_promotion","start_date","end_date","price","description","created_at","updated_at","is_active")
                  values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning "id"`
 	err = tx.QueryRow(
 		statement,
 		input.PromotionPackageID,
 		input.PackagePromotion,
-		datetime.StrParseToTime(input.StartDate,"2006-01-02"),
-		datetime.StrParseToTime(input.EndDate,"2006-01-02"),
+		datetime.StrParseToTime(input.StartDate, "2006-01-02"),
+		datetime.StrParseToTime(input.EndDate, "2006-01-02"),
 		input.Price,
 		input.Description,
-		datetime.StrParseToTime(input.CreatedAt,time.RFC3339),
-		datetime.StrParseToTime(input.UpdatedAt,time.RFC3339),
+		datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
+		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
 		input.IsActive,
-		).Scan(&res)
+	).Scan(&res)
 
-	return res,err
+	return res, err
 }
 
-func (PromotionRepository) Delete(ID, updatedAt, deletedAt string,tx *sql.Tx) (res string, err error) {
+func (PromotionRepository) Delete(ID, updatedAt, deletedAt string, tx *sql.Tx) (res string, err error) {
 	statement := `update "promotions" set "updated_at"=$1, "deleted_at"=$2 where "id"=$3 returning "id"`
-	_,err = tx.Exec(statement,datetime.StrParseToTime(updatedAt,time.RFC3339),datetime.StrParseToTime(deletedAt,time.RFC3339),ID)
+	_, err = tx.Exec(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), ID)
 
-	return res,err
+	return res, err
 }
 
-func (repository PromotionRepository) CountBy(ID, column, value string) (res int, err error) {
+func (repository PromotionRepository) CountBy(ID, promotionPackageID, column, value string) (res int, err error) {
 	if ID == "" {
-		statement := `select count(p."id") from "promotions" p 
+		if promotionPackageID == ""{
+			statement := `select count(p."id") from "promotions" p 
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where `+column+`=$1 and p."deleted_at" is null`
-		err = repository.DB.QueryRow(statement,value).Scan(&res)
-	}else{
-		statement := `select count(p."id") from "promotions" p 
+                 where ` + column + `=$1 and p."deleted_at" is null`
+			err = repository.DB.QueryRow(statement, value).Scan(&res)
+			fmt.Print("ini")
+		}else{
+			fmt.Println(promotionPackageID)
+			statement := `select count(p."id") from "promotions" p 
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where (`+column+`=$1 and p."deleted_at" is null) and p."id"<>$2`
-		err = repository.DB.QueryRow(statement,value,ID).Scan(&res)
+                 where ` + column + `=$1 and p."deleted_at" is null and p."promotion_package_id"=$2`
+			err = repository.DB.QueryRow(statement, value, promotionPackageID).Scan(&res)
+		}
+	} else {
+		if promotionPackageID == ""{
+			statement := `select count(p."id") from "promotions" p 
+                 inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
+                 where (` + column + `=$1 and p."deleted_at" is null) and p."id"<>$3`
+			err = repository.DB.QueryRow(statement, value, promotionPackageID, ID).Scan(&res)
+			fmt.Print("inu")
+		}else{
+			statement := `select count(p."id") from "promotions" p 
+                 inner join "promotion_packages" pp on pp."id"= p."promotion_package_id"
+                 where (` + column + `=$1 and p."deleted_at" is null and p."promotion_package_id"=$2) and p."id"<>$3`
+			fmt.Println("ono")
+			err = repository.DB.QueryRow(statement, value, promotionPackageID, ID).Scan(&res)
+		}
 	}
 
-	return res,err
+	return res, err
 }

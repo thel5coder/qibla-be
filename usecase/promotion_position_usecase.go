@@ -38,10 +38,7 @@ func (uc PromotionPositionUseCase) Delete(promotionPlatformID string, tx *sql.Tx
 }
 
 func (uc PromotionPositionUseCase) Store(promotionPlatformID string, positions []string, tx *sql.Tx) (err error) {
-	rows, err := uc.Browse(promotionPlatformID)
-	if err != nil {
-		return err
-	}
+	rows, _ := uc.Browse(promotionPlatformID)
 
 	if len(rows) > 0 {
 		err = uc.Delete(promotionPlatformID, tx)
