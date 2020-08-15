@@ -28,6 +28,7 @@ func (uc MasterProductUseCase) Browse(search, order, sort string, page, limit in
 			ID:        masterProduct.ID,
 			Slug:      masterProduct.Slug,
 			Name:      masterProduct.Name,
+			SubscriptionType: masterProduct.SubscriptionType,
 			CreatedAt: masterProduct.CreatedAt,
 			UpdatedAt: masterProduct.UpdatedAt,
 			DeletedAt: masterProduct.DeletedAt.String,
@@ -41,18 +42,19 @@ func (uc MasterProductUseCase) Browse(search, order, sort string, page, limit in
 
 func (uc MasterProductUseCase) ReadBy(column, value string) (res viewmodel.MasterProductVm, err error) {
 	repository := actions.NewMasterProductRepository(uc.DB)
-	promotionPackage, err := repository.ReadBy(column, value)
+	masterProduct, err := repository.ReadBy(column, value)
 	if err != nil {
 		return res, err
 	}
 
 	res = viewmodel.MasterProductVm{
-		ID:        promotionPackage.ID,
-		Slug:      promotionPackage.Slug,
-		Name:      promotionPackage.Name,
-		CreatedAt: promotionPackage.CreatedAt,
-		UpdatedAt: promotionPackage.UpdatedAt,
-		DeletedAt: promotionPackage.DeletedAt.String,
+		ID:               masterProduct.ID,
+		Slug:             masterProduct.Slug,
+		Name:             masterProduct.Name,
+		SubscriptionType: masterProduct.SubscriptionType,
+		CreatedAt:        masterProduct.CreatedAt,
+		UpdatedAt:        masterProduct.UpdatedAt,
+		DeletedAt:        masterProduct.DeletedAt.String,
 	}
 
 	return res, err
