@@ -13,8 +13,8 @@ const Article = "article"
 
 const ValuePackagePromotionEnum1 = "Per Hari"
 const KeyPackagePromotionEnum1 = "per_hari"
-const ValuePackagePromotionEnum2 = "per_bundle"
-const KeyPackagePromotionEnum2 = "Per Bundle"
+const ValuePackagePromotionEnum2 = "Per Bundle"
+const KeyPackagePromotionEnum2 = "per_bundle"
 
 const ValuePlatformEnum1 = "Semua"
 const KeyPlatformEnum1 = "semua"
