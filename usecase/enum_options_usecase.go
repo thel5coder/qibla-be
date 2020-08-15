@@ -89,7 +89,7 @@ func (uc EnumOptionsUseCase) GetPlatformEnum() (res []viewmodel.EnumVm) {
 
 	res = append(res, viewmodel.EnumVm{
 		Key:   enums.KeyPlatformEnum3,
-		Value: enums.ValuePlatformEnum2,
+		Value: enums.ValuePlatformEnum3,
 	})
 
 	return res
