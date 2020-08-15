@@ -3,7 +3,7 @@ package enums
 const View = "View"
 const Add = "Add"
 const Edit = "Edit"
-const Delete = "Delete"
+const Delete = "DeleteBySettingProductID"
 const Approve = "Approve"
 
 const Gallery = "galery"
@@ -45,6 +45,7 @@ const KeyPriceUnitEnum1 = "hari"
 const ValuePriceUnitEnum1 = "Hari"
 const KeyPriceUnitEnum2 = "jam"
 const ValuePriceUnitEnum2 = "Jam"
+const KeyPriceUnitEnum3="jamaah"
 
 const KeyDiscountTypeEnum1 = "perhari"
 const ValueDiscountTypeEnum1 = "Per Hari"
