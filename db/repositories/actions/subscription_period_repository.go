@@ -6,16 +6,16 @@ import (
 	"qibla-backend/db/repositories/contracts"
 )
 
-type SubscriptionPeriodRepository struct{
+type SettingProductPeriodRepository struct{
 	DB *sql.DB
 }
 
-func NewSubscriptionPeriodRepository(DB *sql.DB) contracts.ISubscriptionPeriodRepository{
-	return &SubscriptionPeriodRepository{DB: DB}
+func NewSettingProductPeriodRepository(DB *sql.DB) contracts.ISettingProductPeriodRepository {
+	return &SettingProductPeriodRepository{DB: DB}
 }
 
-func (repository SubscriptionPeriodRepository) BrowseBySettingProductID(settingProductID string) (data []models.SubscriptionPeriod, err error) {
-	statement := `select * from "subscription_periods" where "setting_product_id"=$1`
+func (repository SettingProductPeriodRepository) BrowseBySettingProductID(settingProductID string) (data []models.SubscriptionPeriod, err error) {
+	statement := `select * from setting_product_periods where "setting_product_id"=$1`
 	rows,err := repository.DB.Query(statement,settingProductID)
 	if err != nil {
 		return data,err
@@ -38,15 +38,15 @@ func (repository SubscriptionPeriodRepository) BrowseBySettingProductID(settingP
 	return data,err
 }
 
-func (SubscriptionPeriodRepository) Add(settingProductID string, period int, tx *sql.Tx) (err error) {
-	statement :=`insert into "subscription_periods" ("setting_product_id","period") values($1,$2)`
+func (SettingProductPeriodRepository) Add(settingProductID string, period int, tx *sql.Tx) (err error) {
+	statement :=`insert into setting_product_periods ("setting_product_id","period") values($1,$2)`
 	_,err = tx.Exec(statement,settingProductID,period)
 
 	return err
 }
 
-func (SubscriptionPeriodRepository) DeleteBySettingProductID(settingProductID string, tx *sql.Tx) (err error) {
-	statement := `delete from "subscription_periods" where "setting_product_id"=$1`
+func (SettingProductPeriodRepository) DeleteBySettingProductID(settingProductID string, tx *sql.Tx) (err error) {
+	statement := `delete from setting_product_periods where "setting_product_id"=$1`
 	_,err = tx.Exec(statement,settingProductID)
 
 	return err

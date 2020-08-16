@@ -40,6 +40,28 @@ func (uc PromotionPackageUseCase) Browse(search, order, sort string, page, limit
 	return res, pagination, err
 }
 
+func (uc PromotionPackageUseCase) BrowseAll() (res []viewmodel.PromotionPackageVm,err error){
+	repository := actions.NewPromotionPackageRepository(uc.DB)
+	promotionPackages,err := repository.BrowseAll()
+	if err != nil {
+		return res,err
+	}
+
+	for _, promotionPackage := range promotionPackages {
+		res = append(res, viewmodel.PromotionPackageVm{
+			ID:          promotionPackage.ID,
+			Slug:        promotionPackage.Slug,
+			PackageName: promotionPackage.PackageName,
+			IsActive:    promotionPackage.IsActive,
+			CreatedAt:   promotionPackage.CreatedAt,
+			UpdatedAt:   promotionPackage.UpdatedAt,
+			DeletedAt:   promotionPackage.DeletedAt.String,
+		})
+	}
+
+	return res,err
+}
+
 func (uc PromotionPackageUseCase) ReadBy(column, value string) (res viewmodel.PromotionPackageVm, err error) {
 	repository := actions.NewPromotionPackageRepository(uc.DB)
 	promotionPackage, err := repository.ReadBy(column, value)

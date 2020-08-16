@@ -18,6 +18,7 @@ func (route PromotionPackageRoutes) RegisterRoute(){
 	promotionPackageRoute := route.RouteGroup.Group("/promotion-package")
 	promotionPackageRoute.Use(jwtMiddleware.JWTWithConfig)
 	promotionPackageRoute.GET("",handler.Browse)
+	promotionPackageRoute.GET("/all",handler.BrowseAll)
 	promotionPackageRoute.GET("/:id",handler.Read)
 	promotionPackageRoute.PUT("/:id",handler.Edit)
 	promotionPackageRoute.POST("",handler.Add)

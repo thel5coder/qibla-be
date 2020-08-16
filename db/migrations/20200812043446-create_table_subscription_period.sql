@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS "subscription_period"
 );
 
 -- +migrate Down
-DROP TABLE if exists subscription_periods;
+DROP TABLE if exists setting_product_periods;

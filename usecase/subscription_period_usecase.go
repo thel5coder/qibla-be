@@ -6,12 +6,12 @@ import (
 	"qibla-backend/usecase/viewmodel"
 )
 
-type SubscriptionPeriodUseCase struct {
+type SettingProductPeriodUseCase struct {
 	*UcContract
 }
 
-func (uc SubscriptionPeriodUseCase) BrowseBySettingProductID(settingProductID string) (res []viewmodel.SubscriptionPeriodVm, err error) {
-	repository := actions.NewSubscriptionPeriodRepository(uc.DB)
+func (uc SettingProductPeriodUseCase) BrowseBySettingProductID(settingProductID string) (res []viewmodel.SubscriptionPeriodVm, err error) {
+	repository := actions.NewSettingProductPeriodRepository(uc.DB)
 	subscriptionPeriods, err := repository.BrowseBySettingProductID(settingProductID)
 	if err != nil {
 		return res, err
@@ -27,21 +27,21 @@ func (uc SubscriptionPeriodUseCase) BrowseBySettingProductID(settingProductID st
 	return res, err
 }
 
-func (uc SubscriptionPeriodUseCase) Add(settingProductID string, period int, tx *sql.Tx) (err error) {
-	repository := actions.NewSubscriptionPeriodRepository(uc.DB)
+func (uc SettingProductPeriodUseCase) Add(settingProductID string, period int, tx *sql.Tx) (err error) {
+	repository := actions.NewSettingProductPeriodRepository(uc.DB)
 	err = repository.Add(settingProductID, period, tx)
 
 	return err
 }
 
-func (uc SubscriptionPeriodUseCase) DeleteBySettingProductID(settingProductID string, tx *sql.Tx) (err error) {
-	repository := actions.NewSubscriptionPeriodRepository(uc.DB)
+func (uc SettingProductPeriodUseCase) DeleteBySettingProductID(settingProductID string, tx *sql.Tx) (err error) {
+	repository := actions.NewSettingProductPeriodRepository(uc.DB)
 	err = repository.DeleteBySettingProductID(settingProductID, tx)
 
 	return err
 }
 
-func (uc SubscriptionPeriodUseCase) Store(settingProductID string, periods []int, tx *sql.Tx) (err error) {
+func (uc SettingProductPeriodUseCase) Store(settingProductID string, periods []int, tx *sql.Tx) (err error) {
 	err = uc.DeleteBySettingProductID(settingProductID,tx)
 	if err != nil {
 		return err

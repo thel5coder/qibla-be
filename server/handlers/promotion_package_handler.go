@@ -26,6 +26,13 @@ func (handler PromotionPackageHandler) Browse(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, pagination, err)
 }
 
+func (handler PromotionPackageHandler) BrowseAll(ctx echo.Context) error{
+	uc := usecase.PromotionPackageUseCase{UcContract: handler.UseCaseContract}
+	res, err := uc.BrowseAll()
+
+	return handler.SendResponse(ctx, res, nil, err)
+}
+
 func (handler PromotionPackageHandler) Read(ctx echo.Context) error {
 	ID := ctx.Param("id")
 

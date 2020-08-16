@@ -5,7 +5,7 @@ import (
 	"qibla-backend/db/models"
 )
 
-type ISubscriptionPeriodRepository interface {
+type ISettingProductPeriodRepository interface {
 	BrowseBySettingProductID(settingProductID string) (data []models.SubscriptionPeriod,err error)
 
 	Add(settingProductID string, period int,tx *sql.Tx) (err error)

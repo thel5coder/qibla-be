@@ -54,6 +54,34 @@ func (repository PromotionPackageRepository) Browse(search, order, sort string, 
 	return data, count, err
 }
 
+func (repository PromotionPackageRepository) BrowseAll() (data []models.PromotionPackage,err error){
+	statement := `select * from "promotion_packages"`
+	rows, err := repository.DB.Query(statement)
+	if err != nil {
+		return data, err
+	}
+
+	for rows.Next() {
+		dataTemp := models.PromotionPackage{}
+		err = rows.Scan(
+			&dataTemp.ID,
+			&dataTemp.Slug,
+			&dataTemp.PackageName,
+			&dataTemp.IsActive,
+			&dataTemp.CreatedAt,
+			&dataTemp.UpdatedAt,
+			&dataTemp.DeletedAt,
+		)
+		if err != nil {
+			return data, err
+		}
+
+		data = append(data, dataTemp)
+	}
+
+	return data,err
+}
+
 func (repository PromotionPackageRepository) ReadBy(column, value string) (data models.PromotionPackage, err error) {
 	statement := `select * from "promotion_packages" where ` + column + `=$1 and "deleted_at" is null`
 	err = repository.DB.QueryRow(statement, value).Scan(

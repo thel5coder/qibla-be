@@ -8,6 +8,8 @@ import (
 type IPackagePromotionRepository interface {
 	Browse(search, order, sort string, limit, offset int) (data []models.PromotionPackage, count int, err error)
 
+	BrowseAll() (data []models.PromotionPackage,err error)
+
 	ReadBy(column, value string) (data models.PromotionPackage, err error)
 
 	Edit(input viewmodel.PromotionPackageVm) (res string, err error)

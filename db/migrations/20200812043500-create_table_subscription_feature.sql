@@ -9,4 +9,4 @@ CREATE TABLE "subscription_features"
     "deleted_at"         timestamp
 );
 -- +migrate Down
-DROP TABLE IF EXISTS "subscription_features";
+DROP TABLE IF EXISTS setting_product_features;
