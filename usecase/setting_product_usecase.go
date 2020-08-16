@@ -29,20 +29,7 @@ func (uc SettingProductUseCase) Browse(search, order, sort string, page, limit i
 		var settingProductFeatures []viewmodel.SettingProductFeatureVm
 		var settingProductPeriods []viewmodel.SettingProductPeriodVm
 		settingProductFeatures, _ = settingProductFeatureUc.BrowseBySettingProductID(settingProduct.ID)
-		for _, settingProductFeature := range settingProductFeatures {
-			settingProductFeatures = append(settingProductFeatures, viewmodel.SettingProductFeatureVm{
-				ID:          settingProductFeature.ID,
-				FeatureName: settingProductFeature.FeatureName,
-			})
-		}
-
 		settingProductPeriods, _ = settingProductPeriodUc.BrowseBySettingProductID(settingProduct.ID)
-		for _, settingProductPeriod := range settingProductPeriods {
-			settingProductPeriods = append(settingProductPeriods, viewmodel.SettingProductPeriodVm{
-				ID:     settingProductPeriod.ID,
-				Period: settingProductPeriod.Period,
-			})
-		}
 
 		res = append(res, viewmodel.SettingProductVm{
 			ID:                    settingProduct.ID,
