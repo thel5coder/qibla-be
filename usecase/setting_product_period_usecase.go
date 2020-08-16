@@ -10,7 +10,7 @@ type SettingProductPeriodUseCase struct {
 	*UcContract
 }
 
-func (uc SettingProductPeriodUseCase) BrowseBySettingProductID(settingProductID string) (res []viewmodel.SubscriptionPeriodVm, err error) {
+func (uc SettingProductPeriodUseCase) BrowseBySettingProductID(settingProductID string) (res []viewmodel.SettingProductPeriodVm, err error) {
 	repository := actions.NewSettingProductPeriodRepository(uc.DB)
 	subscriptionPeriods, err := repository.BrowseBySettingProductID(settingProductID)
 	if err != nil {
@@ -18,7 +18,7 @@ func (uc SettingProductPeriodUseCase) BrowseBySettingProductID(settingProductID 
 	}
 
 	for _, subscriptionPeriod := range subscriptionPeriods {
-		res = append(res, viewmodel.SubscriptionPeriodVm{
+		res = append(res, viewmodel.SettingProductPeriodVm{
 			ID:     subscriptionPeriod.ID,
 			Period: subscriptionPeriod.Period,
 		})
@@ -42,13 +42,17 @@ func (uc SettingProductPeriodUseCase) DeleteBySettingProductID(settingProductID 
 }
 
 func (uc SettingProductPeriodUseCase) Store(settingProductID string, periods []int, tx *sql.Tx) (err error) {
-	err = uc.DeleteBySettingProductID(settingProductID,tx)
-	if err != nil {
-		return err
+	rows, _ := uc.BrowseBySettingProductID(settingProductID)
+
+	if len(rows) > 0 {
+		err = uc.DeleteBySettingProductID(settingProductID, tx)
+		if err != nil {
+			return err
+		}
 	}
 
-	for _,period := range periods{
-		err = uc.Add(settingProductID,period,tx)
+	for _, period := range periods {
+		err = uc.Add(settingProductID, period, tx)
 		if err != nil {
 			return err
 		}

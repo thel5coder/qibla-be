@@ -136,4 +136,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		Handler:    handlerType,
 	}
 	masterProductRoutes.RegisterRoute()
+
+	//setting product
+	settingProductRoutes := routes.SettingProductRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	settingProductRoutes.RegisterRoute()
 }

@@ -1,6 +1,6 @@
 package viewmodel
 
-type SubscriptionPeriodVm struct {
+type SettingProductPeriodVm struct {
 	ID     string `json:"id"`
 	Period int    `json:"period"`
 }

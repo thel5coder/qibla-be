@@ -54,6 +54,34 @@ func (repository MasterProductRepository) Browse(search, order, sort string, lim
 	return data, count, err
 }
 
+func (repository MasterProductRepository) BrowseAll() (data []models.MasterProduct,err error) {
+	statement := `select * from "master_products"`
+	rows, err := repository.DB.Query(statement)
+	if err != nil {
+		return data, err
+	}
+
+	for rows.Next() {
+		dataTemp := models.MasterProduct{}
+		err = rows.Scan(
+			&dataTemp.ID,
+			&dataTemp.Slug,
+			&dataTemp.Name,
+			&dataTemp.SubscriptionType,
+			&dataTemp.CreatedAt,
+			&dataTemp.UpdatedAt,
+			&dataTemp.DeletedAt,
+		)
+		if err != nil {
+			return data, err
+		}
+
+		data = append(data, dataTemp)
+	}
+
+	return data,err
+}
+
 func (repository MasterProductRepository) ReadBy(column, value string) (data models.MasterProduct, err error) {
 	statement := `select * from "master_products" where ` + column + `=$1 and "deleted_at" is null`
 	err = repository.DB.QueryRow(statement, value).Scan(

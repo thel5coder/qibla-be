@@ -40,6 +40,28 @@ func (uc MasterProductUseCase) Browse(search, order, sort string, page, limit in
 	return res, pagination, err
 }
 
+func (uc MasterProductUseCase) BrowseAll() (res []viewmodel.MasterProductVm,err error){
+	repository := actions.NewMasterProductRepository(uc.DB)
+	masterProducts, err := repository.BrowseAll()
+	if err != nil {
+		return res, err
+	}
+
+	for _, masterProduct := range masterProducts {
+		res = append(res, viewmodel.MasterProductVm{
+			ID:        masterProduct.ID,
+			Slug:      masterProduct.Slug,
+			Name:      masterProduct.Name,
+			SubscriptionType: masterProduct.SubscriptionType,
+			CreatedAt: masterProduct.CreatedAt,
+			UpdatedAt: masterProduct.UpdatedAt,
+			DeletedAt: masterProduct.DeletedAt.String,
+		})
+	}
+
+	return res,err
+}
+
 func (uc MasterProductUseCase) ReadBy(column, value string) (res viewmodel.MasterProductVm, err error) {
 	repository := actions.NewMasterProductRepository(uc.DB)
 	masterProduct, err := repository.ReadBy(column, value)

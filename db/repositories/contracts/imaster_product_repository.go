@@ -8,6 +8,8 @@ import (
 type IMasterProductRepository interface {
 	Browse(search, order, sort string, limit, offset int) (data []models.MasterProduct, count int, err error)
 
+	BrowseAll() (data []models.MasterProduct,err error)
+
 	ReadBy(column, value string) (data models.MasterProduct, err error)
 
 	Edit(input viewmodel.MasterProductVm) (res string, err error)

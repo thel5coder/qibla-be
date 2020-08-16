@@ -10,7 +10,7 @@ type SettingProductFeatureUseCase struct {
 	*UcContract
 }
 
-func (uc SettingProductFeatureUseCase) BrowseBySettingProductID(settingProductID string) (res []viewmodel.SubscriptionFeatureVm, err error) {
+func (uc SettingProductFeatureUseCase) BrowseBySettingProductID(settingProductID string) (res []viewmodel.SettingProductFeatureVm, err error) {
 	repository := actions.NewSettingProductFeatureRepository(uc.DB)
 	subscriptionFeatures, err := repository.BrowseBySettingProductID(settingProductID)
 	if err != nil {
@@ -18,7 +18,7 @@ func (uc SettingProductFeatureUseCase) BrowseBySettingProductID(settingProductID
 	}
 
 	for _, subscriptionFeature := range subscriptionFeatures {
-		res = append(res, viewmodel.SubscriptionFeatureVm{
+		res = append(res, viewmodel.SettingProductFeatureVm{
 			ID:          subscriptionFeature.ID,
 			FeatureName: subscriptionFeature.FeatureName,
 		})
@@ -42,9 +42,12 @@ func (uc SettingProductFeatureUseCase) DeleteBySettingProductID(settingProductID
 }
 
 func (uc SettingProductFeatureUseCase) Store(settingProductID string, features []string, tx *sql.Tx) (err error) {
-	err = uc.DeleteBySettingProductID(settingProductID,tx)
-	if err != nil {
-		return err
+	rows,_ := uc.BrowseBySettingProductID(settingProductID)
+	if len(rows) > 0 {
+		err = uc.DeleteBySettingProductID(settingProductID,tx)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _,feature := range features{
