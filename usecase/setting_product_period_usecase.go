@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/usecase/viewmodel"
 )
@@ -52,11 +53,12 @@ func (uc SettingProductPeriodUseCase) Store(settingProductID string, periods []i
 	}
 
 	for _, period := range periods {
+		fmt.Println(settingProductID)
 		err = uc.Add(settingProductID, period, tx)
 		if err != nil {
 			return err
 		}
 	}
 
-	return err
+	return nil
 }

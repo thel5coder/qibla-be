@@ -9,3 +9,11 @@ func StrParseToTime(dateValue, dateLayout string) time.Time {
 
 	return dateResult
 }
+
+func EmptyTime(timeInput time.Time) *time.Time{
+	if timeInput.IsZero() {
+		return nil
+	}
+
+	return &timeInput
+}

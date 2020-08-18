@@ -143,4 +143,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		Handler:    handlerType,
 	}
 	settingProductRoutes.RegisterRoute()
+
+	//contact route
+	contactRoutes := routes.ContactRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	contactRoutes.RegisterRoute()
 }

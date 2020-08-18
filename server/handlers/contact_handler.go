@@ -9,42 +9,44 @@ import (
 	"strconv"
 )
 
-type MasterProductHandler struct {
+type ContactHandler struct {
 	Handler
 }
 
-func (handler MasterProductHandler) Browse(ctx echo.Context) error {
+func (handler ContactHandler) Browse(ctx echo.Context) error {
 	search := ctx.QueryParam("search")
 	order := ctx.QueryParam("order")
 	sort := ctx.QueryParam("sort")
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
 
-	uc := usecase.MasterProductUseCase{UcContract: handler.UseCaseContract}
+	uc := usecase.ContactUseCase{UcContract: handler.UseCaseContract}
 	res, pagination, err := uc.Browse(search, order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
 }
 
-func(handler MasterProductHandler) BrowseAll(ctx echo.Context) error{
-	uc := usecase.MasterProductUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.BrowseAll()
+func (handler ContactHandler) BrowseAll(ctx echo.Context) error {
+	search := ctx.QueryParam("search")
+
+	uc := usecase.ContactUseCase{UcContract: handler.UseCaseContract}
+	res, err := uc.BrowseAll(search)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
-func (handler MasterProductHandler) Read(ctx echo.Context) error {
+func (handler ContactHandler) Read(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
-	uc := usecase.MasterProductUseCase{UcContract: handler.UseCaseContract}
+	uc := usecase.ContactUseCase{UcContract: handler.UseCaseContract}
 	res, err := uc.ReadByPk(ID)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
-func (handler MasterProductHandler) Edit(ctx echo.Context) error{
+func (handler ContactHandler) Edit(ctx echo.Context) error {
 	ID := ctx.Param("id")
-	input := new(requests.MasterProductRequest)
+	input := new(requests.ContactRequest)
 
 	if err := ctx.Bind(input); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
@@ -53,14 +55,14 @@ func (handler MasterProductHandler) Edit(ctx echo.Context) error{
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 	}
 
-	uc := usecase.MasterProductUseCase{UcContract: handler.UseCaseContract}
-	err := uc.Edit(ID,input)
+	uc := usecase.ContactUseCase{UcContract: handler.UseCaseContract}
+	err := uc.Edit(ID, input)
 
-	return handler.SendResponse(ctx,nil,nil,err)
+	return handler.SendResponse(ctx, nil, nil, err)
 }
 
-func (handler MasterProductHandler) Add(ctx echo.Context) error{
-	input := new(requests.MasterProductRequest)
+func (handler ContactHandler) Add(ctx echo.Context) error {
+	input := new(requests.ContactRequest)
 
 	if err := ctx.Bind(input); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
@@ -69,17 +71,17 @@ func (handler MasterProductHandler) Add(ctx echo.Context) error{
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 	}
 
-	uc := usecase.MasterProductUseCase{UcContract: handler.UseCaseContract}
+	uc := usecase.ContactUseCase{UcContract: handler.UseCaseContract}
 	err := uc.Add(input)
 
-	return handler.SendResponse(ctx,nil,nil,err)
+	return handler.SendResponse(ctx, nil, nil, err)
 }
 
-func (handler MasterProductHandler) Delete(ctx echo.Context) error{
+func (handler ContactHandler) Delete(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
-	uc := usecase.MasterProductUseCase{UcContract: handler.UseCaseContract}
+	uc := usecase.ContactUseCase{UcContract: handler.UseCaseContract}
 	err := uc.Delete(ID)
 
-	return handler.SendResponse(ctx,nil,nil,err)
+	return handler.SendResponse(ctx, nil, nil, err)
 }

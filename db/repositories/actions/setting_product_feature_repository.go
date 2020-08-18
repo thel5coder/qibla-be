@@ -46,7 +46,7 @@ func (SettingProductFeatureRepository) Add(settingProductID, featureName string,
 }
 
 func (SettingProductFeatureRepository) DeleteBySettingProductID(settingProductID string, tx *sql.Tx) (err error) {
-	statement := `delete from setting_product_periods where "setting_product_id"=$1`
+	statement := `delete from "setting_product_features" where "setting_product_id"=$1`
 	_,err = tx.Exec(statement,settingProductID)
 
 	return err

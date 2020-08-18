@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/enums"
 	"qibla-backend/helpers/messages"
@@ -164,7 +165,7 @@ func (uc SettingProductUseCase) ReadBy(column, value string) (res viewmodel.Sett
 }
 
 func (uc SettingProductUseCase) ReadByPk(ID string) (res viewmodel.SettingProductVm, err error) {
-	res, err = uc.ReadBy("id", ID)
+	res, err = uc.ReadBy("sp.id", ID)
 	if err != nil {
 		return res, err
 	}
@@ -231,6 +232,7 @@ func (uc SettingProductUseCase) Edit(ID string, input *requests.SettingProductRe
 
 	err = settingProductPeriodUc.Store(ID, input.SettingPeriods, uc.TX)
 	if err != nil {
+		fmt.Println("error")
 		uc.TX.Rollback()
 
 		return err
@@ -245,7 +247,7 @@ func (uc SettingProductUseCase) Edit(ID string, input *requests.SettingProductRe
 
 	uc.TX.Commit()
 
-	return err
+	return nil
 }
 
 func (uc SettingProductUseCase) Add(input *requests.SettingProductRequest) (err error) {

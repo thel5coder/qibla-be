@@ -15,7 +15,7 @@ func NewSettingProductPeriodRepository(DB *sql.DB) contracts.ISettingProductPeri
 }
 
 func (repository SettingProductPeriodRepository) BrowseBySettingProductID(settingProductID string) (data []models.SubscriptionPeriod, err error) {
-	statement := `select * from setting_product_periods where "setting_product_id"=$1`
+	statement := `select * from "setting_product_periods" where "setting_product_id"=$1`
 	rows,err := repository.DB.Query(statement,settingProductID)
 	if err != nil {
 		return data,err
@@ -39,14 +39,14 @@ func (repository SettingProductPeriodRepository) BrowseBySettingProductID(settin
 }
 
 func (SettingProductPeriodRepository) Add(settingProductID string, period int, tx *sql.Tx) (err error) {
-	statement :=`insert into setting_product_periods ("setting_product_id","period") values($1,$2)`
+	statement :=`insert into "setting_product_periods" ("setting_product_id","period") values($1,$2)`
 	_,err = tx.Exec(statement,settingProductID,period)
 
 	return err
 }
 
 func (SettingProductPeriodRepository) DeleteBySettingProductID(settingProductID string, tx *sql.Tx) (err error) {
-	statement := `delete from setting_product_periods where "setting_product_id"=$1`
+	statement := `delete from "setting_product_periods" where "setting_product_id"=$1`
 	_,err = tx.Exec(statement,settingProductID)
 
 	return err

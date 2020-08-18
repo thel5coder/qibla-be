@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -130,6 +131,7 @@ func (repository SettingProductRepository) ReadBy(column, value string) (data mo
 func (SettingProductRepository) Edit(input viewmodel.SettingProductVm, tx *sql.Tx) (err error) {
 	statement := `update "setting_products" set "product_id"=$1, "price"=$2, "price_unit"=$3, "maintenance_price"=$4, "discount"=$5, "discount_type"=$6, "discount_period_start"=$7, "discount_period_end"=$8,
                   "description"=$9, "sessions"=$10, "updated_at"=$11 where "id"=$12`
+	fmt.Println(input.Sessions)
 	_, err = tx.Exec(
 		statement,
 		input.ProductID,
