@@ -125,20 +125,7 @@ func (uc SettingProductUseCase) ReadBy(column, value string) (res viewmodel.Sett
 	var settingProductFeatures []viewmodel.SettingProductFeatureVm
 	var settingProductPeriods []viewmodel.SettingProductPeriodVm
 	settingProductFeatures, _ = settingProductFeatureUc.BrowseBySettingProductID(settingProduct.ID)
-	for _, settingProductFeature := range settingProductFeatures {
-		settingProductFeatures = append(settingProductFeatures, viewmodel.SettingProductFeatureVm{
-			ID:          settingProductFeature.ID,
-			FeatureName: settingProductFeature.FeatureName,
-		})
-	}
-
 	settingProductPeriods, _ = settingProductPeriodUc.BrowseBySettingProductID(settingProduct.ID)
-	for _, settingProductPeriod := range settingProductPeriods {
-		settingProductPeriods = append(settingProductPeriods, viewmodel.SettingProductPeriodVm{
-			ID:     settingProductPeriod.ID,
-			Period: settingProductPeriod.Period,
-		})
-	}
 
 	res = viewmodel.SettingProductVm{
 		ID:                    settingProduct.ID,

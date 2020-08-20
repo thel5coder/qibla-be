@@ -32,6 +32,7 @@ const (
 	OtpLifeTime       = "3m"
 	MaxOtpSubmitRetry = 3
 	StaticBaseUrl     = "/statics"
+	fasPayBaseUrl = "https://dev.faspay.co.id/cvr"
 )
 
 //globalsmscounter
