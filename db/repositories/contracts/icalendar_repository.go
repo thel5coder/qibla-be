@@ -6,7 +6,7 @@ import (
 )
 
 type ICalendarRepository interface {
-	BrowseByYearMonth(year,month string) (data []models.Calendar, err error)
+	BrowseByYearMonth(yearMonth string) (data []models.Calendar, err error)
 
 	ReadBy(column, value string) (data models.Calendar, err error)
 

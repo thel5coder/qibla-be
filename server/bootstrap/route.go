@@ -150,4 +150,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		Handler:    handlerType,
 	}
 	contactRoutes.RegisterRoute()
+
+	//calendar routes
+	calendarRoutes := routes.CalendarRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	calendarRoutes.RegisterRoute()
 }

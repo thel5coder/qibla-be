@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -17,9 +18,9 @@ func NewCalendarRepository(DB *sql.DB) contracts.ICalendarRepository{
 	return &CalendarRepository{DB: DB}
 }
 
-func (repository CalendarRepository) BrowseByYearMonth(year,month string) (data []models.Calendar, err error) {
-	statement := `select * from "calendars" where date_part('year',timestamp,"start")=$1 and date_part('month',timestamp,'start')=$2 and "deleted_at" is null`
-	rows,err := repository.DB.Query(statement,year,month)
+func (repository CalendarRepository) BrowseByYearMonth(yearMonth string) (data []models.Calendar, err error) {
+	statement := `select * from "calendars" where cast("start" as varchar) like $1 and "deleted_at" is null`
+	rows,err := repository.DB.Query(statement,yearMonth+"%")
 	if err != nil {
 		return data,err
 	}
@@ -77,6 +78,7 @@ func (repository CalendarRepository) Edit(input viewmodel.CalendarVm) (res strin
 }
 
 func (repository CalendarRepository) Add(input viewmodel.CalendarVm) (res string, err error) {
+	fmt.Println(input.Start)
 	statement := `insert into "calendars" ("title","start","end","description","created_at","updated_at") values($1,$2,$3,$4,$5,$6) returning "id"`
 	err = repository.DB.QueryRow(
 		statement,
