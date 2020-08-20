@@ -55,7 +55,7 @@ func (repository MasterProductRepository) Browse(search, order, sort string, lim
 }
 
 func (repository MasterProductRepository) BrowseAll() (data []models.MasterProduct,err error) {
-	statement := `select * from "master_products"`
+	statement := `select * from "master_products" where "deleted_at" is null`
 	rows, err := repository.DB.Query(statement)
 	if err != nil {
 		return data, err
