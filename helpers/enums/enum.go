@@ -57,3 +57,8 @@ const KeyComplaintStatusEnum1="open"
 const ValueComplaintStatusEnum1="Open"
 const KeyComplaintStatusEnum2="close"
 const ValueComplaintStatusEnum2 ="Close"
+
+const KeyTypeZakatEnum1="maal"
+const ValueTypeZakatEnum1="Maal"
+const KeyTypeZakatEnum2="penghasilan"
+const ValueTypeZakatEnum2="Penghasilan"

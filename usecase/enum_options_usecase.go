@@ -184,3 +184,17 @@ func (uc EnumOptionsUseCase) GetStatusComplaint() (res []viewmodel.EnumVm) {
 
 	return res
 }
+
+func (uc EnumOptionsUseCase) GetTypeZakat() (res []viewmodel.EnumVm) {
+	res = append(res, viewmodel.EnumVm{
+		Key:   enums.KeyTypeZakatEnum1,
+		Value: enums.ValueTypeZakatEnum1,
+	})
+
+	res = append(res, viewmodel.EnumVm{
+		Key:   enums.KeyTypeZakatEnum2,
+		Value: enums.ValueTypeZakatEnum2,
+	})
+
+	return res
+}

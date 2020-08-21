@@ -171,4 +171,18 @@ func (boot *Bootstrap) RegisterRouters() {
 		Handler:    handlerType,
 	}
 	prayRoutes.RegisterRoute()
+
+	//video content routes
+	videoContentRoutes := routes.VideoContentRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	videoContentRoutes.RegisterRoute()
+
+	//master zakat routes
+	masterZakatRoutes := routes.MasterZakatRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	masterZakatRoutes.RegisterRoute()
 }
