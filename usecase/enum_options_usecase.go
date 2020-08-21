@@ -170,3 +170,17 @@ func (uc EnumOptionsUseCase) GetDiscountTypeEnum() (res []viewmodel.EnumVm) {
 
 	return res
 }
+
+func (uc EnumOptionsUseCase) GetStatusComplaint() (res []viewmodel.EnumVm) {
+	res = append(res, viewmodel.EnumVm{
+		Key:   enums.KeyComplaintStatusEnum1,
+		Value: enums.ValueComplaintStatusEnum1,
+	})
+
+	res = append(res, viewmodel.EnumVm{
+		Key:   enums.KeyComplaintStatusEnum2,
+		Value: enums.ValueComplaintStatusEnum2,
+	})
+
+	return res
+}

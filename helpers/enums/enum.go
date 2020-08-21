@@ -52,3 +52,8 @@ const KeyDiscountTypeEnum1 = "per_hari"
 const ValueDiscountTypeEnum1 = "Per Hari"
 const KeyDiscountTypeEnum2 = "fix"
 const ValueDiscountTypeEnum2 = "Fix"
+
+const KeyComplaintStatusEnum1="open"
+const ValueComplaintStatusEnum1="Open"
+const KeyComplaintStatusEnum2="close"
+const ValueComplaintStatusEnum2 ="Close"
