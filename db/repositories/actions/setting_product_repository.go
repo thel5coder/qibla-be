@@ -22,7 +22,8 @@ func NewSettingProductRepository(DB *sql.DB) contracts.ISettingProductRepository
 func (repository SettingProductRepository) Browse(search, order, sort string, limit, offset int) (data []models.SettingProduct, count int, err error) {
 	statement := `select sp.*,mp."name" from "setting_products" sp 
                  inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null
-                order by sp.` + order + ` ` + sort + ` limit $1 offset $2`
+                where sp."deleted_at" is null
+                order by sp.` + order + ` ` + sort + ` limit $1 offset $2"`
 	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
 		return data, count, err
@@ -56,7 +57,8 @@ func (repository SettingProductRepository) Browse(search, order, sort string, li
 	}
 
 	statement = `select count(sp."id") from "setting_products" sp 
-                 inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null`
+                 inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null
+                   where sp."deleted_at" is null`
 	err = repository.DB.QueryRow(statement).Scan(&count)
 	if err != nil {
 		return data, count, err
@@ -67,7 +69,7 @@ func (repository SettingProductRepository) Browse(search, order, sort string, li
 
 func (repository SettingProductRepository) BrowseAll() (data []models.SettingProduct, err error) {
 	statement := `select sp.*,mp."name" from "setting_products" sp 
-                 inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null`
+                 inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null where sp."deleted_at" is null`
 	rows, err := repository.DB.Query(statement)
 	if err != nil {
 		return data, err
@@ -106,7 +108,7 @@ func (repository SettingProductRepository) BrowseAll() (data []models.SettingPro
 func (repository SettingProductRepository) ReadBy(column, value string) (data models.SettingProduct, err error) {
 	statement := `select sp.*,mp."name" from "setting_products" sp 
                  inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null
-                 where ` + column + `=$1`
+                 where ` + column + `=$1 and sp."deleted_at" is null`
 	err = repository.DB.QueryRow(statement, value).Scan(
 		&data.ID,
 		&data.ProductID,
