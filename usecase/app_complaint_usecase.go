@@ -66,7 +66,7 @@ func (uc AppComplaintUseCase) readBy(column, value string) (res viewmodel.AppCom
 	return res, err
 }
 
-func (uc AppComplaintUseCase) Edit(ID string, input *requests.AppComplaintRequest) (err error){
+func (uc AppComplaintUseCase) Edit(ID string, input *requests.AppComplaintRequest) (err error) {
 	repository := actions.NewAppComplaintRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
@@ -74,14 +74,13 @@ func (uc AppComplaintUseCase) Edit(ID string, input *requests.AppComplaintReques
 		ID:            ID,
 		FullName:      input.FullName,
 		Email:         input.Email,
-		TicketNumber:  input.TicketNumber,
 		ComplaintType: input.ComplaintType,
 		Complaint:     input.Complaint,
 		Solution:      input.Solution,
 		Status:        input.Status,
 		UpdatedAt:     now,
 	}
-	_,err = repository.Edit(body)
+	_, err = repository.Edit(body)
 	if err != nil {
 		return err
 	}
@@ -89,7 +88,7 @@ func (uc AppComplaintUseCase) Edit(ID string, input *requests.AppComplaintReques
 	return nil
 }
 
-func (uc AppComplaintUseCase) Add(input *requests.AppComplaintRequest) (err error){
+func (uc AppComplaintUseCase) Add(input *requests.AppComplaintRequest) (err error) {
 	repository := actions.NewAppComplaintRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
@@ -100,10 +99,10 @@ func (uc AppComplaintUseCase) Add(input *requests.AppComplaintRequest) (err erro
 		ComplaintType: input.ComplaintType,
 		Complaint:     input.Complaint,
 		Solution:      input.Solution,
-		Status:        input.Status,
+		Status:        "open",
 		UpdatedAt:     now,
 	}
-	_,err = repository.Add(body)
+	_, err = repository.Add(body)
 	if err != nil {
 		return err
 	}
@@ -111,16 +110,16 @@ func (uc AppComplaintUseCase) Add(input *requests.AppComplaintRequest) (err erro
 	return nil
 }
 
-func (uc AppComplaintUseCase) Delete(ID string) (err error){
+func (uc AppComplaintUseCase) Delete(ID string) (err error) {
 	repository := actions.NewAppComplaintRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
-	count,err := uc.countBy("","id",ID)
+	count, err := uc.countBy("", "id", ID)
 	if err != nil {
 		return err
 	}
 
 	if count > 0 {
-		_,err = repository.Delete(ID,now,now)
+		_, err = repository.Delete(ID, now, now)
 		if err != nil {
 			return err
 		}
@@ -148,27 +147,27 @@ func (uc AppComplaintUseCase) countBy(ID, column, value string) (res int, err er
 	return res, nil
 }
 
-func (uc AppComplaintUseCase) GetTicketNumber() (res string,err error){
+func (uc AppComplaintUseCase) GetTicketNumber() (res string, err error) {
 	repository := actions.NewAppComplaintRepository(uc.DB)
-	count,err := repository.CountAll()
+	count, err := repository.CountAll()
 	if err != nil {
-		return res,err
+		return res, err
 	}
-	count = count+1
+	count = count + 1
 
-	if count == 0 {
-		res = `00000`+ strconv.Itoa(count)
-	}else if count > 9 {
-		res = `0000`+ strconv.Itoa(count)
-	}else if count > 99 {
-		res = `000`+ strconv.Itoa(count)
-	}else if count > 999 {
-		res = `00`+strconv.Itoa(count)
-	}else if count > 9999 {
-		res = `0`+strconv.Itoa(count)
-	}else{
+	if count > 99999 {
 		res = strconv.Itoa(count)
+	} else if count > 9999 {
+		res = `0` + strconv.Itoa(count)
+	} else if count > 999 {
+		res = `00` + strconv.Itoa(count)
+	} else if count > 99 {
+		res = `000` + strconv.Itoa(count)
+	} else if count > 9 {
+		res = `0000` + strconv.Itoa(count)
+	} else {
+		res = `00000`+strconv.Itoa(count)
 	}
 
-	return res,err
+	return res, err
 }

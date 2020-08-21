@@ -164,4 +164,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		Handler:    handlerType,
 	}
 	appComplaintRoutes.RegisterRoute()
+
+	//pray routes
+	prayRoutes := routes.PrayRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	prayRoutes.RegisterRoute()
 }

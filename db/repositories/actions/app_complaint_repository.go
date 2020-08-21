@@ -6,6 +6,7 @@ import (
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
 	"qibla-backend/usecase/viewmodel"
+	"strings"
 	"time"
 )
 
@@ -18,9 +19,9 @@ func NewAppComplaintRepository(DB *sql.DB) contracts.IAppComplaintRepository {
 }
 
 func (repository AppComplaintRepository) Browse(search, order, sort string, limit, offset int) (data []models.AppComplaint, count int, err error) {
-	statement := `select * from "app_complaints" where (cast("created_at" as varchar) like $1 or "full_name" like $1 or "email" like $1 or "ticket_number" like $1 or "complaint_type" like $1 or "complaint" like $1 
-                 or "solution" like $1 or "status" like $1) and "deleted_at" is null order by ` + order + ` ` + sort + ` limit $2 offset $3`
-	rows, err := repository.DB.Query(statement, "%"+search+"%", limit, offset)
+	statement := `select * from "app_complaints" where (cast("created_at" as varchar) like $1 or lower("full_name") like $1 or lower("email") like $1 or "ticket_number" like $1 or lower("complaint_type") like $1 or lower("complaint") like $1 
+                 or lower("solution") like $1 or cast(lower("status") as varchar) like $1) and "deleted_at" is null order by ` + order + ` ` + sort + ` limit $2 offset $3`
+	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
 	if err != nil {
 		return data, count, err
 	}
@@ -44,7 +45,7 @@ func (repository AppComplaintRepository) Browse(search, order, sort string, limi
 	}
 
 	statement = `select count("id") from "app_complaints" where (cast("created_at" as varchar) like $1 or "full_name" like $1 or "email" like $1 or "ticket_number" like $1 or "complaint_type" like $1 or "complaint" like $1 
-                 or "solution" like $1 or "status" like $1) and "deleted_at" is null`
+                 or "solution" like $1 or cast("status" as varchar) like $1) and "deleted_at" is null`
 	err = repository.DB.QueryRow(statement, "%"+search+"%").Scan(&count)
 	if err != nil {
 		return data, count, err
@@ -73,12 +74,11 @@ func (repository AppComplaintRepository) ReadBy(column, value string) (data mode
 }
 
 func (repository AppComplaintRepository) Edit(input viewmodel.AppComplaintVm) (res string, err error) {
-	statement := `update "app_complaints" set "full_name"=$1, "email"=$2, "ticket_number"=$3, "complaint_type"=$4, "complaint"=$4, "solution"=$5, "status"=$6, "updated_at"=$7 where "id"=$8 returning "id"`
+	statement := `update "app_complaints" set "full_name"=$1, "email"=$2, "complaint_type"=$3,"complaint"=$4, "solution"=$5, "status"=$6, "updated_at"=$7 where "id"=$8 returning "id"`
 	err = repository.DB.QueryRow(
 		statement,
 		input.FullName,
 		input.Email,
-		input.TicketNumber,
 		input.ComplaintType,
 		input.Complaint,
 		input.Solution,

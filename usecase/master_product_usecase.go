@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gosimple/slug"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/messages"
@@ -93,13 +92,6 @@ func (uc MasterProductUseCase) ReadByPk(ID string) (res viewmodel.MasterProductV
 }
 
 func (uc MasterProductUseCase) Edit(ID string, input *requests.MasterProductRequest) (err error) {
-	start, err := time.Parse("2006-1-2", "2016-4-1")
-	// handle error
-
-	// set d to starting date and keep adding 1 day to it as long as month doesn't change
-	for d := start; d.Month() == start.Month(); d = d.AddDate(0, 0, 1) {
-		fmt.Println(d.Day())
-	}
 	repository := actions.NewMasterProductRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
