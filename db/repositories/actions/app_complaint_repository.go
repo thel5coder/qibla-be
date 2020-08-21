@@ -127,3 +127,10 @@ func (repository AppComplaintRepository) CountBy(ID, column, value string) (res 
 
 	return res,err
 }
+
+func (repository AppComplaintRepository) CountAll() (res int,err error){
+	statement := `select count("id") from "app_complaints" where "deleted_at" is null`
+	err = repository.DB.QueryRow(statement).Scan(&res)
+
+	return res,err
+}

@@ -8,7 +8,7 @@ type AppComplaintVm struct {
 	ComplaintType string `json:"complaint_type"`
 	Complaint     string `json:"complaint"`
 	Solution      string `json:"solution"`
-	Status        bool   `json:"status"`
+	Status        string `json:"status"`
 	CreatedAt     string `json:"created_at"`
 	UpdatedAt     string `json:"updated_at"`
 	DeletedAt     string `json:"deleted_at"`

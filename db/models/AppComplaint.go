@@ -10,7 +10,7 @@ type AppComplaint struct {
 	ComplaintType string         `db:"complaint_type"`
 	Complaint     string         `db:"complaint"`
 	Solution      sql.NullString `db:"solution"`
-	Status        bool           `db:"status"`
+	Status        string         `db:"status"`
 	CreatedAt     string         `db:"created_at"`
 	UpdatedAt     string         `db:"updated_at"`
 	DeletedAt     sql.NullString `db:"deleted_at"`

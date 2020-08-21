@@ -17,4 +17,6 @@ type IAppComplaintRepository interface {
 	Delete(ID, updatedAt, deletedAt string) (res string, err error)
 
 	CountBy(ID, column, value string) (res int, err error)
+
+	CountAll() (res int,err error)
 }

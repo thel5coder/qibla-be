@@ -157,4 +157,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		Handler:    handlerType,
 	}
 	calendarRoutes.RegisterRoute()
+
+	//complaint routes
+	appComplaintRoutes := routes.AppComplaintRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	appComplaintRoutes.RegisterRoute()
 }

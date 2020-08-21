@@ -7,5 +7,5 @@ type AppComplaintRequest struct {
 	ComplaintType string `json:"complaint_type"`
 	Complaint     string `json:"complaint"`
 	Solution      string `json:"solution"`
-	Status        bool   `json:"status"`
+	Status        string `json:"status"`
 }
