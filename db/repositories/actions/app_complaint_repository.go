@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -20,9 +21,10 @@ func NewAppComplaintRepository(DB *sql.DB) contracts.IAppComplaintRepository {
 
 func (repository AppComplaintRepository) Browse(search, order, sort string, limit, offset int) (data []models.AppComplaint, count int, err error) {
 	statement := `select * from "app_complaints" where (cast("created_at" as varchar) like $1 or lower("full_name") like $1 or lower("email") like $1 or "ticket_number" like $1 or lower("complaint_type") like $1 or lower("complaint") like $1 
-                 or lower("solution") like $1 or cast(lower("status") as varchar) like $1) and "deleted_at" is null order by ` + order + ` ` + sort + ` limit $2 offset $3`
+                 or lower("solution") like $1 or cast("status" as varchar) like $1) and "deleted_at" is null order by ` + order + ` ` + sort + ` limit $2 offset $3`
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
 	if err != nil {
+		fmt.Println(err.Error())
 		return data, count, err
 	}
 
@@ -44,9 +46,9 @@ func (repository AppComplaintRepository) Browse(search, order, sort string, limi
 		data = append(data, dataTemp)
 	}
 
-	statement = `select count("id") from "app_complaints" where (cast("created_at" as varchar) like $1 or "full_name" like $1 or "email" like $1 or "ticket_number" like $1 or "complaint_type" like $1 or "complaint" like $1 
-                 or "solution" like $1 or cast("status" as varchar) like $1) and "deleted_at" is null`
-	err = repository.DB.QueryRow(statement, "%"+search+"%").Scan(&count)
+	statement = `select count("id") from "app_complaints" where (cast("created_at" as varchar) like $1 or lower("full_name") like $1 or lower("email") like $1 or "ticket_number" like $1 or lower("complaint_type") like $1 or lower("complaint") like $1 
+                 or lower("solution") like $1 or cast("status" as varchar) like $1) and "deleted_at" is null`
+	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
 	if err != nil {
 		return data, count, err
 	}
