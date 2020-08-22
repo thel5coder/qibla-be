@@ -1,11 +1,9 @@
 package usecase
 
 import (
-	"bytes"
 	"crypto/md5"
 	"crypto/sha1"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 )
