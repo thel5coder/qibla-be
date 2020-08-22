@@ -15,6 +15,7 @@ type ContactUseCase struct {
 
 func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.ContactVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
+	fileUc := FileUseCase{}
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
 	contacts, count, err := repository.Browse(search, order, sort, limit, offset)
@@ -23,6 +24,7 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 	}
 
 	for _, contact := range contacts {
+		file, _ := fileUc.ReadByPk(contact.Logo)
 		res = append(res, viewmodel.ContactVm{
 			ID:                   contact.ID,
 			BranchName:           contact.BranchName,
@@ -40,7 +42,7 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 			DirectorContact:      contact.DirectorContact.String,
 			PicName:              contact.PicName,
 			PicContact:           contact.PicContact,
-			Logo:                 contact.Logo,
+			FileLogo:             file,
 			VirtualAccountNumber: contact.VirtualAccountNumber.String,
 			AccountNumber:        contact.AccountNumber,
 			AccountName:          contact.AccountName,
@@ -58,15 +60,16 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 	return res, pagination, err
 }
 
-
-func (uc ContactUseCase) BrowseAll(search string) (res []viewmodel.ContactVm,err error){
+func (uc ContactUseCase) BrowseAll(search string) (res []viewmodel.ContactVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
-	contacts,err := repository.BrowseAll(search)
+	fileUc := FileUseCase{}
+	contacts, err := repository.BrowseAll(search)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
 	for _, contact := range contacts {
+		file, _ := fileUc.ReadByPk(contact.Logo)
 		res = append(res, viewmodel.ContactVm{
 			ID:                   contact.ID,
 			BranchName:           contact.BranchName,
@@ -84,7 +87,7 @@ func (uc ContactUseCase) BrowseAll(search string) (res []viewmodel.ContactVm,err
 			DirectorContact:      contact.DirectorContact.String,
 			PicName:              contact.PicName,
 			PicContact:           contact.PicContact,
-			Logo:                 contact.Logo,
+			FileLogo:             file,
 			VirtualAccountNumber: contact.VirtualAccountNumber.String,
 			AccountNumber:        contact.AccountNumber,
 			AccountName:          contact.AccountName,
@@ -97,18 +100,18 @@ func (uc ContactUseCase) BrowseAll(search string) (res []viewmodel.ContactVm,err
 		})
 	}
 
-	return res,err
+	return res, err
 }
 
 func (uc ContactUseCase) ReadBy(column, value string) (res viewmodel.ContactVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
-	fileUc := FileUseCase{UcContract:uc.UcContract}
+	fileUc := FileUseCase{UcContract: uc.UcContract}
 	contact, err := repository.ReadBy(column, value)
 	if err != nil {
 		return res, err
 	}
 
-	file,_ := fileUc.ReadByPk(contact.Logo)
+	file, _ := fileUc.ReadByPk(contact.Logo)
 
 	res = viewmodel.ContactVm{
 		ID:                   contact.ID,
@@ -127,7 +130,7 @@ func (uc ContactUseCase) ReadBy(column, value string) (res viewmodel.ContactVm, 
 		DirectorContact:      contact.DirectorContact.String,
 		PicName:              contact.PicName,
 		PicContact:           contact.PicContact,
-		Logo:                 file,
+		FileLogo:             file,
 		VirtualAccountNumber: contact.VirtualAccountNumber.String,
 		AccountNumber:        contact.AccountNumber,
 		AccountName:          contact.AccountName,
@@ -228,17 +231,17 @@ func (uc ContactUseCase) Add(input *requests.ContactRequest) (err error) {
 	return nil
 }
 
-func (uc ContactUseCase) Delete(ID string) (err error){
+func (uc ContactUseCase) Delete(ID string) (err error) {
 	repository := actions.NewContactRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	count,err := uc.countBy("","id",ID)
+	count, err := uc.countBy("", "id", ID)
 	if err != nil {
 		return err
 	}
 
 	if count > 0 {
-		_,err = repository.Delete(ID,now,now)
+		_, err = repository.Delete(ID, now, now)
 		if err != nil {
 			return err
 		}

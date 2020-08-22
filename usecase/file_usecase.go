@@ -39,13 +39,13 @@ func (uc FileUseCase) ReadBy(column,value string) (res viewmodel.FileVm,err erro
 	return res,err
 }
 
-func (uc FileUseCase) ReadByPk(ID string) (res string,err error){
+func (uc FileUseCase) ReadByPk(ID string) (res viewmodel.FileVm,err error){
 	file,err := uc.ReadBy("id",ID)
 	if err != nil {
 		return res,err
 	}
 
-	return file.Path,err
+	return file,err
 }
 
 func (uc FileUseCase) CountBy(column,value string) (res int,err error){

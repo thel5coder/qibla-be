@@ -17,7 +17,7 @@ type ContactVm struct {
 	DirectorContact      string `json:"director_contact"`
 	PicName              string `json:"pic_name"`
 	PicContact           string `json:"pic_contact"`
-	Logo                 string `json:"logo"`
+	FileLogo             FileVm `json:"file_logo"`
 	VirtualAccountNumber string `json:"virtual_account_number"`
 	AccountNumber        string `json:"account_number"`
 	AccountName          string `json:"account_name"`
