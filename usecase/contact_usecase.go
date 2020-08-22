@@ -15,7 +15,7 @@ type ContactUseCase struct {
 
 func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.ContactVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
-	fileUc := FileUseCase{}
+	fileUc := FileUseCase{UcContract:uc.UcContract}
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
 	contacts, count, err := repository.Browse(search, order, sort, limit, offset)
@@ -24,6 +24,7 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 	}
 
 	for _, contact := range contacts {
+		fmt.Println(contact.Logo)
 		file, _ := fileUc.ReadByPk(contact.Logo)
 		res = append(res, viewmodel.ContactVm{
 			ID:                   contact.ID,
@@ -62,7 +63,7 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 
 func (uc ContactUseCase) BrowseAll(search string) (res []viewmodel.ContactVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
-	fileUc := FileUseCase{}
+	fileUc := FileUseCase{UcContract:uc.UcContract}
 	contacts, err := repository.BrowseAll(search)
 	if err != nil {
 		return res, err
@@ -155,24 +156,24 @@ func (uc ContactUseCase) Edit(ID string, input *requests.ContactRequest) (err er
 	}
 
 	body := viewmodel.ContactVm{
-		ID:                   ID,
-		BranchName:           input.BranchName,
-		TravelAgentName:      input.TravelAgentName,
-		Address:              input.Address,
-		Longitude:            input.Longitude,
-		Latitude:             input.Latitude,
-		AreaCode:             input.AreaCode,
-		PhoneNumber:          input.PhoneNumber,
-		SKNumber:             input.SKNumber,
-		SKDate:               input.SKDate,
-		Accreditation:        input.Accreditation,
-		AccreditationDate:    input.AccreditationDate,
-		DirectorName:         input.DirectorName,
-		DirectorContact:      input.DirectorContact,
-		PicName:              input.PicName,
-		PicContact:           input.PicContact,
+		ID:                ID,
+		BranchName:        input.BranchName,
+		TravelAgentName:   input.TravelAgentName,
+		Address:           input.Address,
+		Longitude:         input.Longitude,
+		Latitude:          input.Latitude,
+		AreaCode:          input.AreaCode,
+		PhoneNumber:       input.PhoneNumber,
+		SKNumber:          input.SKNumber,
+		SKDate:            input.SKDate,
+		Accreditation:     input.Accreditation,
+		AccreditationDate: input.AccreditationDate,
+		DirectorName:      input.DirectorName,
+		DirectorContact:   input.DirectorContact,
+		PicName:           input.PicName,
+		PicContact:        input.PicContact,
 		FileLogo: viewmodel.FileVm{
-			ID:        input.Logo,
+			ID: input.Logo,
 		},
 		VirtualAccountNumber: input.VirtualAccountNumber,
 		AccountNumber:        input.AccountNumber,
@@ -200,23 +201,23 @@ func (uc ContactUseCase) Add(input *requests.ContactRequest) (err error) {
 	}
 
 	body := viewmodel.ContactVm{
-		BranchName:           input.BranchName,
-		TravelAgentName:      input.TravelAgentName,
-		Address:              input.Address,
-		Longitude:            input.Longitude,
-		Latitude:             input.Latitude,
-		AreaCode:             input.AreaCode,
-		PhoneNumber:          input.PhoneNumber,
-		SKNumber:             input.SKNumber,
-		SKDate:               input.SKDate,
-		Accreditation:        input.Accreditation,
-		AccreditationDate:    input.AccreditationDate,
-		DirectorName:         input.DirectorName,
-		DirectorContact:      input.DirectorContact,
-		PicName:              input.PicName,
-		PicContact:           input.PicContact,
+		BranchName:        input.BranchName,
+		TravelAgentName:   input.TravelAgentName,
+		Address:           input.Address,
+		Longitude:         input.Longitude,
+		Latitude:          input.Latitude,
+		AreaCode:          input.AreaCode,
+		PhoneNumber:       input.PhoneNumber,
+		SKNumber:          input.SKNumber,
+		SKDate:            input.SKDate,
+		Accreditation:     input.Accreditation,
+		AccreditationDate: input.AccreditationDate,
+		DirectorName:      input.DirectorName,
+		DirectorContact:   input.DirectorContact,
+		PicName:           input.PicName,
+		PicContact:        input.PicContact,
 		FileLogo: viewmodel.FileVm{
-			ID:        input.Logo,
+			ID: input.Logo,
 		},
 		VirtualAccountNumber: input.VirtualAccountNumber,
 		AccountNumber:        input.AccountNumber,
