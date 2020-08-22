@@ -171,7 +171,9 @@ func (uc ContactUseCase) Edit(ID string, input *requests.ContactRequest) (err er
 		DirectorContact:      input.DirectorContact,
 		PicName:              input.PicName,
 		PicContact:           input.PicContact,
-		Logo:                 input.Logo,
+		FileLogo: viewmodel.FileVm{
+			ID:        input.Logo,
+		},
 		VirtualAccountNumber: input.VirtualAccountNumber,
 		AccountNumber:        input.AccountNumber,
 		AccountName:          input.AccountName,
@@ -213,7 +215,9 @@ func (uc ContactUseCase) Add(input *requests.ContactRequest) (err error) {
 		DirectorContact:      input.DirectorContact,
 		PicName:              input.PicName,
 		PicContact:           input.PicContact,
-		Logo:                 input.Logo,
+		FileLogo: viewmodel.FileVm{
+			ID:        input.Logo,
+		},
 		VirtualAccountNumber: input.VirtualAccountNumber,
 		AccountNumber:        input.AccountNumber,
 		AccountName:          input.AccountName,

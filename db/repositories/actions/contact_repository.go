@@ -76,12 +76,12 @@ func (repository ContactRepository) Browse(search, order, sort string, limit, of
 
 func (repository ContactRepository) BrowseAll(search string) (data []models.Contact, err error) {
 	var rows *sql.Rows
-	if search == ""{
+	if search == "" {
 		statement := `select * from "contacts"`
 		rows, err = repository.DB.Query(statement)
-	}else{
+	} else {
 		statement := `select * from "contacts" where lower("travel_agent_name") like $1 or lower("branch_name") like $2`
-		rows, err = repository.DB.Query(statement,"%"+strings.ToLower(search)+"%")
+		rows, err = repository.DB.Query(statement, "%"+strings.ToLower(search)+"%")
 	}
 	if err != nil {
 		return data, err
@@ -161,7 +161,7 @@ func (repository ContactRepository) ReadBy(column, value string) (data models.Co
 	return data, err
 }
 
-func (repository ContactRepository) Edit(input viewmodel.ContactVm) (res string,err error) {
+func (repository ContactRepository) Edit(input viewmodel.ContactVm) (res string, err error) {
 	statement := `update "contacts" set "branch_name"=$1, "travel_agent_name"=$2, "address"=$3, "longitude"=$4, "latitude"=$5, "area_code"=$6, "phone_number"=$7, "sk_number"=$8, "sk_date"=$9,
                  "accreditation"=$10, "accreditation_date"=$11, "director_name"=$12, "director_contact"=$13, "pic_name"=$14, "pic_contact"=$15, "logo"=$16, "virtual_account_number"=$17, "account_number"=$18,
                  "account_name"=$19, "account_bank_name"=$20, "account_bank_code"=$21, "updated_at"=$22, "email"=$23 where "id"=$24 returning "id"`
@@ -175,28 +175,28 @@ func (repository ContactRepository) Edit(input viewmodel.ContactVm) (res string,
 		input.AreaCode,
 		input.PhoneNumber,
 		str.EmptyString(input.SKNumber),
-		datetime.EmptyTime(datetime.StrParseToTime(input.SKDate,"2006-01-02")),
+		datetime.EmptyTime(datetime.StrParseToTime(input.SKDate, "2006-01-02")),
 		str.EmptyString(input.Accreditation),
-		datetime.EmptyTime(datetime.StrParseToTime(input.AccreditationDate,"2006-01-02")),
+		datetime.EmptyTime(datetime.StrParseToTime(input.AccreditationDate, "2006-01-02")),
 		str.EmptyString(input.DirectorName),
 		str.EmptyString(input.DirectorContact),
 		input.PicName,
 		input.PicContact,
-		input.Logo,
+		input.FileLogo.ID,
 		str.EmptyString(input.VirtualAccountNumber),
 		input.AccountNumber,
 		input.AccountName,
 		input.AccountBankName,
 		input.AccountBankCode,
-		datetime.StrParseToTime(input.UpdatedAt,time.RFC3339),
+		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
 		input.Email,
 		input.ID,
-		).Scan(&res)
+	).Scan(&res)
 
-	return res,err
+	return res, err
 }
 
-func (repository ContactRepository) Add(input viewmodel.ContactVm) (res string,err error) {
+func (repository ContactRepository) Add(input viewmodel.ContactVm) (res string, err error) {
 	statement := `insert into "contacts" ("email","branch_name","travel_agent_name","address","longitude","latitude","area_code","phone_number","sk_number","sk_date","accreditation","accreditation_date","director_name",
                   "director_contact","pic_name","pic_contact","logo","virtual_account_number","account_number","account_name","account_bank_name","account_bank_code","created_at","updated_at") 
                   values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24) returning "id"`
@@ -212,43 +212,43 @@ func (repository ContactRepository) Add(input viewmodel.ContactVm) (res string,e
 		input.AreaCode,
 		input.PhoneNumber,
 		str.EmptyString(input.SKNumber),
-		datetime.EmptyTime(datetime.StrParseToTime(input.SKDate,"2006-01-02")),
+		datetime.EmptyTime(datetime.StrParseToTime(input.SKDate, "2006-01-02")),
 		str.EmptyString(input.Accreditation),
-		datetime.EmptyTime(datetime.StrParseToTime(input.AccreditationDate,"2006-01-02")),
+		datetime.EmptyTime(datetime.StrParseToTime(input.AccreditationDate, "2006-01-02")),
 		str.EmptyString(input.DirectorName),
 		str.EmptyString(input.DirectorContact),
 		input.PicName,
 		input.PicContact,
-		input.Logo,
+		input.FileLogo.ID,
 		input.VirtualAccountNumber,
 		input.AccountNumber,
 		input.AccountName,
 		input.AccountBankName,
 		input.AccountBankCode,
-		datetime.StrParseToTime(input.CreatedAt,time.RFC3339),
-		datetime.StrParseToTime(input.UpdatedAt,time.RFC3339),
-		).Scan(&res)
+		datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
+		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
+	).Scan(&res)
 
-	return res,err
+	return res, err
 }
 
-func (repository ContactRepository) Delete(ID, updatedAt, deletedAt string) (res string,err error) {
+func (repository ContactRepository) Delete(ID, updatedAt, deletedAt string) (res string, err error) {
 	statement := `update "contacts" set "updated_at"=$1, "deleted_at"=$2 where "id"=$3 returning "id"`
-	err = repository.DB.QueryRow(statement,datetime.StrParseToTime(updatedAt,time.RFC3339),datetime.StrParseToTime(deletedAt,time.RFC3339),ID).Scan(&res)
+	err = repository.DB.QueryRow(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), ID).Scan(&res)
 
-	return res,err
+	return res, err
 }
 
 func (repository ContactRepository) CountBy(ID, column, value string) (res int, err error) {
-	if ID == ""{
+	if ID == "" {
 		statement := `select count("id") from "contacts"
-			where `+column+`=$1 and "deleted_at" is null`
-		err = repository.DB.QueryRow(statement,value).Scan(&res)
-	}else{
+			where ` + column + `=$1 and "deleted_at" is null`
+		err = repository.DB.QueryRow(statement, value).Scan(&res)
+	} else {
 		statement := `select count("id") from "contacts"
-			where (`+column+`=$1 and "deleted_at" is null) and "id"<>$2`
-		err = repository.DB.QueryRow(statement,value,ID).Scan(&res)
+			where (` + column + `=$1 and "deleted_at" is null) and "id"<>$2`
+		err = repository.DB.QueryRow(statement, value, ID).Scan(&res)
 	}
 
-	return res,err
+	return res, err
 }
