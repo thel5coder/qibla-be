@@ -76,12 +76,9 @@ func (repository AppComplaintRepository) ReadBy(column, value string) (data mode
 }
 
 func (repository AppComplaintRepository) Edit(input viewmodel.AppComplaintVm) (res string, err error) {
-	statement := `update "app_complaints" set "full_name"=$1, "email"=$2, "complaint_type"=$3,"complaint"=$4, "solution"=$5, "status"=$6, "updated_at"=$7 where "id"=$8 returning "id"`
+	statement := `update "app_complaints" set "complaint"=$1, "solution"=$2, "status"=$3, "updated_at"=$4 where "id"=$5 returning "id"`
 	err = repository.DB.QueryRow(
 		statement,
-		input.FullName,
-		input.Email,
-		input.ComplaintType,
 		input.Complaint,
 		input.Solution,
 		input.Status,

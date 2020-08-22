@@ -72,9 +72,6 @@ func (uc AppComplaintUseCase) Edit(ID string, input *requests.AppComplaintReques
 
 	body := viewmodel.AppComplaintVm{
 		ID:            ID,
-		FullName:      input.FullName,
-		Email:         input.Email,
-		ComplaintType: input.ComplaintType,
 		Complaint:     input.Complaint,
 		Solution:      input.Solution,
 		Status:        input.Status,
