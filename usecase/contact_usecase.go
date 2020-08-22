@@ -102,10 +102,13 @@ func (uc ContactUseCase) BrowseAll(search string) (res []viewmodel.ContactVm,err
 
 func (uc ContactUseCase) ReadBy(column, value string) (res viewmodel.ContactVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
+	fileUc := FileUseCase{UcContract:uc.UcContract}
 	contact, err := repository.ReadBy(column, value)
 	if err != nil {
 		return res, err
 	}
+
+	file,_ := fileUc.ReadByPk(contact.Logo)
 
 	res = viewmodel.ContactVm{
 		ID:                   contact.ID,
@@ -124,7 +127,7 @@ func (uc ContactUseCase) ReadBy(column, value string) (res viewmodel.ContactVm, 
 		DirectorContact:      contact.DirectorContact.String,
 		PicName:              contact.PicName,
 		PicContact:           contact.PicContact,
-		Logo:                 contact.Logo,
+		Logo:                 file,
 		VirtualAccountNumber: contact.VirtualAccountNumber.String,
 		AccountNumber:        contact.AccountNumber,
 		AccountName:          contact.AccountName,
