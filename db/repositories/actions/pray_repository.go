@@ -71,7 +71,7 @@ func (repository PrayRepository) Edit(input viewmodel.PrayVm) (res string, err e
 }
 
 func (repository PrayRepository) Add(input viewmodel.PrayVm) (res string, err error) {
-	statement := `insert into "prays" ("name","file_id","is_active","created_at","updated_at") values($1,$2,$3,$4) returning "id"`
+	statement := `insert into "prays" ("name","file_id","is_active","created_at","updated_at") values($1,$2,$3,$4,$5) returning "id"`
 	err = repository.DB.QueryRow(statement, input.Name, input.FileID, input.IsActive, datetime.StrParseToTime(input.CreatedAt, time.RFC3339), datetime.StrParseToTime(input.UpdatedAt, time.RFC3339)).Scan(&res)
 
 	return res, err
