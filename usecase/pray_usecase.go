@@ -13,6 +13,7 @@ type PrayUseCase struct {
 
 func (uc PrayUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.PrayVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewPrayRepository(uc.DB)
+	fileUc := FileUseCase{UcContract: uc.UcContract}
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
 	prays, count, err := repository.Browse(search, order, sort, limit, offset)
@@ -21,11 +22,13 @@ func (uc PrayUseCase) Browse(search, order, sort string, page, limit int) (res [
 	}
 
 	for _, pray := range prays {
+		file, _ := fileUc.ReadByPk(pray.FileID)
 		res = append(res, viewmodel.PrayVm{
 			ID:        pray.ID,
 			Name:      pray.Name,
 			FileID:    pray.FileID,
 			IsActive:  pray.IsActive,
+			File:      file,
 			CreatedAt: pray.CreatedAt,
 			UpdatedAt: pray.UpdatedAt,
 			DeletedAt: pray.DeletedAt.String,
@@ -39,16 +42,19 @@ func (uc PrayUseCase) Browse(search, order, sort string, page, limit int) (res [
 
 func (uc PrayUseCase) ReadBy(column, value string) (res viewmodel.PrayVm, err error) {
 	repository := actions.NewPrayRepository(uc.DB)
+	fileUc := FileUseCase{UcContract: uc.UcContract}
 	pray, err := repository.ReadBy(column, value)
 	if err != nil {
 		return res, err
 	}
 
+	file, _ := fileUc.ReadByPk(pray.FileID)
 	res = viewmodel.PrayVm{
 		ID:        pray.ID,
 		Name:      pray.Name,
 		FileID:    pray.FileID,
 		IsActive:  pray.IsActive,
+		File:      file,
 		CreatedAt: pray.CreatedAt,
 		UpdatedAt: pray.UpdatedAt,
 		DeletedAt: pray.DeletedAt.String,
