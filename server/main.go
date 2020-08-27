@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/id"
 	ut "github.com/go-playground/universal-translator"
@@ -16,6 +18,7 @@ import (
 	"log"
 	"os"
 	"qibla-backend/db"
+	awsHelper "qibla-backend/helpers/aws"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
 	redisHelper "qibla-backend/helpers/redis"
@@ -92,6 +95,25 @@ func main() {
 		URL:      "https://demo.garudea.com",
 	})
 
+	//aws setup
+	awsAccessKey := os.Getenv("S3_ACCESS_KEY")
+	awsSecretKey := os.Getenv("S3_SECRET_KEY")
+	awsBucket := os.Getenv("S3_BUCKET")
+	awsDirectory := os.Getenv("S3_DIRECTORY")
+	s3EndPoint := os.Getenv("S3_BASE_URL")
+	awsConfig := aws.Config{
+		Endpoint:    &s3EndPoint,
+		Region:      aws.String(os.Getenv("S3_LOCATION")),
+		Credentials: credentials.NewStaticCredentials(awsAccessKey, awsSecretKey, ""),
+	}
+	awsS3 := awsHelper.AWSS3{
+		AWSConfig: awsConfig,
+		Bucket:    awsBucket,
+		Directory: awsDirectory,
+		AccessKey: awsAccessKey,
+		SecretKey: awsSecretKey,
+	}
+
 	//init validator
 	validatorInit()
 
@@ -107,6 +129,7 @@ func main() {
 		JwtConfig:   jwtConfig,
 		JwtCred:     jwtCred,
 		Odoo:        c,
+		AWSS3:       awsS3,
 	}
 
 	bootApp := bootstrap.Bootstrap{

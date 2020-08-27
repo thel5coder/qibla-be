@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"os"
 	queue "qibla-backend/helpers/amqp"
+	"qibla-backend/helpers/aws"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
 	"qibla-backend/helpers/messages"
@@ -32,7 +33,7 @@ const (
 	OtpLifeTime       = "3m"
 	MaxOtpSubmitRetry = 3
 	StaticBaseUrl     = "/statics"
-	fasPayBaseUrl = "https://dev.faspay.co.id/cvr"
+	fasPayBaseUrl     = "https://dev.faspay.co.id/cvr"
 )
 
 //globalsmscounter
@@ -58,6 +59,7 @@ type UcContract struct {
 	JwtConfig   middleware.JWTConfig
 	JwtCred     jwt.JwtCredential
 	Odoo        *odoo.Client
+	AWSS3       aws.AWSS3
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {

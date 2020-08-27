@@ -27,7 +27,7 @@ func (handler FileHandler) Add(ctx echo.Context) error {
 	fmt.Println(ext)
 
 	uc := usecase.FileUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.Add(file)
+	res, err := uc.UploadFile(file)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }

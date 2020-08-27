@@ -24,6 +24,7 @@ func (boot *Bootstrap) RegisterRouters() {
 	})
 
 	apiV1 := boot.E.Group("/api/v1")
+	_ = apiV1.Group("/mobile")
 
 	//authentication route
 	authenticationRoute := routes.AuthenticationRoutes{
@@ -185,4 +186,12 @@ func (boot *Bootstrap) RegisterRouters() {
 		Handler:    handlerType,
 	}
 	masterZakatRoutes.RegisterRoute()
+
+	faspayRoutes := routes.FaspayRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	faspayRoutes.RegisterRoute()
+
+
 }
