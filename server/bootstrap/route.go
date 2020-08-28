@@ -187,11 +187,17 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	masterZakatRoutes.RegisterRoute()
 
+	//satisfaction category
+	satisfactionCategoryRoutes := routes.SatisfactionCategoryRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	satisfactionCategoryRoutes.RegisterRoute()
+
 	faspayRoutes := routes.FaspayRoutes{
 		RouteGroup: apiV1,
 		Handler:    handlerType,
 	}
 	faspayRoutes.RegisterRoute()
-
 
 }
