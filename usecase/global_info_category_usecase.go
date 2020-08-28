@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"fmt"
+	"github.com/gosimple/slug"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/server/requests"
@@ -14,7 +15,7 @@ type GlobalInfoCategoryUseCase struct {
 	*UcContract
 }
 
-func (uc GlobalInfoCategoryUseCase) Browse(search,order,sort string,page, limit int) (res []viewmodel.GlobalInfoCategoryVm, pagination viewmodel.PaginationVm, err error){
+func (uc GlobalInfoCategoryUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.GlobalInfoCategoryVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewGlobalInfoCategoryRepository(uc.DB)
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
@@ -23,10 +24,11 @@ func (uc GlobalInfoCategoryUseCase) Browse(search,order,sort string,page, limit 
 		return res, pagination, err
 	}
 
-	for _,globalInfoCategory := range globalInfoCategories{
-		res = append(res,viewmodel.GlobalInfoCategoryVm{
+	for _, globalInfoCategory := range globalInfoCategories {
+		res = append(res, viewmodel.GlobalInfoCategoryVm{
 			ID:        globalInfoCategory.ID,
 			Name:      globalInfoCategory.Name,
+			Slug:      globalInfoCategory.Slug,
 			CreatedAt: globalInfoCategory.CreatedAt,
 			UpdatedAt: globalInfoCategory.UpdatedAt,
 			DeletedAt: globalInfoCategory.DeletedAt.String,
@@ -37,46 +39,47 @@ func (uc GlobalInfoCategoryUseCase) Browse(search,order,sort string,page, limit 
 	return res, pagination, err
 }
 
-func (uc GlobalInfoCategoryUseCase) ReadBy(column,value string)(res viewmodel.GlobalInfoCategoryVm,err error){
+func (uc GlobalInfoCategoryUseCase) ReadBy(column, value string) (res viewmodel.GlobalInfoCategoryVm, err error) {
 	repository := actions.NewGlobalInfoCategoryRepository(uc.DB)
-	globalInfoCategory,err := repository.ReadBy(column,value)
+	globalInfoCategory, err := repository.ReadBy(column, value)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
 	res = viewmodel.GlobalInfoCategoryVm{
 		ID:        globalInfoCategory.ID,
 		Name:      globalInfoCategory.Name,
+		Slug:      globalInfoCategory.Slug,
 		CreatedAt: globalInfoCategory.CreatedAt,
 		UpdatedAt: globalInfoCategory.UpdatedAt,
 		DeletedAt: globalInfoCategory.DeletedAt.String,
 	}
 
-	return res,err
+	return res, err
 }
 
-func (uc GlobalInfoCategoryUseCase) ReadByPk(ID string) (res viewmodel.GlobalInfoCategoryVm,err error){
-	res, err = uc.ReadBy("id",ID)
+func (uc GlobalInfoCategoryUseCase) ReadByPk(ID string) (res viewmodel.GlobalInfoCategoryVm, err error) {
+	res, err = uc.ReadBy("id", ID)
 	if err != nil {
 		fmt.Println(err)
-		return res,errors.New(messages.DataNotFound)
+		return res, errors.New(messages.DataNotFound)
 	}
 
-	return res,err
+	return res, err
 }
 
-func (uc GlobalInfoCategoryUseCase) CountBy(ID,column,value string) (res int,err error){
+func (uc GlobalInfoCategoryUseCase) CountBy(ID, column, value string) (res int, err error) {
 	repository := actions.NewGlobalInfoCategoryRepository(uc.DB)
-	res,err = repository.CountBy(ID,column,value)
+	res, err = repository.CountBy(ID, column, value)
 
-	return res,err
+	return res, err
 }
 
-func (uc GlobalInfoCategoryUseCase) Edit(ID string,input *requests.GlobalInfoCategoryRequest) (err error){
+func (uc GlobalInfoCategoryUseCase) Edit(ID string, input *requests.GlobalInfoCategoryRequest) (err error) {
 	repository := actions.NewGlobalInfoCategoryRepository(uc.DB)
 	now := time.Now().UTC()
 
-	isExist,err := uc.IsNameExist(ID,input.Name)
+	isExist, err := uc.IsNameExist(ID, input.Name)
 	if err != nil {
 		return err
 	}
@@ -87,18 +90,19 @@ func (uc GlobalInfoCategoryUseCase) Edit(ID string,input *requests.GlobalInfoCat
 	body := viewmodel.GlobalInfoCategoryVm{
 		ID:        ID,
 		Name:      input.Name,
+		Slug:      slug.Make(input.Name),
 		UpdatedAt: now.Format(time.RFC3339),
 	}
-	_,err = repository.Edit(body)
+	_, err = repository.Edit(body)
 
 	return err
 }
 
-func (uc GlobalInfoCategoryUseCase) Add(input *requests.GlobalInfoCategoryRequest) (error error){
+func (uc GlobalInfoCategoryUseCase) Add(input *requests.GlobalInfoCategoryRequest) (error error) {
 	repository := actions.NewGlobalInfoCategoryRepository(uc.DB)
 	now := time.Now().UTC()
 
-	isExist,err := uc.IsNameExist("",input.Name)
+	isExist, err := uc.IsNameExist("", input.Name)
 	if err != nil {
 		return err
 	}
@@ -108,41 +112,42 @@ func (uc GlobalInfoCategoryUseCase) Add(input *requests.GlobalInfoCategoryReques
 
 	body := viewmodel.GlobalInfoCategoryVm{
 		Name:      input.Name,
+		Slug:      slug.Make(input.Name),
 		CreatedAt: now.Format(time.RFC3339),
 		UpdatedAt: now.Format(time.RFC3339),
 	}
-	_,err = repository.Add(body)
+	_, err = repository.Add(body)
 
 	return err
 }
 
-func(uc GlobalInfoCategoryUseCase) Delete(ID string) (err error){
+func (uc GlobalInfoCategoryUseCase) Delete(ID string) (err error) {
 	repository := actions.NewGlobalInfoCategoryRepository(uc.DB)
 	now := time.Now().UTC()
 
-	count,err := uc.CountByPk(ID)
+	count, err := uc.CountByPk(ID)
 	if err != nil {
 		return errors.New(messages.DataNotFound)
 	}
 
 	if count > 0 {
-		_,err = repository.Delete(ID,now.Format(time.RFC3339),now.Format(time.RFC3339))
+		_, err = repository.Delete(ID, now.Format(time.RFC3339), now.Format(time.RFC3339))
 	}
 
 	return err
 }
 
-func (uc GlobalInfoCategoryUseCase) CountByPk(ID string) (res int,err error){
+func (uc GlobalInfoCategoryUseCase) CountByPk(ID string) (res int, err error) {
 	repository := actions.NewGlobalInfoCategoryRepository(uc.DB)
-	res,err = repository.CountBy("","id",ID)
+	res, err = repository.CountBy("", "id", ID)
 
-	return res,err
+	return res, err
 }
 
-func (uc GlobalInfoCategoryUseCase) IsNameExist(ID,name string) (res bool,err error){
-	count,err := uc.CountBy(ID,"name",name)
+func (uc GlobalInfoCategoryUseCase) IsNameExist(ID, name string) (res bool, err error) {
+	count, err := uc.CountBy(ID, "slug", name)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
 	return count > 0, err

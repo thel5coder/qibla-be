@@ -8,15 +8,14 @@ import (
 
 type GlobalInfoRoutes struct {
 	RouteGroup *echo.Group
-	Handler handlers.Handler
+	Handler    handlers.Handler
 }
 
-func (route GlobalInfoRoutes) RegisterRoute(){
+func (route GlobalInfoRoutes) RegisterRoute() {
 	globalInfoCategoryHandler := handlers.GlobalInfoCategoryHandler{Handler: route.Handler}
-	globalInfoCategorySettinghandler := handlers.GlobalInfoCategorySettingHandler{Handler:route.Handler}
-	jwtMiddleware := middleware.JwtVerify{UcContract:route.Handler.UseCaseContract}
+	globalInfoCategorySettingHandler := handlers.GlobalInfoCategorySettingHandler{Handler: route.Handler}
+	jwtMiddleware := middleware.JwtVerify{UcContract: route.Handler.UseCaseContract}
 	globalInfoRoute := route.RouteGroup.Group("/global-info")
-
 
 	globalInfoCategoryRoute := globalInfoRoute.Group("/category")
 	globalInfoCategoryRoute.Use(jwtMiddleware.JWTWithConfig)
@@ -28,9 +27,10 @@ func (route GlobalInfoRoutes) RegisterRoute(){
 
 	globalInfoCategorySettingRoute := globalInfoRoute.Group("/category-setting")
 	globalInfoCategorySettingRoute.Use(jwtMiddleware.JWTWithConfig)
-	globalInfoCategorySettingRoute.GET("", globalInfoCategorySettinghandler.Browse)
-	globalInfoCategorySettingRoute.GET("/:id", globalInfoCategorySettinghandler.Read)
-	globalInfoCategorySettingRoute.PUT("/:id", globalInfoCategorySettinghandler.Edit)
-	globalInfoCategorySettingRoute.POST("", globalInfoCategorySettinghandler.Add)
-	globalInfoCategorySettingRoute.DELETE("/:id", globalInfoCategorySettinghandler.Delete)
+	globalInfoCategorySettingRoute.GET("", globalInfoCategorySettingHandler.Browse)
+	globalInfoCategorySettingRoute.GET("/category/:globalInfoCategory", globalInfoCategorySettingHandler.BrowseByGlobalInfoCategory)
+	globalInfoCategorySettingRoute.GET("/:id", globalInfoCategorySettingHandler.Read)
+	globalInfoCategorySettingRoute.PUT("/:id", globalInfoCategorySettingHandler.Edit)
+	globalInfoCategorySettingRoute.POST("", globalInfoCategorySettingHandler.Add)
+	globalInfoCategorySettingRoute.DELETE("/:id", globalInfoCategorySettingHandler.Delete)
 }

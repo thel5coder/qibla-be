@@ -21,7 +21,20 @@ func (handler GlobalInfoCategorySettingHandler) Browse(ctx echo.Context) error{
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
 
 	uc := usecase.GlobalInfoCategorySettingUseCase{UcContract: handler.UseCaseContract}
-	res, pagination, err := uc.Browse(search, order, sort, page, limit)
+	res, pagination, err := uc.Browse("",search, order, sort, page, limit)
+
+	return handler.SendResponse(ctx, res, pagination, err)
+}
+
+func (handler GlobalInfoCategorySettingHandler) BrowseByGlobalInfoCategory(ctx echo.Context) error{
+	order := ctx.QueryParam("order")
+	sort := ctx.QueryParam("sort")
+	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
+	page, _ := strconv.Atoi(ctx.QueryParam("page"))
+	globalInfoCategory := ctx.Param("globalInfoCategory")
+
+	uc := usecase.GlobalInfoCategorySettingUseCase{UcContract: handler.UseCaseContract}
+	res, pagination, err := uc.Browse(globalInfoCategory,"", order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
 }

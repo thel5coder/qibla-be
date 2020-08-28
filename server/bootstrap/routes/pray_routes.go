@@ -22,4 +22,5 @@ func (route PrayRoutes) RegisterRoute(){
 	prayRoute.PUT("/:id",handler.Edit)
 	prayRoute.POST("",handler.Add)
 	prayRoute.DELETE("/:id",handler.Delete)
+
 }

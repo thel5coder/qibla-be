@@ -14,11 +14,11 @@ type GlobalInfoCategorySettingUseCase struct {
 	*UcContract
 }
 
-func (uc GlobalInfoCategorySettingUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.GlobalInfoCategorySettingVm, pagination viewmodel.PaginationVm, err error) {
+func (uc GlobalInfoCategorySettingUseCase) Browse(globalInfoCategorySlug,search, order, sort string, page, limit int) (res []viewmodel.GlobalInfoCategorySettingVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewGlobalInfoCategorySettingRepository(uc.DB)
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
-	globalInfoCategorySettings, count, err := repository.Browse(search, order, sort, limit, offset)
+	globalInfoCategorySettings, count, err := repository.Browse(globalInfoCategorySlug,search, order, sort, limit, offset)
 	if err != nil {
 		return res, pagination, err
 	}
@@ -82,13 +82,13 @@ func (uc GlobalInfoCategorySettingUseCase) Edit(ID string, input *requests.Globa
 	repository := actions.NewGlobalInfoCategorySettingRepository(uc.DB)
 	now := time.Now().UTC()
 
-	isExist, err := uc.IsGlobalInfoCategoryExist(ID, input.GlobalInfoCategoryID)
-	if err != nil {
-		return err
-	}
-	if isExist {
-		return errors.New(messages.DataAlreadyExist)
-	}
+	//isExist, err := uc.IsGlobalInfoCategoryExist(ID, input.GlobalInfoCategoryID)
+	//if err != nil {
+	//	return err
+	//}
+	//if isExist {
+	//	return errors.New(messages.DataAlreadyExist)
+	//}
 
 	body := viewmodel.GlobalInfoCategorySettingVm{
 		ID:                   ID,
@@ -102,17 +102,17 @@ func (uc GlobalInfoCategorySettingUseCase) Edit(ID string, input *requests.Globa
 	return err
 }
 
-func (uc GlobalInfoCategorySettingUseCase) Add(input *requests.GlobalInfoCategorySettingRequest) (error error) {
+func (uc GlobalInfoCategorySettingUseCase) Add(input *requests.GlobalInfoCategorySettingRequest) (err error) {
 	repository := actions.NewGlobalInfoCategorySettingRepository(uc.DB)
 	now := time.Now().UTC()
 
-	isExist, err := uc.IsGlobalInfoCategoryExist("", input.GlobalInfoCategoryID)
-	if err != nil {
-		return err
-	}
-	if isExist {
-		return errors.New(messages.DataAlreadyExist)
-	}
+	//isExist, err := uc.IsGlobalInfoCategoryExist("", input.GlobalInfoCategoryID)
+	//if err != nil {
+	//	return err
+	//}
+	//if isExist {
+	//	return errors.New(messages.DataAlreadyExist)
+	//}
 
 	body := viewmodel.GlobalInfoCategorySettingVm{
 		GlobalInfoCategoryID: input.GlobalInfoCategoryID,

@@ -6,7 +6,7 @@ import (
 )
 
 type IGlobalInfoCategorySettingRepository interface {
-	Browse(search, order, sort string, limit, offset int) (data []models.GlobalInfoCategorySetting, count int, err error)
+	Browse(globalInfoCategorySlug,search, order, sort string, limit, offset int) (data []models.GlobalInfoCategorySetting, count int, err error)
 
 	ReadBy(column, value string) (data models.GlobalInfoCategorySetting, err error)
 
