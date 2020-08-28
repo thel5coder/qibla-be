@@ -57,6 +57,7 @@ func (repository ContactRepository) Browse(search, order, sort string, limit, of
 			&dataTemp.UpdatedAt,
 			&dataTemp.DeletedAt,
 			&dataTemp.Email,
+			&dataTemp.IsZakatPartner,
 		)
 		if err != nil {
 			return data, count, err
@@ -74,14 +75,14 @@ func (repository ContactRepository) Browse(search, order, sort string, limit, of
 	return data, count, err
 }
 
-func (repository ContactRepository) BrowseAll(search string) (data []models.Contact, err error) {
+func (repository ContactRepository) BrowseAll(search string,isZakatPartner bool) (data []models.Contact, err error) {
 	var rows *sql.Rows
 	if search == "" {
-		statement := `select * from "contacts"`
-		rows, err = repository.DB.Query(statement)
+		statement := `select * from "contacts" where "is_zakat_partner"=$1`
+		rows, err = repository.DB.Query(statement,isZakatPartner)
 	} else {
-		statement := `select * from "contacts" where lower("travel_agent_name") like $1 or lower("branch_name") like $2`
-		rows, err = repository.DB.Query(statement, "%"+strings.ToLower(search)+"%")
+		statement := `select * from "contacts" where (lower("travel_agent_name") like $1 or lower("branch_name") like $1) and "is_zakat_partner"=$2`
+		rows, err = repository.DB.Query(statement, "%"+strings.ToLower(search)+"%",isZakatPartner)
 	}
 	if err != nil {
 		return data, err
@@ -116,6 +117,7 @@ func (repository ContactRepository) BrowseAll(search string) (data []models.Cont
 			&dataTemp.UpdatedAt,
 			&dataTemp.DeletedAt,
 			&dataTemp.Email,
+			&dataTemp.IsZakatPartner,
 		)
 		if err != nil {
 			return data, err
@@ -156,6 +158,7 @@ func (repository ContactRepository) ReadBy(column, value string) (data models.Co
 		&data.UpdatedAt,
 		&data.DeletedAt,
 		&data.Email,
+		&data.IsZakatPartner,
 	)
 
 	return data, err
@@ -164,7 +167,7 @@ func (repository ContactRepository) ReadBy(column, value string) (data models.Co
 func (repository ContactRepository) Edit(input viewmodel.ContactVm) (res string, err error) {
 	statement := `update "contacts" set "branch_name"=$1, "travel_agent_name"=$2, "address"=$3, "longitude"=$4, "latitude"=$5, "area_code"=$6, "phone_number"=$7, "sk_number"=$8, "sk_date"=$9,
                  "accreditation"=$10, "accreditation_date"=$11, "director_name"=$12, "director_contact"=$13, "pic_name"=$14, "pic_contact"=$15, "logo"=$16, "virtual_account_number"=$17, "account_number"=$18,
-                 "account_name"=$19, "account_bank_name"=$20, "account_bank_code"=$21, "updated_at"=$22, "email"=$23 where "id"=$24 returning "id"`
+                 "account_name"=$19, "account_bank_name"=$20, "account_bank_code"=$21, "updated_at"=$22, "email"=$23, "is_zakat_partner"=$24 where "id"=$25 returning "id"`
 	err = repository.DB.QueryRow(
 		statement,
 		input.BranchName,
@@ -190,6 +193,7 @@ func (repository ContactRepository) Edit(input viewmodel.ContactVm) (res string,
 		input.AccountBankCode,
 		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
 		input.Email,
+		input.IsZakatPartner,
 		input.ID,
 	).Scan(&res)
 
@@ -198,8 +202,8 @@ func (repository ContactRepository) Edit(input viewmodel.ContactVm) (res string,
 
 func (repository ContactRepository) Add(input viewmodel.ContactVm) (res string, err error) {
 	statement := `insert into "contacts" ("email","branch_name","travel_agent_name","address","longitude","latitude","area_code","phone_number","sk_number","sk_date","accreditation","accreditation_date","director_name",
-                  "director_contact","pic_name","pic_contact","logo","virtual_account_number","account_number","account_name","account_bank_name","account_bank_code","created_at","updated_at") 
-                  values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24) returning "id"`
+                  "director_contact","pic_name","pic_contact","logo","virtual_account_number","account_number","account_name","account_bank_name","account_bank_code","is_zakat_partner","created_at","updated_at") 
+                  values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25) returning "id"`
 
 	err = repository.DB.QueryRow(
 		statement,
@@ -225,6 +229,7 @@ func (repository ContactRepository) Add(input viewmodel.ContactVm) (res string, 
 		input.AccountName,
 		input.AccountBankName,
 		input.AccountBankCode,
+		input.IsZakatPartner,
 		datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
 		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
 	).Scan(&res)

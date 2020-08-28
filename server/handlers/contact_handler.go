@@ -4,6 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
+	"qibla-backend/helpers/str"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"
@@ -28,9 +29,10 @@ func (handler ContactHandler) Browse(ctx echo.Context) error {
 
 func (handler ContactHandler) BrowseAll(ctx echo.Context) error {
 	search := ctx.QueryParam("search")
+	isZakatPartner := str.StringToBool(ctx.QueryParam("isZakatPartner"))
 
 	uc := usecase.ContactUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.BrowseAll(search)
+	res, err := uc.BrowseAll(search,isZakatPartner)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }

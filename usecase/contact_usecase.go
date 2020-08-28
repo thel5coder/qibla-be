@@ -15,7 +15,7 @@ type ContactUseCase struct {
 
 func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.ContactVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
-	fileUc := FileUseCase{UcContract:uc.UcContract}
+	fileUc := FileUseCase{UcContract: uc.UcContract}
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
 	contacts, count, err := repository.Browse(search, order, sort, limit, offset)
@@ -50,6 +50,7 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 			AccountBankName:      contact.AccountBankName,
 			AccountBankCode:      contact.AccountBankCode,
 			Email:                contact.Email,
+			IsZakatPartner:       contact.IsZakatPartner,
 			CreatedAt:            contact.CreatedAt,
 			UpdatedAt:            contact.UpdatedAt,
 			DeletedAt:            contact.DeletedAt.String,
@@ -61,10 +62,10 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 	return res, pagination, err
 }
 
-func (uc ContactUseCase) BrowseAll(search string) (res []viewmodel.ContactVm, err error) {
+func (uc ContactUseCase) BrowseAll(search string,isZakatPartner bool) (res []viewmodel.ContactVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
-	fileUc := FileUseCase{UcContract:uc.UcContract}
-	contacts, err := repository.BrowseAll(search)
+	fileUc := FileUseCase{UcContract: uc.UcContract}
+	contacts, err := repository.BrowseAll(search,isZakatPartner)
 	if err != nil {
 		return res, err
 	}
@@ -95,6 +96,7 @@ func (uc ContactUseCase) BrowseAll(search string) (res []viewmodel.ContactVm, er
 			AccountBankName:      contact.AccountBankName,
 			AccountBankCode:      contact.AccountBankCode,
 			Email:                contact.Email,
+			IsZakatPartner:       contact.IsZakatPartner,
 			CreatedAt:            contact.CreatedAt,
 			UpdatedAt:            contact.UpdatedAt,
 			DeletedAt:            contact.DeletedAt.String,
@@ -138,6 +140,7 @@ func (uc ContactUseCase) ReadBy(column, value string) (res viewmodel.ContactVm, 
 		AccountBankName:      contact.AccountBankName,
 		AccountBankCode:      contact.AccountBankCode,
 		Email:                contact.Email,
+		IsZakatPartner:       contact.IsZakatPartner,
 		CreatedAt:            contact.CreatedAt,
 		UpdatedAt:            contact.UpdatedAt,
 		DeletedAt:            contact.DeletedAt.String,
@@ -181,6 +184,7 @@ func (uc ContactUseCase) Edit(ID string, input *requests.ContactRequest) (err er
 		AccountBankName:      input.AccountBankName,
 		AccountBankCode:      input.AccountBankCode,
 		Email:                input.Email,
+		IsZakatPartner:       input.IsZakatPartner,
 		UpdatedAt:            now,
 	}
 	_, err = repository.Edit(body)
@@ -225,6 +229,7 @@ func (uc ContactUseCase) Add(input *requests.ContactRequest) (err error) {
 		AccountBankName:      input.AccountBankName,
 		AccountBankCode:      input.AccountBankCode,
 		Email:                input.Email,
+		IsZakatPartner:       input.IsZakatPartner,
 		CreatedAt:            now,
 		UpdatedAt:            now,
 	}
@@ -259,7 +264,6 @@ func (uc ContactUseCase) duplicateCheck(ID string, input *requests.ContactReques
 	//cek sk
 	skCount, err := uc.countBy(ID, "sk_number", input.SKNumber)
 	if err != nil {
-		fmt.Println(1)
 		return err
 	}
 	if skCount > 0 {
@@ -269,7 +273,6 @@ func (uc ContactUseCase) duplicateCheck(ID string, input *requests.ContactReques
 	//cek akreditasi
 	accreditationCount, err := uc.countBy(ID, "accreditation", input.Accreditation)
 	if err != nil {
-		fmt.Println(1)
 		return err
 	}
 	if accreditationCount > 0 {

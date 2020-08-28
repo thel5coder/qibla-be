@@ -24,6 +24,7 @@ type ContactVm struct {
 	AccountBankName      string `json:"account_bank_name"`
 	AccountBankCode      string `json:"account_bank_code"`
 	Email                string `json:"email"`
+	IsZakatPartner       bool   `json:"is_zakat_partner"`
 	CreatedAt            string `json:"created_at"`
 	UpdatedAt            string `json:"updated_at"`
 	DeletedAt            string `json:"deleted_at"`

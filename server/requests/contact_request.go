@@ -23,4 +23,5 @@ type ContactRequest struct {
 	AccountBankName      string `json:"account_bank_name"`
 	AccountBankCode      string `json:"account_bank_code"`
 	Email                string `json:"email"`
+	IsZakatPartner       bool   `json:"is_zakat_partner"`
 }

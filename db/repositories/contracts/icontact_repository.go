@@ -8,7 +8,7 @@ import (
 type IContactRepository interface {
 	Browse(search, order, sort string, limit, offset int) (data []models.Contact, count int, err error)
 
-	BrowseAll(search string) (data []models.Contact, err error)
+	BrowseAll(search string,isZakatPartner bool) (data []models.Contact, err error)
 
 	ReadBy(column, value string) (data models.Contact, err error)
 

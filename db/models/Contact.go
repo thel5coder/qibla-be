@@ -26,6 +26,7 @@ type Contact struct {
 	AccountBankName      string         `db:"account_bank_name"`
 	AccountBankCode      string         `db:"account_bank_code"`
 	Email                string         `db:"email"`
+	IsZakatPartner       bool           `db:"is_zakat_partner"`
 	CreatedAt            string         `db:"created_at"`
 	UpdatedAt            string         `db:"updated_at"`
 	DeletedAt            sql.NullString `db:"deleted_at"`
