@@ -8,6 +8,7 @@ type Calendar struct {
 	Start       string         `db:"start"`
 	End         string         `db:"end"`
 	Description string         `db:"description"`
+	Remember    int            `json:"remember"`
 	CreatedAt   string         `db:"created_at"`
 	UpdatedAt   string         `db:"updated_at"`
 	DeletedAt   sql.NullString `db:"deleted_at"`

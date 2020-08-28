@@ -3,6 +3,7 @@ package usecase
 import (
 	"qibla-backend/helpers/enums"
 	"qibla-backend/usecase/viewmodel"
+	"strconv"
 )
 
 type EnumOptionsUseCase struct {
@@ -194,6 +195,45 @@ func (uc EnumOptionsUseCase) GetTypeZakat() (res []viewmodel.EnumVm) {
 	res = append(res, viewmodel.EnumVm{
 		Key:   enums.KeyTypeZakatEnum2,
 		Value: enums.ValueTypeZakatEnum2,
+	})
+
+	return res
+}
+
+func (uc EnumOptionsUseCase) GetRememberOptions() (res []viewmodel.EnumVm) {
+	res = append(res, viewmodel.EnumVm{
+		Key:   strconv.Itoa(enums.KeyRememberCalender1),
+		Value: enums.ValueRememberCalender1,
+	})
+
+	res = append(res, viewmodel.EnumVm{
+		Key:   strconv.Itoa(enums.KeyRememberCalender2),
+		Value: enums.ValueRememberCalender2,
+	})
+
+	res = append(res, viewmodel.EnumVm{
+		Key:   strconv.Itoa(enums.KeyRememberCalender3),
+		Value: enums.ValueRememberCalender3,
+	})
+
+	res = append(res, viewmodel.EnumVm{
+		Key:   strconv.Itoa(enums.KeyRememberCalender4),
+		Value: enums.ValueRememberCalender4,
+	})
+
+	res = append(res, viewmodel.EnumVm{
+		Key:   strconv.Itoa(enums.KeyRememberCalender5),
+		Value: enums.ValueRememberCalender5,
+	})
+
+	res = append(res, viewmodel.EnumVm{
+		Key:   strconv.Itoa(enums.KeyRememberCalender6),
+		Value: enums.ValueRememberCalender6,
+	})
+
+	res = append(res, viewmodel.EnumVm{
+		Key:   strconv.Itoa(enums.KeyRememberCalender7),
+		Value: enums.ValueRememberCalender7,
 	})
 
 	return res

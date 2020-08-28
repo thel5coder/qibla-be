@@ -12,3 +12,4 @@ CREATE TABLE IF NOT EXISTS "satisfaction_categories"
 );
 
 -- +migrate Down
+DROP TABLE if exists "satisfaction_categories";

@@ -14,21 +14,28 @@ type CalendarUseCase struct {
 
 func (uc CalendarUseCase) BrowseByYearMonth(yearMonth string) (res []viewmodel.CalendarVm, err error) {
 	repository := actions.NewCalendarRepository(uc.DB)
+	calendarParticipantUc := CalendarParticipantUseCase{UcContract: uc.UcContract}
 	calendars, err := repository.BrowseByYearMonth(yearMonth)
 	if err != nil {
 		return res, err
 	}
 
 	for _, calendar := range calendars {
+		var participants []string
+		calendarParticipants, _ := calendarParticipantUc.BrowseByCalendarID(calendar.ID)
+		for _, calendarParticipant := range calendarParticipants {
+			participants = append(participants, calendarParticipant.Email)
+		}
 		res = append(res, viewmodel.CalendarVm{
-			ID:          calendar.ID,
-			Title:       calendar.Title,
-			Start:       calendar.Start,
-			End:         calendar.End,
-			Description: calendar.Description,
-			CreatedAt:   calendar.CreatedAt,
-			UpdatedAt:   calendar.UpdatedAt,
-			DeletedAt:   calendar.DeletedAt.String,
+			ID:           calendar.ID,
+			Title:        calendar.Title,
+			Start:        calendar.Start,
+			End:          calendar.End,
+			Description:  calendar.Description,
+			Participants: participants,
+			CreatedAt:    calendar.CreatedAt,
+			UpdatedAt:    calendar.UpdatedAt,
+			DeletedAt:    calendar.DeletedAt.String,
 		})
 	}
 
@@ -37,20 +44,28 @@ func (uc CalendarUseCase) BrowseByYearMonth(yearMonth string) (res []viewmodel.C
 
 func (uc CalendarUseCase) readBy(column, value string) (res viewmodel.CalendarVm, err error) {
 	repository := actions.NewCalendarRepository(uc.DB)
+	calendarParticipantUc := CalendarParticipantUseCase{UcContract: uc.UcContract}
+	var participants []string
+
 	calendar, err := repository.ReadBy(column, value)
 	if err != nil {
 		return res, err
 	}
 
+	calendarParticipants, _ := calendarParticipantUc.BrowseByCalendarID(calendar.ID)
+	for _, calendarParticipant := range calendarParticipants {
+		participants = append(participants, calendarParticipant.Email)
+	}
 	res = viewmodel.CalendarVm{
-		ID:          calendar.ID,
-		Title:       calendar.Title,
-		Start:       calendar.Start,
-		End:         calendar.End,
-		Description: calendar.Description,
-		CreatedAt:   calendar.CreatedAt,
-		UpdatedAt:   calendar.UpdatedAt,
-		DeletedAt:   calendar.DeletedAt.String,
+		ID:           calendar.ID,
+		Title:        calendar.Title,
+		Start:        calendar.Start,
+		End:          calendar.End,
+		Description:  calendar.Description,
+		Participants: participants,
+		CreatedAt:    calendar.CreatedAt,
+		UpdatedAt:    calendar.UpdatedAt,
+		DeletedAt:    calendar.DeletedAt.String,
 	}
 
 	return res, err
@@ -67,18 +82,37 @@ func (uc CalendarUseCase) ReadByPk(ID string) (res viewmodel.CalendarVm, err err
 func (uc CalendarUseCase) Edit(ID string, input *requests.CalendarRequest) (err error) {
 	repository := actions.NewCalendarRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
+
+	uc.TX, err = uc.DB.Begin()
+	if err != nil {
+		uc.TX.Rollback()
+
+		return err
+	}
 	body := viewmodel.CalendarVm{
 		ID:          ID,
 		Title:       input.Title,
-		Start:       datetime.StrParseToTime(input.Start,"2006-01-02 15:04:05").Format(time.RFC3339),
-		End:         datetime.StrParseToTime(input.End,"2006-01-02 15:04:05").Format(time.RFC3339),
+		Start:       datetime.StrParseToTime(input.Start, "2006-01-02 15:04:05").Format(time.RFC3339),
+		End:         datetime.StrParseToTime(input.End, "2006-01-02 15:04:05").Format(time.RFC3339),
 		Description: input.Description,
+		Remember:    input.Remember,
 		UpdatedAt:   now,
 	}
-	_, err = repository.Edit(body)
+	err = repository.Edit(body, uc.TX)
 	if err != nil {
+		uc.TX.Rollback()
+
 		return err
 	}
+
+	calendarParticipantUc := CalendarParticipantUseCase{UcContract: uc.UcContract}
+	err = calendarParticipantUc.Store(ID, input.Participants)
+	if err != nil {
+		uc.TX.Rollback()
+
+		return err
+	}
+	uc.TX.Commit()
 
 	return nil
 }
@@ -86,18 +120,37 @@ func (uc CalendarUseCase) Edit(ID string, input *requests.CalendarRequest) (err 
 func (uc CalendarUseCase) Add(input *requests.CalendarRequest) (err error) {
 	repository := actions.NewCalendarRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
+
+	uc.TX, err = uc.DB.Begin()
+	if err != nil {
+		uc.TX.Rollback()
+
+		return err
+	}
 	body := viewmodel.CalendarVm{
 		Title:       input.Title,
-		Start:       datetime.StrParseToTime(input.Start,"2006-01-02 15:04:05").Format(time.RFC3339),
-		End:         datetime.StrParseToTime(input.End,"2006-01-02 15:04:05").Format(time.RFC3339),
+		Start:       datetime.StrParseToTime(input.Start, "2006-01-02 15:04:05").Format(time.RFC3339),
+		End:         datetime.StrParseToTime(input.End, "2006-01-02 15:04:05").Format(time.RFC3339),
 		Description: input.Description,
+		Remember:    input.Remember,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
-	_, err = repository.Add(body)
+	body.ID, err = repository.Add(body, uc.TX)
 	if err != nil {
+		uc.TX.Rollback()
+
 		return err
 	}
+
+	calendarParticipantUc := CalendarParticipantUseCase{UcContract: uc.UcContract}
+	err = calendarParticipantUc.Store(body.ID, input.Participants)
+	if err != nil {
+		uc.TX.Rollback()
+
+		return err
+	}
+	uc.TX.Commit()
 
 	return nil
 }
@@ -109,12 +162,30 @@ func (uc CalendarUseCase) Delete(ID string) (err error) {
 	if err != nil {
 		return err
 	}
+
+	uc.TX, err = uc.DB.Begin()
+	if err != nil {
+		uc.TX.Rollback()
+
+		return err
+	}
+	calendarParticipantUc := CalendarParticipantUseCase{UcContract: uc.UcContract}
 	if count > 0 {
-		_, err = repository.Delete(ID, now, now)
+		err = repository.Delete(ID, now, now, uc.TX)
 		if err != nil {
+			uc.TX.Rollback()
+
+			return err
+		}
+
+		err = calendarParticipantUc.Delete(ID)
+		if err != nil {
+			uc.TX.Rollback()
+
 			return err
 		}
 	}
+	uc.TX.Commit()
 
 	return nil
 }

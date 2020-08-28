@@ -53,12 +53,29 @@ const ValueDiscountTypeEnum1 = "Per Hari"
 const KeyDiscountTypeEnum2 = "fix"
 const ValueDiscountTypeEnum2 = "Fix"
 
-const KeyComplaintStatusEnum1="open"
-const ValueComplaintStatusEnum1="Open"
-const KeyComplaintStatusEnum2="close"
-const ValueComplaintStatusEnum2 ="Close"
+const KeyComplaintStatusEnum1 = "open"
+const ValueComplaintStatusEnum1 = "Open"
+const KeyComplaintStatusEnum2 = "close"
+const ValueComplaintStatusEnum2 = "Close"
 
-const KeyTypeZakatEnum1="maal"
-const ValueTypeZakatEnum1="Maal"
-const KeyTypeZakatEnum2="penghasilan"
-const ValueTypeZakatEnum2="Penghasilan"
+const KeyTypeZakatEnum1 = "maal"
+const ValueTypeZakatEnum1 = "Maal"
+const KeyTypeZakatEnum2 = "penghasilan"
+const ValueTypeZakatEnum2 = "Penghasilan"
+
+const KeyRememberCalender1 = 0
+const ValueRememberCalender1 = "At time of event"
+const KeyRememberCalender2 = 5
+const ValueRememberCalender2 = "5 minutes before"
+const KeyRememberCalender3 = 10
+const ValueRememberCalender3 = "10 minutes before"
+const KeyRememberCalender4 = 30
+const ValueRememberCalender4 = "30 minutes before"
+const KeyRememberCalender5 = 60
+const ValueRememberCalender5 = "1 hour before"
+const KeyRememberCalender6 =  120
+const ValueRememberCalender6 = "2 hours before"
+const KeyRememberCalender7 = 1440
+const ValueRememberCalender7 = "1 day before"
+const KeyRememberCalender8 = 2880
+const ValueRememberCalender8 = "2 days before"
