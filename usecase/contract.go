@@ -11,6 +11,7 @@ import (
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
 	"qibla-backend/helpers/messages"
+	"qibla-backend/helpers/pusher"
 	"qibla-backend/usecase/viewmodel"
 	"strings"
 	"time"
@@ -60,6 +61,7 @@ type UcContract struct {
 	JwtCred     jwt.JwtCredential
 	Odoo        *odoo.Client
 	AWSS3       aws.AWSS3
+	Pusher      pusher.Credential
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {

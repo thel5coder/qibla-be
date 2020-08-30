@@ -21,6 +21,7 @@ import (
 	awsHelper "qibla-backend/helpers/aws"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
+	"qibla-backend/helpers/pusher"
 	redisHelper "qibla-backend/helpers/redis"
 	"qibla-backend/helpers/str"
 	"qibla-backend/server/bootstrap"
@@ -114,6 +115,14 @@ func main() {
 		SecretKey: awsSecretKey,
 	}
 
+	//pusher
+	pusherCredential := pusher.Credential{
+		AppID:   os.Getenv("PUSHER_APP_ID"),
+		Key:     os.Getenv("PUSHER_KEY"),
+		Secret:  os.Getenv("PUSHER_SECRET"),
+		Cluster: os.Getenv("PUSHER_CLUSTER"),
+	}
+
 	//init validator
 	validatorInit()
 
@@ -130,6 +139,7 @@ func main() {
 		JwtCred:     jwtCred,
 		Odoo:        c,
 		AWSS3:       awsS3,
+		Pusher:      pusherCredential,
 	}
 
 	bootApp := bootstrap.Bootstrap{

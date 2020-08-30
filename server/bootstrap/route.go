@@ -194,6 +194,20 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	satisfactionCategoryRoutes.RegisterRoute()
 
+	//crm story
+	crmStoryRoutes := routes.CrmStoryRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	crmStoryRoutes.RegisterRoute()
+
+	//crm board
+	crmBoardRoutes := routes.CrmBoardRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	crmBoardRoutes.RegisterRoute()
+
 	faspayRoutes := routes.FaspayRoutes{
 		RouteGroup: apiV1,
 		Handler:    handlerType,

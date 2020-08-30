@@ -19,6 +19,7 @@ require (
 	github.com/lestrrat/go-jwx v0.0.0-20180221005942-b7d4802280ae
 	github.com/lestrrat/go-pdebug v0.0.0-20180220043741-569c97477ae8 // indirect
 	github.com/lib/pq v1.7.0
+	github.com/pusher/pusher-http-go v4.0.1+incompatible
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.6.0
 	github.com/skilld-labs/go-odoo v1.5.0
