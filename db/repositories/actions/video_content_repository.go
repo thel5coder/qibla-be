@@ -18,7 +18,7 @@ func NewVideoContentRepository(DB *sql.DB) contracts.IVideoContentRepository {
 }
 
 func (repository VideoContentRepository) Browse(order, sort string, limit, offset int) (data []models.VideoContent, count int, err error) {
-	statement := `select * from "video_contents" order by ` + order + ` ` + sort + ` limit $1 offset $2`
+	statement := `select * from "video_contents" where "deleted_at" is null order by ` + order + ` ` + sort + ` limit $1 offset $2`
 	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
 		return data, count, err
