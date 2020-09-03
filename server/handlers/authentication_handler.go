@@ -43,12 +43,12 @@ func (handler AuthenticationHandler) RegisterByGmail(ctx echo.Context) error {
 	}
 
 	uc := usecase.AuthenticationUseCase{UcContract: handler.UseCaseContract}
-	err := uc.RegisterByGmail(input)
+	res,err := uc.RegisterByGmail(input)
 
-	return handler.SendResponse(ctx, nil, nil, err)
+	return handler.SendResponse(ctx, res, nil, err)
 }
 
-func (handler AuthenticationHandler) RegisterJaamaahByEmail(ctx echo.Context) error {
+func (handler AuthenticationHandler) RegisterJamaahByEmail(ctx echo.Context) error {
 	input := new(requests.RegisterByMailRequest)
 
 	if err := ctx.Bind(input); err != nil {

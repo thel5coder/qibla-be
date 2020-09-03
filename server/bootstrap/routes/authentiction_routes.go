@@ -17,7 +17,7 @@ func (route AuthenticationRoutes) RegisterRoute() {
 
 	authenticationRoute := route.RouteGroup.Group("/auth")
 	authenticationRoute.POST("/login", authenticationHandler.Login)
-	authenticationRoute.POST("/register", authenticationHandler.RegisterJaamaahByEmail)
+	authenticationRoute.POST("/register", authenticationHandler.RegisterJamaahByEmail)
 	authenticationRoute.POST("/forgot", authenticationHandler.ForgotPassword)
 	authenticationRoute.POST("/register-by-gmail",authenticationHandler.RegisterByGmail)
 

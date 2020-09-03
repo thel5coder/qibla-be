@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/hashing"
 	"qibla-backend/usecase/viewmodel"
@@ -40,24 +39,22 @@ func (uc JamaahUseCase) ReadBy(column, value string) (res viewmodel.JamaahVm, er
 	return res, err
 }
 
-func (uc JamaahUseCase) Add(name, roleSlug, email, password string) (err error) {
+func (uc JamaahUseCase) Add(name, roleSlug, email, password string) (res string,err error) {
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	roleUc := RoleUseCase{UcContract: uc.UcContract}
 
 	role, err := roleUc.ReadBy("slug", roleSlug)
 	if err != nil {
-		fmt.Print(1)
-		return err
+		return res,err
 	}
 
 	encryptedPassword, _ := hashing.HashAndSalt(password)
-	_, err = userUc.Add(name, email, email, "", role.ID, encryptedPassword, true, false)
+	res, err = userUc.Add(name, email, email, "", role.ID, encryptedPassword, true, false)
 	if err != nil {
-		fmt.Print(err)
-		return err
+		return res,err
 	}
 
-	return nil
+	return res,nil
 }
 
 func (uc JamaahUseCase) EditPassword(ID, password string) (err error) {
