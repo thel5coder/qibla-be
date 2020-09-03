@@ -32,6 +32,22 @@ func (handler AuthenticationHandler) Login(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, nil, nil)
 }
 
+func (handler AuthenticationHandler) RegisterByGmail(ctx echo.Context) error {
+	input := new(requests.RegisterByGmailRequest)
+
+	if err := ctx.Bind(input); err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	if err := handler.Validate.Struct(input); err != nil {
+		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
+	}
+
+	uc := usecase.AuthenticationUseCase{UcContract: handler.UseCaseContract}
+	err := uc.RegisterByGmail(input)
+
+	return handler.SendResponse(ctx, nil, nil, err)
+}
+
 func (handler AuthenticationHandler) RegisterJaamaahByEmail(ctx echo.Context) error {
 	input := new(requests.RegisterByMailRequest)
 

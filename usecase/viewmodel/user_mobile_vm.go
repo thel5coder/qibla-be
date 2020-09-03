@@ -8,6 +8,7 @@ type JamaahVm struct {
 	MobilePhone    string `json:"mobile_phone"`
 	ProfilePicture string `json:"profile_picture"`
 	IsActive       bool   `json:"is_active"`
+	IsPinSet       bool   `json:"is_pin_set"`
 	CreatedAt      string `json:"created_at"`
 	UpdatedAt      string `json:"updated_at"`
 }

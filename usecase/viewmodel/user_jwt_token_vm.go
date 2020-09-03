@@ -5,4 +5,5 @@ type UserJwtTokenVm struct {
 	ExpTime         string `json:"exp_time"`
 	RefreshToken    string `json:"refresh_token"`
 	ExpRefreshToken string `json:"exp_refresh_token"`
+	IsPinSet        bool   `json:"is_pin_set"`
 }

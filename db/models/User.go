@@ -9,8 +9,11 @@ type User struct {
 	Name           sql.NullString `db:"name"`
 	ProfilePicture sql.NullString `db:"profile_picture"`
 	Password       string         `db:"password"`
+	MobilePhone    sql.NullString `db:"mobile_phone"`
+	PIN            sql.NullString `db:"pin"`
 	IsActive       bool           `db:"is_active"`
-	RoleID         string         `db:"role_id"`
+	IsAdminPanel   bool           `db:"is_admin_panel"`
+	RoleID         sql.NullString `db:"role_id"`
 	RoleModel      Role           `db:"role_model"`
 	OdooUserID     sql.NullString `db:"odoo_user_id"`
 	CreatedAt      string         `db:"activation_at"`

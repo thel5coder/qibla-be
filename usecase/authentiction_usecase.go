@@ -6,8 +6,11 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"os"
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/helpers/google"
 	"qibla-backend/helpers/hashing"
 	"qibla-backend/helpers/messages"
+	"qibla-backend/helpers/str"
+	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 )
 
@@ -41,10 +44,10 @@ func (uc AuthenticationUseCase) GenerateJwtToken(jwePayload, email, session stri
 	return token, refreshToken, expTokenAt, expRefreshTokenAt, err
 }
 
-func (uc AuthenticationUseCase) IsPasswordValid(ID,password,hashedPassword string) (err error){
-	isValid := hashing.CheckHashString(password,hashedPassword)
+func (uc AuthenticationUseCase) IsPasswordValid(ID, password, hashedPassword string) (err error) {
+	isValid := hashing.CheckHashString(password, hashedPassword)
 	if !isValid {
-		uc.RedisClient.RemoveFromRedis("session-"+ID)
+		uc.RedisClient.RemoveFromRedis("session-" + ID)
 
 		return errors.New(messages.CredentialDoNotMatch)
 	}
@@ -55,6 +58,7 @@ func (uc AuthenticationUseCase) IsPasswordValid(ID,password,hashedPassword strin
 func (uc AuthenticationUseCase) Login(username, password string) (res viewmodel.UserJwtTokenVm, err error) {
 	repository := actions.NewUserRepository(uc.DB)
 	userUc := UserUseCase{UcContract: uc.UcContract}
+	isPinSet := false
 
 	isExist, err := userUc.IsUserNameExist("", username)
 	if err != nil {
@@ -64,15 +68,14 @@ func (uc AuthenticationUseCase) Login(username, password string) (res viewmodel.
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
-	user, err := repository.ReadBy("username",username)
+	user, err := repository.ReadBy("username", username)
 	if err != nil {
-		fmt.Println(err)
-		return res,errors.New(messages.CredentialDoNotMatch)
+		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
-	err = uc.IsPasswordValid(user.ID,password,user.Password)
+	err = uc.IsPasswordValid(user.ID, password, user.Password)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
 	jwePayload, _ := uc.Jwe.GenerateJwePayload(user.ID)
@@ -81,12 +84,89 @@ func (uc AuthenticationUseCase) Login(username, password string) (res viewmodel.
 	if err != nil {
 		return res, err
 	}
+	if user.PIN.String != "" {
+		isPinSet = true
+	}
 	res = viewmodel.UserJwtTokenVm{
 		Token:           token,
 		ExpTime:         tokenExpiredAt,
 		RefreshToken:    refreshToken,
 		ExpRefreshToken: refreshTokenExpiredAt,
+		IsPinSet:        isPinSet,
 	}
 
 	return res, nil
+}
+
+func (uc AuthenticationUseCase) RegisterByEmail(input *requests.RegisterByMailRequest) (err error) {
+	userUc := UserUseCase{UcContract: uc.UcContract}
+
+	//check is email exist
+	isEmailExist, err := userUc.IsEmailExist("", input.Email)
+	if err != nil {
+		return err
+	}
+	if isEmailExist {
+		return errors.New(messages.EmailAlreadyExist)
+	}
+
+	//init db transaction
+	uc.TX, err = uc.DB.Begin()
+	if err != nil {
+		uc.TX.Rollback()
+
+		return err
+	}
+
+	//add user jamaah
+	jamaahUc := JamaahUseCase{UcContract: uc.UcContract}
+	err = jamaahUc.Add(input.Name, "jamaah", input.Email, input.Password)
+	if err != nil {
+		uc.TX.Rollback()
+
+		return err
+	}
+	uc.TX.Commit()
+
+	return nil
+}
+
+func (uc AuthenticationUseCase) ForgotPassword(email string) (err error) {
+	userUc := UserUseCase{UcContract: uc.UcContract}
+	jamaahUc := JamaahUseCase{UcContract: uc.UcContract}
+
+	count, err := userUc.CountBy("", "email", email)
+	if err != nil {
+		fmt.Print(1)
+		return err
+	}
+
+	if count > 0 {
+		jamaah, err := jamaahUc.ReadBy("email", email)
+		if err != nil {
+			fmt.Print(1)
+			return err
+		}
+		password := str.RandomString(6)
+		err = jamaahUc.EditPassword(jamaah.ID, password)
+		if err != nil {
+			fmt.Print(1)
+			return err
+		}
+
+		uc.GoMailConfig.SendGoMail(email, "New Password", `<h1>`+password+`</h1>`)
+	}
+
+	return nil
+}
+
+func (uc AuthenticationUseCase) RegisterByGmail(input *requests.RegisterByGmailRequest) (err error) {
+	res ,err := google.GetGoogleProfile(input.Token)
+	if err != nil {
+		return errors.New(messages.CredentialDoNotMatch)
+	}
+
+	fmt.Print(res)
+
+	return nil
 }

@@ -15,8 +15,8 @@ type JwtCredential struct {
 
 type CustomClaims struct {
 	jwt.StandardClaims
-	Email   string               `json:"email"`
-	Session string               `json:"session"`
+	Email   string `json:"email"`
+	Session string `json:"session"`
 }
 
 func (cred JwtCredential) GetToken(session, email, id string) (string, string, error) {

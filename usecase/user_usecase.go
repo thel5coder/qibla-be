@@ -1,12 +1,7 @@
 package usecase
 
 import (
-	"errors"
-	"fmt"
 	"qibla-backend/db/repositories/actions"
-	"qibla-backend/helpers/hashing"
-	"qibla-backend/helpers/messages"
-	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"
 )
@@ -15,240 +10,62 @@ type UserUseCase struct {
 	*UcContract
 }
 
-func (uc UserUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.UserVm, pagination viewmodel.PaginationVm, err error) {
+func (uc UserUseCase) Edit(ID, name, userName, email, mobilePhone, roleID, password string, isActive, isAdminPanel bool) (err error) {
 	repository := actions.NewUserRepository(uc.DB)
-	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
+	now := time.Now().UTC()
 
-	users, count, err := repository.Browse(search, order, sort, limit, offset)
+	body := viewmodel.UserVm{
+		ID:           ID,
+		Name:         name,
+		UserName:     userName,
+		Email:        email,
+		MobilePhone:  mobilePhone,
+		IsActive:     isActive,
+		RoleID:       roleID,
+		IsAdminPanel: isAdminPanel,
+		UpdatedAt:    now.Format(time.RFC3339),
+	}
+	err = repository.Edit(body, password, uc.TX)
 	if err != nil {
-		return res, pagination, err
+		return err
 	}
 
-	for _, user := range users {
-		res = append(res, viewmodel.UserVm{
-			ID:       user.ID,
-			UserName: user.UserName,
-			Email:    user.Email,
-			IsActive: user.IsActive,
-			Role: viewmodel.RoleVm{
-				ID:        user.RoleModel.ID,
-				Name:      user.RoleModel.Name,
-				CreatedAt: user.RoleModel.CreatedAt,
-				UpdatedAt: user.RoleModel.UpdatedAt,
-				DeletedAt: user.RoleModel.DeletedAt.String,
-			},
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
-			DeletedAt: user.DeletedAt.String,
-		})
-	}
-	pagination = uc.setPaginationResponse(page, limit, count)
-
-	return res, pagination, err
+	return err
 }
 
-func (uc UserUseCase) ReadBy(column, value string) (res viewmodel.UserVm, err error) {
+func (uc UserUseCase) Add(name, userName, email, mobilePhone, roleID, password string, isActive, isAdminPanel bool) (res string, err error) {
 	repository := actions.NewUserRepository(uc.DB)
-	menuPermissionUserUc := MenuPermissionUserUseCase{UcContract: uc.UcContract}
-	var permissions []viewmodel.MenuPermissionUserVm
+	now := time.Now().UTC().Format(time.RFC3339)
 
-	user, err := repository.ReadBy(column, value)
+	body := viewmodel.UserVm{
+		Name:         name,
+		UserName:     userName,
+		Email:        email,
+		MobilePhone:  mobilePhone,
+		IsActive:     isActive,
+		RoleID:       roleID,
+		IsAdminPanel: isAdminPanel,
+		CreatedAt:    now,
+		UpdatedAt:    now,
+	}
+	res, err = repository.Add(body, password, uc.TX)
 	if err != nil {
 		return res, err
-	}
-
-	menuPermissionsUsers, err := menuPermissionUserUc.Browse(user.ID)
-	if err != nil {
-		return res, err
-	}
-	fmt.Print(menuPermissionsUsers)
-	for _, menuPermissionsUser := range menuPermissionsUsers {
-		permissions = append(permissions, menuPermissionsUser)
-	}
-
-	res = viewmodel.UserVm{
-		ID:       user.ID,
-		UserName: user.UserName,
-		Email:    user.Email,
-		IsActive: user.IsActive,
-		Role: viewmodel.RoleVm{
-			ID:        user.RoleModel.ID,
-			Name:      user.RoleModel.Name,
-			CreatedAt: user.RoleModel.CreatedAt,
-			UpdatedAt: user.RoleModel.UpdatedAt,
-			DeletedAt: user.RoleModel.DeletedAt.String,
-		},
-		CreatedAt:       user.CreatedAt,
-		UpdatedAt:       user.UpdatedAt,
-		DeletedAt:       user.DeletedAt.String,
-		MenuPermissions: permissions,
 	}
 
 	return res, err
 }
 
-func (uc UserUseCase) ReadByPk(ID string) (res viewmodel.UserVm, err error) {
-	res, err = uc.ReadBy("id", ID)
-	if err != nil {
-		return res, errors.New(messages.DataNotFound)
-	}
-
-	return res, err
-}
-
-func (uc UserUseCase) Edit(ID string, input *requests.UserRequest) (err error) {
+func (uc UserUseCase) Delete(ID string) (err error) {
 	repository := actions.NewUserRepository(uc.DB)
-	menuPermissionUserUc := MenuPermissionUserUseCase{UcContract: uc.UcContract}
-	now := time.Now().UTC()
-	var password string
-
-	isEmailExist, err := uc.IsEmailExist(ID, input.Email)
-	if err != nil {
-		return err
-	}
-	if isEmailExist {
-		return errors.New(messages.EmailAlreadyExist)
-	}
-
-	isUserNameExist, err := uc.IsUserNameExist(ID, input.UserName)
-	if err != nil {
-		return err
-	}
-	if isUserNameExist {
-		return errors.New(messages.UserNameExist)
-	}
-
-	transaction, err := uc.DB.Begin()
-	if err != nil {
-		transaction.Rollback()
-
-		return err
-	}
-
-	if input.Password != "" {
-		password, _ = hashing.HashAndSalt(input.Password)
-	}
-	body := viewmodel.UserVm{
-		ID:       ID,
-		UserName: input.UserName,
-		Email:    input.Email,
-		IsActive: input.IsActive,
-		Role: viewmodel.RoleVm{
-			ID: input.RoleID,
-		},
-		UpdatedAt: now.Format(time.RFC3339),
-	}
-	err = repository.Edit(body, password, transaction)
-	if err != nil {
-		transaction.Rollback()
-
-		return err
-	}
-
-	err = menuPermissionUserUc.Store(ID, input.MenuPermissions, input.DeletedMenuPermissions, transaction)
-	if err != nil {
-		transaction.Rollback()
-
-		return err
-	}
-	transaction.Commit()
-
-	return err
-}
-
-func (uc UserUseCase) Add(input *requests.UserRequest) (err error) {
-	repository := actions.NewUserRepository(uc.DB)
-	menuPermissionUserUc := MenuPermissionUserUseCase{UcContract: uc.UcContract}
 	now := time.Now().UTC()
 
-	isEmailExist, err := uc.IsEmailExist("", input.Email)
+	err = repository.Delete(ID, now.Format(time.RFC3339), now.Format(time.RFC3339), uc.TX)
 	if err != nil {
 		return err
 	}
-	if isEmailExist {
-		return errors.New(messages.EmailAlreadyExist)
-	}
 
-	isUserNameExist, err := uc.IsUserNameExist("", input.UserName)
-	if err != nil {
-		return err
-	}
-	if isUserNameExist {
-		return errors.New(messages.UserNameExist)
-	}
-
-	transaction, err := uc.DB.Begin()
-	if err != nil {
-		transaction.Rollback()
-
-		return err
-	}
-
-	password, _ := hashing.HashAndSalt(input.Password)
-	body := viewmodel.UserVm{
-		UserName: input.UserName,
-		Email:    input.Email,
-		IsActive: input.IsActive,
-		Role: viewmodel.RoleVm{
-			ID: input.RoleID,
-		},
-		CreatedAt: now.Format(time.RFC3339),
-		UpdatedAt: now.Format(time.RFC3339),
-	}
-	userID, err := repository.Add(body, password, transaction)
-	if err != nil {
-		transaction.Rollback()
-
-		return err
-	}
-
-	err = menuPermissionUserUc.Store(userID, input.MenuPermissions, input.DeletedMenuPermissions, transaction)
-	if err != nil {
-		transaction.Rollback()
-
-		return err
-	}
-
-	transaction.Commit()
-
-	return err
-}
-
-func (uc UserUseCase) Delete(ID string) (error error) {
-	repository := actions.NewUserRepository(uc.DB)
-	menuPermissionUserUc := MenuPermissionUserUseCase{UcContract:uc.UcContract}
-	now := time.Now().UTC()
-
-	count, err := uc.CountByPk(ID)
-	if err != nil {
-		return errors.New(messages.DataNotFound)
-	}
-
-	if count > 0 {
-		transaction, err := uc.DB.Begin()
-		if err != nil {
-			transaction.Rollback()
-
-			return err
-		}
-
-		err = repository.Delete(ID, now.Format(time.RFC3339), now.Format(time.RFC3339), transaction)
-		if err != nil {
-			transaction.Rollback()
-
-			return err
-		}
-
-		err = menuPermissionUserUc.DeleteByUser(ID,transaction)
-		if err != nil {
-			transaction.Rollback()
-
-			return error
-		}
-		transaction.Commit()
-	}
-
-	return err
+	return nil
 }
 
 func (uc UserUseCase) CountBy(ID, column, value string) (res int, err error) {

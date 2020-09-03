@@ -7,11 +7,17 @@ import (
 )
 
 type IUserRepository interface {
-	Browse(search, order, sort string, limit, offset int) (data []models.User, count int, err error)
+	BrowseNonUserAdminPanel(search, order, sort string, limit, offset int) (data []models.User, count int, err error)
+
+	BrowseUserAdminPanel(search, order, sort string, limit, offset int) (data []models.User, count int, err error)
 
 	ReadBy(column, value string) (data models.User, err error)
 
 	Edit(input viewmodel.UserVm, password string, tx *sql.Tx) (err error)
+
+	EditPIN(ID,pin,updatedAt string) (res string,err error)
+
+	EditPassword(ID,password,updatedAt string) (res string,err error)
 
 	Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error)
 

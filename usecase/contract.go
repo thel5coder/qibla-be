@@ -10,6 +10,7 @@ import (
 	"qibla-backend/helpers/aws"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
+	"qibla-backend/helpers/mailing"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/helpers/pusher"
 	"qibla-backend/usecase/viewmodel"
@@ -50,18 +51,19 @@ var AmqpChannel *amqp.Channel
 var xRequestID interface{}
 
 type UcContract struct {
-	E           *echo.Echo
-	DB          *sql.DB
-	TX          *sql.Tx
-	RedisClient redis.RedisClient
-	Jwe         jwe.Credential
-	Validate    *validator.Validate
-	Translator  ut.Translator
-	JwtConfig   middleware.JWTConfig
-	JwtCred     jwt.JwtCredential
-	Odoo        *odoo.Client
-	AWSS3       aws.AWSS3
-	Pusher      pusher.Credential
+	E            *echo.Echo
+	DB           *sql.DB
+	TX           *sql.Tx
+	RedisClient  redis.RedisClient
+	Jwe          jwe.Credential
+	Validate     *validator.Validate
+	Translator   ut.Translator
+	JwtConfig    middleware.JWTConfig
+	JwtCred      jwt.JwtCredential
+	Odoo         *odoo.Client
+	AWSS3        aws.AWSS3
+	Pusher       pusher.Credential
+	GoMailConfig mailing.GoMailConfig
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {

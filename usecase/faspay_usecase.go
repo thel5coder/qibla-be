@@ -16,6 +16,7 @@ type FaspayUseCase struct {
 }
 
 func (uc FaspayUseCase) GetLisPaymentMethods() (res map[string]interface{}, err error) {
+	fmt.Print("ini")
 	compose := os.Getenv("FASPAY_USER_ID") + `` + os.Getenv("FASPAY_PASSWORD")
 	var md5 = md5.New()
 	var sha1 = sha1.New()
@@ -32,21 +33,24 @@ func (uc FaspayUseCase) GetLisPaymentMethods() (res map[string]interface{}, err 
 
 	//sha1Encrypted := sha1.Sum(md5.Sum([]byte(compose)))
 	//sha1EncryptedString := fmt.Sprintf("%x", sha1Encrypted)
-	var bodyPost = []byte(`{"merchant_id":"` + os.Getenv("FASPAY_MERCHANT_ID") + `","signature":"` + sh1Str + `"`)
+	var bodyPost = []byte(`{"merchant_id":"` + os.Getenv("FASPAY_MERCHANT_ID") + `","signature":"` + sh1Str + `"}`)
 
-	request, err := http.NewRequest("POST", fasPayBaseUrl+"/users", bytes.NewBuffer(bodyPost))
+	request, err := http.NewRequest("POST", fasPayBaseUrl+"/100001/10", bytes.NewBuffer(bodyPost))
 	if err != nil {
+		fmt.Print(err.Error())
 		return res, err
 	}
 
 	response, err := client.Do(request)
 	if err != nil {
+		fmt.Print(err.Error())
 		return res, err
 	}
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
+		fmt.Print(err.Error())
 		return res,err
 	}
 	err = json.Unmarshal(body,&res)

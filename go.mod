@@ -26,5 +26,7 @@ require (
 	github.com/streadway/amqp v1.0.0
 	golang.org/x/crypto v0.0.0-20200707235045-ab33eee955e0
 	golang.org/x/sys v0.0.0-20191220142924-d4481acd189f // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.2.5 // indirect
 )
