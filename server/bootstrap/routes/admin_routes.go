@@ -6,13 +6,13 @@ import (
 	"qibla-backend/server/middleware"
 )
 
-type UserRoutes struct {
+type AdminRoutes struct {
 	RouteGroup *echo.Group
 	Handler    handlers.Handler
 }
 
-func (route UserRoutes) RegisterRoute() {
-	userHandler := handlers.UserHandler{Handler: route.Handler}
+func (route AdminRoutes) RegisterRoute() {
+	userHandler := handlers.AdminHandler{Handler: route.Handler}
 	jwtMiddleware := middleware.JwtVerify{UcContract: route.Handler.UseCaseContract}
 
 	userRoute := route.RouteGroup.Group("/user")
@@ -22,5 +22,5 @@ func (route UserRoutes) RegisterRoute() {
 	userRoute.PUT("/:id", userHandler.Edit)
 	userRoute.POST("", userHandler.Add)
 	userRoute.DELETE("/:id", userHandler.Delete)
-	userRoute.GET("/current", userHandler.GetCurrentUser)
+	userRoute.GET("/current", userHandler.GetCurrentAdminUser)
 }

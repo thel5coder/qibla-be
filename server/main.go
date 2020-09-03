@@ -21,6 +21,7 @@ import (
 	awsHelper "qibla-backend/helpers/aws"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
+	"qibla-backend/helpers/mailing"
 	"qibla-backend/helpers/pusher"
 	redisHelper "qibla-backend/helpers/redis"
 	"qibla-backend/helpers/str"
@@ -123,23 +124,32 @@ func main() {
 		Cluster: os.Getenv("PUSHER_CLUSTER"),
 	}
 
+	//gomail config
+	goMailConfig := mailing.GoMailConfig{
+		SMTPHost: os.Getenv("SMTP_HOST"),
+		SMTPPort: str.StringToInt(os.Getenv("SMTP_PORT")),
+		Sender:   os.Getenv("MAIL_SENDER"),
+		Password: os.Getenv("PASSWORD"),
+	}
+
 	//init validator
 	validatorInit()
 
 	e := echo.New()
 
 	ucContract := usecase.UcContract{
-		E:           e,
-		DB:          database,
-		RedisClient: redisClient,
-		Jwe:         jweCredential,
-		Validate:    validatorDriver,
-		Translator:  translator,
-		JwtConfig:   jwtConfig,
-		JwtCred:     jwtCred,
-		Odoo:        c,
-		AWSS3:       awsS3,
-		Pusher:      pusherCredential,
+		E:            e,
+		DB:           database,
+		RedisClient:  redisClient,
+		Jwe:          jweCredential,
+		Validate:     validatorDriver,
+		Translator:   translator,
+		JwtConfig:    jwtConfig,
+		JwtCred:      jwtCred,
+		Odoo:         c,
+		AWSS3:        awsS3,
+		Pusher:       pusherCredential,
+		GoMailConfig: goMailConfig,
 	}
 
 	bootApp := bootstrap.Bootstrap{

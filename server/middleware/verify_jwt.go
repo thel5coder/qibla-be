@@ -47,11 +47,9 @@ func (jwtVerify JwtVerify) JWTWithConfig(next echo.HandlerFunc) echo.HandlerFunc
 
 		jweRes, err := jwtVerify.Jwe.Rollback(claims.Id)
 		if err != nil {
-			fmt.Println(1)
 			return apiHandler.SendResponseUnauthorized(ctx, errors.New(messages.FailedLoadPayload))
 		}
 		if jweRes == nil {
-			fmt.Println(2)
 			return apiHandler.SendResponseUnauthorized(ctx, errors.New(messages.FailedLoadPayload))
 		}
 		claims.Id = fmt.Sprintf("%v", jweRes["id"])

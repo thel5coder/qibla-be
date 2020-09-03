@@ -24,7 +24,6 @@ func (boot *Bootstrap) RegisterRouters() {
 	})
 
 	apiV1 := boot.E.Group("/api/v1")
-	_ = apiV1.Group("/mobile")
 
 	//authentication route
 	authenticationRoute := routes.AuthenticationRoutes{
@@ -54,12 +53,12 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	roleRoute.RegisterRoute()
 
-	//userRoute
-	userRoute := routes.UserRoutes{
+	//adminUserRoutes
+	adminUserRoutes := routes.AdminRoutes{
 		RouteGroup: apiV1,
 		Handler:    handlerType,
 	}
-	userRoute.RegisterRoute()
+	adminUserRoutes.RegisterRoute()
 
 	//term condition route
 	termConditionRoute := routes.TermConditionRoutes{
