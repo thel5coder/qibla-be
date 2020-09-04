@@ -20,10 +20,10 @@ func NewSettingProductRepository(DB *sql.DB) contracts.ISettingProductRepository
 }
 
 func (repository SettingProductRepository) Browse(search, order, sort string, limit, offset int) (data []models.SettingProduct, count int, err error) {
+	fmt.Print(offset)
 	statement := `select sp.*,mp."name" from "setting_products" sp 
                  inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null
-                where sp."deleted_at" is null
-                order by sp.` + order + ` ` + sort + ` limit $1 offset $2"`
+                where sp."deleted_at" is null order by sp.` + order + ` ` + sort + ` limit $1 offset $2`
 	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
 		return data, count, err
@@ -65,6 +65,46 @@ func (repository SettingProductRepository) Browse(search, order, sort string, li
 	}
 
 	return data, count, err
+}
+
+func (repository SettingProductRepository) BrowseBy(column, value, operator string) (data []models.SettingProduct, err error) {
+	statement := `select sp.*,mp."name" from "setting_products" sp 
+                 inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null
+                where ` + column + `` + operator + `$1 and sp."deleted_at" is null
+                order by sp."id" asc`
+	rows, err := repository.DB.Query(statement, value)
+	if err != nil {
+		return data, err
+	}
+
+	for rows.Next() {
+		dataTemp := models.SettingProduct{}
+
+		err = rows.Scan(
+			&dataTemp.ID,
+			&dataTemp.ProductID,
+			&dataTemp.Price,
+			&dataTemp.PriceUnit,
+			&dataTemp.MaintenancePrice,
+			&dataTemp.Discount,
+			&dataTemp.DiscountType,
+			&dataTemp.DiscountPeriodStart,
+			&dataTemp.DiscountPeriodEnd,
+			&dataTemp.Description,
+			&dataTemp.Sessions,
+			&dataTemp.CreatedAt,
+			&dataTemp.UpdatedAt,
+			&dataTemp.DeletedAt,
+			&dataTemp.ProductName,
+		)
+		if err != nil {
+			return data, err
+		}
+
+		data = append(data, dataTemp)
+	}
+
+	return data, err
 }
 
 func (repository SettingProductRepository) BrowseAll() (data []models.SettingProduct, err error) {

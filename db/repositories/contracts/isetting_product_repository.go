@@ -9,6 +9,8 @@ import (
 type ISettingProductRepository interface {
 	Browse(search, order, sort string, limit, offset int) (data []models.SettingProduct, count int, err error)
 
+	BrowseBy(column,value,operator string) (data []models.SettingProduct,err error)
+
 	BrowseAll() (data []models.SettingProduct,err error)
 
 	ReadBy(column, value string) (data models.SettingProduct, err error)

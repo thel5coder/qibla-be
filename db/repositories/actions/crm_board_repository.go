@@ -18,7 +18,7 @@ func NewCrmBoardRepository(db *sql.DB) contracts.ICrmBoardRepository {
 }
 
 func (repository CrmBoardRepository) BrowseByCrmStoryID(crmStoryID string) (data []models.CrmBoard, err error) {
-	statement := `select * from "crm_boards" where "crm_story_id"=$1 and "deleted_at" is null`
+	statement := `select * from "crm_boards" where "crm_story_id"=$1 and "deleted_at" is null order by "created_at" desc`
 	rows, err := repository.DB.Query(statement, crmStoryID)
 	if err != nil {
 		return data, err

@@ -17,19 +17,26 @@ type CrmStoryUseCase struct {
 
 func (uc CrmStoryUseCase) BrowseAll() (res []viewmodel.CrmStoryVm, err error) {
 	repository := actions.NewCrmStoryRepository(uc.DB)
+	crmBoardUc := CrmBoardUseCase{UcContract: uc.UcContract}
 	crmStories, err := repository.BrowseAll()
 	if err != nil {
 		return res, err
 	}
 
 	for _, crmStory := range crmStories {
+		var profitCount float32
+		crmBoards, _ := crmBoardUc.BrowseByCrmStoryID(crmStory.ID)
+		for _, crmBoard := range crmBoards {
+			profitCount = profitCount + crmBoard.Opportunity
+		}
 		res = append(res, viewmodel.CrmStoryVm{
 			ID:          crmStory.ID,
 			Slug:        crmStory.Slug,
 			Name:        crmStory.Name,
-			ProfitCount: "",
+			ProfitCount: profitCount,
 			CreatedAt:   crmStory.CreatedAt,
 			UpdatedAt:   crmStory.UpdatedAt,
+			CrmBoards:   crmBoards,
 		})
 	}
 
@@ -38,18 +45,27 @@ func (uc CrmStoryUseCase) BrowseAll() (res []viewmodel.CrmStoryVm, err error) {
 
 func (uc CrmStoryUseCase) ReadBy(column, value string) (res viewmodel.CrmStoryVm, err error) {
 	repository := actions.NewCrmStoryRepository(uc.DB)
+	crmBoardUc := CrmBoardUseCase{UcContract: uc.UcContract}
+	var profitCount float32
+
 	crmStory, err := repository.ReadBy(column, value)
 	if err != nil {
 		return res, err
+	}
+
+	crmBoards, _ := crmBoardUc.BrowseByCrmStoryID(crmStory.ID)
+	for _, crmBoard := range crmBoards {
+		profitCount = profitCount + crmBoard.Opportunity
 	}
 
 	res = viewmodel.CrmStoryVm{
 		ID:          crmStory.ID,
 		Slug:        crmStory.Slug,
 		Name:        crmStory.Name,
-		ProfitCount: "",
+		ProfitCount: profitCount,
 		CreatedAt:   crmStory.CreatedAt,
 		UpdatedAt:   crmStory.UpdatedAt,
+		CrmBoards:   crmBoards,
 	}
 
 	return res, err

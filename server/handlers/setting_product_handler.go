@@ -4,6 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
+	"qibla-backend/helpers/enums"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"
@@ -24,6 +25,20 @@ func (handler SettingProductHandler) Browse(ctx echo.Context) error {
 	res, pagination, err := uc.Browse(search, order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
+}
+
+func (handler SettingProductHandler) BrowseSubscriptionProduct(ctx echo.Context) error{
+	uc := usecase.SettingProductUseCase{UcContract: handler.UseCaseContract}
+	res,err := uc.BrowseBy("mp.subscription_type",enums.KeySubscriptionEnum1,"=")
+
+	return handler.SendResponse(ctx,res,nil,err)
+}
+
+func (handler SettingProductHandler) BrowseWebinarAndWebsiteProduct(ctx echo.Context) error{
+	uc := usecase.SettingProductUseCase{UcContract: handler.UseCaseContract}
+	res,err := uc.BrowseBy("mp.subscription_type",enums.KeySubscriptionEnum1,"<>")
+
+	return handler.SendResponse(ctx,res,nil,err)
 }
 
 func (handler SettingProductHandler) BrowseAll(ctx echo.Context) error {

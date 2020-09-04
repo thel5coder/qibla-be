@@ -19,6 +19,8 @@ func (route SettingProductRoutes) RegisterRoute() {
 	settingProductRoute.Use(jwtMiddleware.JWTWithConfig)
 	settingProductRoute.GET("", handler.Browse)
 	settingProductRoute.GET("/all", handler.BrowseAll)
+	settingProductRoute.GET("/subscription-product", handler.BrowseSubscriptionProduct)
+	settingProductRoute.GET("/webinar-website-product", handler.BrowseWebinarAndWebsiteProduct)
 	settingProductRoute.GET("/:id", handler.Read)
 	settingProductRoute.PUT("/:id", handler.Edit)
 	settingProductRoute.POST("", handler.Add)
