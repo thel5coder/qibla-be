@@ -97,7 +97,7 @@ func (uc CrmBoardUseCase) EditBoardStory(ID, crmStoryID string) (err error) {
 	}
 
 	pusherUc := PusherUseCase{UcContract:uc.UcContract}
-	pusherUc.Broadcast(pusher.EventBoard,body)
+	pusherUc.Broadcast(pusher.EventStory,body)
 
 	return nil
 }
@@ -125,7 +125,7 @@ func (uc CrmBoardUseCase) Add(input *requests.CrmBoardRequest) (err error) {
 		"new_story":input.CrmStoryID,
 	}
 	pusherUc := PusherUseCase{UcContract:uc.UcContract}
-	pusherUc.Broadcast(pusher.EventBoard,pusherBody)
+	pusherUc.Broadcast(pusher.EventStory,pusherBody)
 
 
 	return nil
