@@ -10,6 +10,7 @@ type YoutubeUseCase struct {
 	*UcContract
 }
 
+//get video from youtube by channel id
 func (uc YoutubeUseCase) GetVideoIDByChannelID(channelIDs []string) (res []viewmodel.ChannelVideoVm, err error) {
 	parts := []string{"snippet"}
 
