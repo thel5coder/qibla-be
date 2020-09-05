@@ -17,7 +17,7 @@ after_script:
 build:
   stage: build
   script:
-    - docker build . --compress -t ${DOCKER}
+    - docker build . --compress --no-cache -t ${DOCKER}
   only:
     - dev
 
