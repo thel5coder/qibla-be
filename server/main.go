@@ -137,7 +137,7 @@ func main() {
 
 	//youtube
 	client := &http.Client{
-		Transport: &transport.APIKey{Key: os.Getenv("YOUTUBE_API_KEY")},
+		Transport: &transport.APIKey{Key:"AIzaSyCJ6UN03_evvGzIGfMKK0yRyB-L9JluE0k"},
 	}
 
 	youtubeClient, err := youtube.New(client)
