@@ -15,7 +15,10 @@ import (
 	"github.com/labstack/echo"
 	echoMiddleware "github.com/labstack/echo/middleware"
 	"github.com/skilld-labs/go-odoo"
+	"google.golang.org/api/googleapi/transport"
+	"google.golang.org/api/youtube/v3"
 	"log"
+	"net/http"
 	"os"
 	"qibla-backend/db"
 	awsHelper "qibla-backend/helpers/aws"
@@ -132,24 +135,35 @@ func main() {
 		Password: os.Getenv("PASSWORD"),
 	}
 
+	//youtube
+	client := &http.Client{
+		Transport: &transport.APIKey{Key: os.Getenv("YOUTUBE_API_KEY")},
+	}
+
+	youtubeClient, err := youtube.New(client)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	//init validator
 	validatorInit()
 
 	e := echo.New()
 
 	ucContract := usecase.UcContract{
-		E:            e,
-		DB:           database,
-		RedisClient:  redisClient,
-		Jwe:          jweCredential,
-		Validate:     validatorDriver,
-		Translator:   translator,
-		JwtConfig:    jwtConfig,
-		JwtCred:      jwtCred,
-		Odoo:         c,
-		AWSS3:        awsS3,
-		Pusher:       pusherCredential,
-		GoMailConfig: goMailConfig,
+		E:             e,
+		DB:            database,
+		RedisClient:   redisClient,
+		Jwe:           jweCredential,
+		Validate:      validatorDriver,
+		Translator:    translator,
+		JwtConfig:     jwtConfig,
+		JwtCred:       jwtCred,
+		Odoo:          c,
+		AWSS3:         awsS3,
+		Pusher:        pusherCredential,
+		GoMailConfig:  goMailConfig,
+		YoutubeClient: youtubeClient,
 	}
 
 	bootApp := bootstrap.Bootstrap{

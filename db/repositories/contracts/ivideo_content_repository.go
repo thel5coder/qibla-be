@@ -8,6 +8,8 @@ import (
 type IVideoContentRepository interface {
 	Browse(order, sort string, limit, offset int) (data []models.VideoContent, count int, err error)
 
+	BrowseAll() (data []models.VideoContent,err error)
+
 	ReadBy(column, value string) (data models.VideoContent, err error)
 
 	Edit(input viewmodel.VideoContentVm) (res string, err error)

@@ -213,4 +213,13 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	faspayRoutes.RegisterRoute()
 
+
+	//mobile
+	//video kajian routes
+	videoKajianRoutes := routes.VideoKajianRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	videoKajianRoutes.RegisterRoute()
+
 }

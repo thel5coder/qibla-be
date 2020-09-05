@@ -4,6 +4,7 @@ import (
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
+	"strings"
 	"time"
 )
 
@@ -24,6 +25,7 @@ func (uc VideoContentUseCase) Browse(order, sort string, page, limit int) (res [
 		res = append(res, viewmodel.VideoContentVm{
 			ID:        videoContent.ID,
 			Channel:   videoContent.Channel,
+			ChannelID: videoContent.ChannelID,
 			Link:      videoContent.Links,
 			IsActive:  videoContent.IsActive,
 			CreatedAt: videoContent.CreatedAt,
@@ -36,6 +38,30 @@ func (uc VideoContentUseCase) Browse(order, sort string, page, limit int) (res [
 	return res, pagination, err
 }
 
+func (uc VideoContentUseCase) BrowseAll() (res []viewmodel.VideoContentVm, err error) {
+	repository := actions.NewVideoContentRepository(uc.DB)
+
+	videoContents, err := repository.BrowseAll()
+	if err != nil {
+		return res, err
+	}
+
+	for _, videoContent := range videoContents {
+		res = append(res, viewmodel.VideoContentVm{
+			ID:        videoContent.ID,
+			Channel:   videoContent.Channel,
+			ChannelID: videoContent.ChannelID,
+			Link:      videoContent.Links,
+			IsActive:  videoContent.IsActive,
+			CreatedAt: videoContent.CreatedAt,
+			UpdatedAt: videoContent.UpdatedAt,
+			DeletedAt: videoContent.DeletedAt.String,
+		})
+	}
+
+	return res, err
+}
+
 func (uc VideoContentUseCase) ReadBy(column, value string) (res viewmodel.VideoContentVm, err error) {
 	repository := actions.NewVideoContentRepository(uc.DB)
 	videoContent, err := repository.ReadBy(column, value)
@@ -46,6 +72,7 @@ func (uc VideoContentUseCase) ReadBy(column, value string) (res viewmodel.VideoC
 	res = viewmodel.VideoContentVm{
 		ID:        videoContent.ID,
 		Channel:   videoContent.Channel,
+		ChannelID: videoContent.ChannelID,
 		Link:      videoContent.Links,
 		IsActive:  videoContent.IsActive,
 		CreatedAt: videoContent.CreatedAt,
@@ -59,9 +86,21 @@ func (uc VideoContentUseCase) ReadBy(column, value string) (res viewmodel.VideoC
 func (uc VideoContentUseCase) Edit(ID string, input *requests.VideoContentRequest) (err error) {
 	repository := actions.NewVideoContentRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
+	link := strings.Split(input.Link, "/")
+	channelID := link[len(link)-1]
+
+	count, err := uc.CountBy(ID, "channel_id", channelID)
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return err
+	}
+
 	body := viewmodel.VideoContentVm{
 		ID:        ID,
 		Channel:   input.Channel,
+		ChannelID: channelID,
 		Link:      input.Link,
 		IsActive:  true,
 		CreatedAt: now,
@@ -77,8 +116,20 @@ func (uc VideoContentUseCase) Edit(ID string, input *requests.VideoContentReques
 func (uc VideoContentUseCase) Add(input *requests.VideoContentRequest) (err error) {
 	repository := actions.NewVideoContentRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
+	link := strings.Split(input.Link, "/")
+	channelID := link[len(link)-1]
+
+	count, err := uc.CountBy("", "channel_id", channelID)
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return err
+	}
+
 	body := viewmodel.VideoContentVm{
 		Channel:   input.Channel,
+		ChannelID: channelID,
 		Link:      input.Link,
 		IsActive:  true,
 		CreatedAt: now,
@@ -96,12 +147,12 @@ func (uc VideoContentUseCase) Delete(ID string) (err error) {
 	repository := actions.NewVideoContentRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	count,err := uc.CountBy("","id",ID)
+	count, err := uc.CountBy("", "id", ID)
 	if err != nil {
 		return err
 	}
 	if count > 0 {
-		_,err = repository.Delete(ID,now,now)
+		_, err = repository.Delete(ID, now, now)
 		if err != nil {
 			return err
 		}
@@ -110,12 +161,12 @@ func (uc VideoContentUseCase) Delete(ID string) (err error) {
 	return err
 }
 
-func (uc VideoContentUseCase) CountBy(ID, column, value string) (res int,err error){
+func (uc VideoContentUseCase) CountBy(ID, column, value string) (res int, err error) {
 	repository := actions.NewVideoContentRepository(uc.DB)
-	res,err = repository.CountBy(ID,column,value)
+	res, err = repository.CountBy(ID, column, value)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
-	return res,err
+	return res, err
 }

@@ -1,0 +1,22 @@
+{
+  "web": {
+    "client_id": "147253454212-fn7k3q4avgarj26an6ak1nio7nqn9v8e.apps.googleusercontent.com",
+    "project_id": "qibla-283800",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_secret": "HxgfsmbV6LgrhT8KFDo7vpxP",
+    "redirect_uris": [
+      "https://qibla-283800.firebaseapp.com/__/auth/handler"
+    ],
+    "javascript_origins": [
+      "http://localhost",
+      "http://localhost:5000",
+      "https://qibla-283800.firebaseapp.com",
+      "https://api.qibla.co.id",
+      "http://localhost:3001",
+      "http://127.0.0.1",
+      "http://127.0.0.1:3001"
+    ]
+  }
+}

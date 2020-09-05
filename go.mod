@@ -25,7 +25,9 @@ require (
 	github.com/skilld-labs/go-odoo v1.5.0
 	github.com/streadway/amqp v1.0.0
 	golang.org/x/crypto v0.0.0-20200707235045-ab33eee955e0
-	golang.org/x/sys v0.0.0-20191220142924-d4481acd189f // indirect
+	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	google.golang.org/api v0.31.0
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.2.5 // indirect

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/skilld-labs/go-odoo"
+	"google.golang.org/api/youtube/v3"
 	"math/rand"
 	"os"
 	queue "qibla-backend/helpers/amqp"
@@ -26,16 +27,19 @@ import (
 )
 
 const (
-	defaultLimit      = 10
-	maxLimit          = 50
-	defaultOrderBy    = "id"
-	defaultSort       = "asc"
-	PasswordLength    = 6
-	defaultLastPage   = 0
-	OtpLifeTime       = "3m"
-	MaxOtpSubmitRetry = 3
-	StaticBaseUrl     = "/statics"
-	fasPayBaseUrl     = "https://dev.faspay.co.id/cvr"
+	defaultLimit                = 10
+	maxLimit                    = 50
+	defaultOrderBy              = "id"
+	defaultSort                 = "asc"
+	PasswordLength              = 6
+	defaultLastPage             = 0
+	OtpLifeTime                 = "3m"
+	MaxOtpSubmitRetry           = 3
+	StaticBaseUrl               = "/statics"
+	fasPayBaseUrl               = "https://dev.faspay.co.id/cvr"
+	defaultMaxResultYoutubeData = 10
+	defaultYoutubeSearchType    = "video"
+	defaultYoutubeOrder         = "date"
 )
 
 //globalsmscounter
@@ -51,19 +55,20 @@ var AmqpChannel *amqp.Channel
 var xRequestID interface{}
 
 type UcContract struct {
-	E            *echo.Echo
-	DB           *sql.DB
-	TX           *sql.Tx
-	RedisClient  redis.RedisClient
-	Jwe          jwe.Credential
-	Validate     *validator.Validate
-	Translator   ut.Translator
-	JwtConfig    middleware.JWTConfig
-	JwtCred      jwt.JwtCredential
-	Odoo         *odoo.Client
-	AWSS3        aws.AWSS3
-	Pusher       pusher.Credential
-	GoMailConfig mailing.GoMailConfig
+	E             *echo.Echo
+	DB            *sql.DB
+	TX            *sql.Tx
+	RedisClient   redis.RedisClient
+	Jwe           jwe.Credential
+	Validate      *validator.Validate
+	Translator    ut.Translator
+	JwtConfig     middleware.JWTConfig
+	JwtCred       jwt.JwtCredential
+	Odoo          *odoo.Client
+	AWSS3         aws.AWSS3
+	Pusher        pusher.Credential
+	GoMailConfig  mailing.GoMailConfig
+	YoutubeClient *youtube.Service
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {
