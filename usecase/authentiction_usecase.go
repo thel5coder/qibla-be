@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	uuid "github.com/satori/go.uuid"
 	"os"
 	"qibla-backend/db/repositories/actions"
@@ -171,11 +172,13 @@ func (uc AuthenticationUseCase) RegisterByGmail(input *requests.RegisterByGmailR
 	//count email by email profile
 	count,err := userUc.CountBy("","email", emailProfile["email"].(string))
 	if err != nil {
+		fmt.Print(1)
 		return res,err
 	}
 	if count > 0 {
 		jamaah, err = jamaahUc.ReadBy("email", emailProfile["email"].(string))
 		if err != nil {
+			fmt.Println(2)
 			return res,err
 		}
 		userID=jamaah.ID
@@ -192,6 +195,7 @@ func (uc AuthenticationUseCase) RegisterByGmail(input *requests.RegisterByGmailR
 		password := str.RandomString(6)
 		userID,err = jamaahUc.Add(emailProfile["name"].(string), "jamaah", emailProfile["email"].(string), password)
 		if err != nil {
+			fmt.Println(3)
 			uc.TX.Rollback()
 
 			return res,err
