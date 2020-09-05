@@ -15,13 +15,12 @@ import (
 	"github.com/labstack/echo"
 	echoMiddleware "github.com/labstack/echo/middleware"
 	"github.com/skilld-labs/go-odoo"
-	"google.golang.org/api/googleapi/transport"
 	"google.golang.org/api/youtube/v3"
 	"log"
-	"net/http"
 	"os"
 	"qibla-backend/db"
 	awsHelper "qibla-backend/helpers/aws"
+	"qibla-backend/helpers/google"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
 	"qibla-backend/helpers/mailing"
@@ -136,14 +135,12 @@ func main() {
 	}
 
 	//youtube
-	client := &http.Client{
-		Transport: &transport.APIKey{Key:"AIzaSyCJ6UN03_evvGzIGfMKK0yRyB-L9JluE0k"},
+	youtubeCred := &google.YoutubeCred{
+		TokenFile:  os.Getenv("YOUTUBE_TOKEN_FILE"),
+		SecretFile: os.Getenv("YOUTUBE_SECRET_FILE"),
+		Scope:      youtube.YoutubeReadonlyScope,
 	}
-
-	youtubeClient, err := youtube.New(client)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	youtubeService, err := youtubeCred.GetYoutubeService()
 
 	//init validator
 	validatorInit()
@@ -151,19 +148,19 @@ func main() {
 	e := echo.New()
 
 	ucContract := usecase.UcContract{
-		E:             e,
-		DB:            database,
-		RedisClient:   redisClient,
-		Jwe:           jweCredential,
-		Validate:      validatorDriver,
-		Translator:    translator,
-		JwtConfig:     jwtConfig,
-		JwtCred:       jwtCred,
-		Odoo:          c,
-		AWSS3:         awsS3,
-		Pusher:        pusherCredential,
-		GoMailConfig:  goMailConfig,
-		YoutubeClient: youtubeClient,
+		E:              e,
+		DB:             database,
+		RedisClient:    redisClient,
+		Jwe:            jweCredential,
+		Validate:       validatorDriver,
+		Translator:     translator,
+		JwtConfig:      jwtConfig,
+		JwtCred:        jwtCred,
+		Odoo:           c,
+		AWSS3:          awsS3,
+		Pusher:         pusherCredential,
+		GoMailConfig:   goMailConfig,
+		YoutubeService: youtubeService,
 	}
 
 	bootApp := bootstrap.Bootstrap{

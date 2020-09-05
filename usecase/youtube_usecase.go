@@ -14,7 +14,7 @@ func (uc YoutubeUseCase) GetVideoIDByChannelID(channelIDs []string) (res []viewm
 	parts := []string{"snippet"}
 
 	for _, channelID := range channelIDs {
-		call := uc.YoutubeClient.Search.List(parts).
+		call := uc.YoutubeService.Search.List(parts).
 			Q("").
 			ChannelId(channelID).
 			MaxResults(defaultMaxResultYoutubeData).
@@ -49,7 +49,7 @@ func (uc YoutubeUseCase) GetVideoIDByChannelID(channelIDs []string) (res []viewm
 func (uc YoutubeUseCase) GetVideo(videoID string) (res viewmodel.VideoDetailVm, err error) {
 	parts := []string{"snippet", "player"}
 
-	call := uc.YoutubeClient.Videos.List(parts).
+	call := uc.YoutubeService.Videos.List(parts).
 		MaxResults(defaultMaxResultYoutubeData).
 		Id(videoID)
 	response,err := call.Do()
@@ -58,11 +58,11 @@ func (uc YoutubeUseCase) GetVideo(videoID string) (res viewmodel.VideoDetailVm, 
 	}
 	
 	res = viewmodel.VideoDetailVm{
-		Title:          response.Items[1].Snippet.Title,
-		ChannelName:    response.Items[1].Snippet.ChannelTitle,
-		Description:    response.Items[1].Snippet.Description,
-		EmbeddedPlayer: response.Items[1].Player.EmbedHtml,
-		PublishedAt:    response.Items[1].Snippet.PublishedAt,
+		Title:          response.Items[0].Snippet.Title,
+		ChannelName:    response.Items[0].Snippet.ChannelTitle,
+		Description:    response.Items[0].Snippet.Description,
+		EmbeddedPlayer: response.Items[0].Player.EmbedHtml,
+		PublishedAt:    response.Items[0].Snippet.PublishedAt,
 	}
 
 	return res,err
