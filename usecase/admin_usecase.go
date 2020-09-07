@@ -67,7 +67,7 @@ func (uc AdminUseCase) ReadBy(column, value string) (res viewmodel.AdminVm, err 
 		ID:          user.ID,
 		UserName:    user.UserName,
 		Email:       user.Email,
-		MobilePhone: user.MobilePhone,
+		MobilePhone: user.MobilePhone.String,
 		IsActive:    user.IsActive,
 		Role: viewmodel.RoleVm{
 			ID:        user.RoleModel.ID,
