@@ -193,11 +193,18 @@ func (repository UserRepository) EditPIN(ID, pin, updatedAt string) (res string,
 	return res, err
 }
 
-func (repository UserRepository) EditPassword(ID,password,updatedAt string) (res string,err error){
+func (repository UserRepository) EditPassword(ID, password, updatedAt string) (res string, err error) {
 	statement := `update "users" set "password"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
 	err = repository.DB.QueryRow(statement, password, datetime.StrParseToTime(updatedAt, time.RFC3339), ID).Scan(&res)
 
 	return res, err
+}
+
+func (UserRepository) EditUserName(ID, userName, updatedAt string, tx *sql.Tx) (err error) {
+	statement := `update "users" set "username"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
+	_, err = tx.Exec(statement, userName, datetime.StrParseToTime(updatedAt, time.RFC3339), ID)
+
+	return err
 }
 
 func (repository UserRepository) Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error) {

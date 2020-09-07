@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"fmt"
+	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/enums"
 	"qibla-backend/helpers/messages"
@@ -17,8 +18,6 @@ type SettingProductUseCase struct {
 
 func (uc SettingProductUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.SettingProductVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewSettingProductRepository(uc.DB)
-	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
-	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
 
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 	settingProducts, count, err := repository.Browse(search, order, sort, limit, offset)
@@ -27,31 +26,7 @@ func (uc SettingProductUseCase) Browse(search, order, sort string, page, limit i
 	}
 
 	for _, settingProduct := range settingProducts {
-		var settingProductFeatures []viewmodel.SettingProductFeatureVm
-		var settingProductPeriods []viewmodel.SettingProductPeriodVm
-		settingProductFeatures, _ = settingProductFeatureUc.BrowseBySettingProductID(settingProduct.ID)
-		settingProductPeriods, _ = settingProductPeriodUc.BrowseBySettingProductID(settingProduct.ID)
-
-		res = append(res, viewmodel.SettingProductVm{
-			ID:                    settingProduct.ID,
-			ProductID:             settingProduct.ProductID,
-			ProductName:           settingProduct.ProductName,
-			Price:                 settingProduct.Price,
-			PriceUnit:             settingProduct.PriceUnit.String,
-			MaintenancePrice:      settingProduct.MaintenancePrice.Int32,
-			Discount:              settingProduct.Discount.Int32,
-			DiscountType:          settingProduct.DiscountType.String,
-			DiscountPeriodStart:   settingProduct.DiscountPeriodStart.String,
-			DiscountPeriodEnd:     settingProduct.DiscountPeriodEnd.String,
-			DiscountPeriod:        settingProduct.DiscountPeriodStart.String + ` - ` + settingProduct.DiscountPeriodEnd.String,
-			Description:           settingProduct.Description,
-			Sessions:              settingProduct.Sessions.String,
-			CreatedAt:             settingProduct.CreatedAt,
-			UpdatedAt:             settingProduct.UpdatedAt,
-			DeletedAt:             settingProduct.DeletedAt.String,
-			SettingProductFeature: settingProductFeatures,
-			SettingProductPeriods: settingProductPeriods,
-		})
+		res = append(res, uc.buildBody(settingProduct))
 	}
 	pagination = uc.setPaginationResponse(page, limit, count)
 
@@ -60,8 +35,6 @@ func (uc SettingProductUseCase) Browse(search, order, sort string, page, limit i
 
 func (uc SettingProductUseCase) BrowseAll() (res []viewmodel.SettingProductVm, err error) {
 	repository := actions.NewSettingProductRepository(uc.DB)
-	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
-	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
 
 	settingProducts, err := repository.BrowseAll()
 	if err != nil {
@@ -69,44 +42,7 @@ func (uc SettingProductUseCase) BrowseAll() (res []viewmodel.SettingProductVm, e
 	}
 
 	for _, settingProduct := range settingProducts {
-		var settingProductFeatures []viewmodel.SettingProductFeatureVm
-		var settingProductPeriods []viewmodel.SettingProductPeriodVm
-		settingProductFeatures, _ = settingProductFeatureUc.BrowseBySettingProductID(settingProduct.ID)
-		for _, settingProductFeature := range settingProductFeatures {
-			settingProductFeatures = append(settingProductFeatures, viewmodel.SettingProductFeatureVm{
-				ID:          settingProductFeature.ID,
-				FeatureName: settingProductFeature.FeatureName,
-			})
-		}
-
-		settingProductPeriods, _ = settingProductPeriodUc.BrowseBySettingProductID(settingProduct.ID)
-		for _, settingProductPeriod := range settingProductPeriods {
-			settingProductPeriods = append(settingProductPeriods, viewmodel.SettingProductPeriodVm{
-				ID:     settingProductPeriod.ID,
-				Period: settingProductPeriod.Period,
-			})
-		}
-
-		res = append(res, viewmodel.SettingProductVm{
-			ID:                    settingProduct.ID,
-			ProductID:             settingProduct.ProductID,
-			ProductName:           settingProduct.ProductName,
-			Price:                 settingProduct.Price,
-			PriceUnit:             settingProduct.PriceUnit.String,
-			MaintenancePrice:      settingProduct.MaintenancePrice.Int32,
-			Discount:              settingProduct.Discount.Int32,
-			DiscountType:          settingProduct.DiscountType.String,
-			DiscountPeriodStart:   settingProduct.DiscountPeriodStart.String,
-			DiscountPeriodEnd:     settingProduct.DiscountPeriodEnd.String,
-			DiscountPeriod:        settingProduct.DiscountPeriodStart.String + ` - ` + settingProduct.DiscountPeriodEnd.String,
-			Description:           settingProduct.Description,
-			Sessions:              settingProduct.Sessions.String,
-			CreatedAt:             settingProduct.CreatedAt,
-			UpdatedAt:             settingProduct.UpdatedAt,
-			DeletedAt:             settingProduct.DeletedAt.String,
-			SettingProductFeature: settingProductFeatures,
-			SettingProductPeriods: settingProductPeriods,
-		})
+		res = append(res, uc.buildBody(settingProduct))
 	}
 
 	return res, err
@@ -115,48 +51,9 @@ func (uc SettingProductUseCase) BrowseAll() (res []viewmodel.SettingProductVm, e
 func (uc SettingProductUseCase) BrowseBy(column,value,operator string) (res []viewmodel.SettingProductVm,err error){
 	repository := actions.NewSettingProductRepository(uc.DB)
 	settingProducts,err := repository.BrowseBy(column,value,operator)
-	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
-	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
 
 	for _, settingProduct := range settingProducts {
-		var settingProductFeatures []viewmodel.SettingProductFeatureVm
-		var settingProductPeriods []viewmodel.SettingProductPeriodVm
-		settingProductFeatures, _ = settingProductFeatureUc.BrowseBySettingProductID(settingProduct.ID)
-		for _, settingProductFeature := range settingProductFeatures {
-			settingProductFeatures = append(settingProductFeatures, viewmodel.SettingProductFeatureVm{
-				ID:          settingProductFeature.ID,
-				FeatureName: settingProductFeature.FeatureName,
-			})
-		}
-
-		settingProductPeriods, _ = settingProductPeriodUc.BrowseBySettingProductID(settingProduct.ID)
-		for _, settingProductPeriod := range settingProductPeriods {
-			settingProductPeriods = append(settingProductPeriods, viewmodel.SettingProductPeriodVm{
-				ID:     settingProductPeriod.ID,
-				Period: settingProductPeriod.Period,
-			})
-		}
-
-		res = append(res, viewmodel.SettingProductVm{
-			ID:                    settingProduct.ID,
-			ProductID:             settingProduct.ProductID,
-			ProductName:           settingProduct.ProductName,
-			Price:                 settingProduct.Price,
-			PriceUnit:             settingProduct.PriceUnit.String,
-			MaintenancePrice:      settingProduct.MaintenancePrice.Int32,
-			Discount:              settingProduct.Discount.Int32,
-			DiscountType:          settingProduct.DiscountType.String,
-			DiscountPeriodStart:   settingProduct.DiscountPeriodStart.String,
-			DiscountPeriodEnd:     settingProduct.DiscountPeriodEnd.String,
-			DiscountPeriod:        settingProduct.DiscountPeriodStart.String + ` - ` + settingProduct.DiscountPeriodEnd.String,
-			Description:           settingProduct.Description,
-			Sessions:              settingProduct.Sessions.String,
-			CreatedAt:             settingProduct.CreatedAt,
-			UpdatedAt:             settingProduct.UpdatedAt,
-			DeletedAt:             settingProduct.DeletedAt.String,
-			SettingProductFeature: settingProductFeatures,
-			SettingProductPeriods: settingProductPeriods,
-		})
+		res = append(res, uc.buildBody(settingProduct))
 	}
 
 	return res, err
@@ -164,39 +61,12 @@ func (uc SettingProductUseCase) BrowseBy(column,value,operator string) (res []vi
 
 func (uc SettingProductUseCase) ReadBy(column, value string) (res viewmodel.SettingProductVm, err error) {
 	repository := actions.NewSettingProductRepository(uc.DB)
-	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
-	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
-
 	settingProduct, err := repository.ReadBy(column, value)
 	if err != nil {
 		return res, err
 	}
 
-	var settingProductFeatures []viewmodel.SettingProductFeatureVm
-	var settingProductPeriods []viewmodel.SettingProductPeriodVm
-	settingProductFeatures, _ = settingProductFeatureUc.BrowseBySettingProductID(settingProduct.ID)
-	settingProductPeriods, _ = settingProductPeriodUc.BrowseBySettingProductID(settingProduct.ID)
-
-	res = viewmodel.SettingProductVm{
-		ID:                    settingProduct.ID,
-		ProductID:             settingProduct.ProductID,
-		ProductName:           settingProduct.ProductName,
-		Price:                 settingProduct.Price,
-		PriceUnit:             settingProduct.PriceUnit.String,
-		MaintenancePrice:      settingProduct.MaintenancePrice.Int32,
-		Discount:              settingProduct.Discount.Int32,
-		DiscountType:          settingProduct.DiscountType.String,
-		DiscountPeriodStart:   settingProduct.DiscountPeriodStart.String,
-		DiscountPeriodEnd:     settingProduct.DiscountPeriodEnd.String,
-		DiscountPeriod:        settingProduct.DiscountPeriodStart.String + ` - ` + settingProduct.DiscountPeriodEnd.String,
-		Description:           settingProduct.Description,
-		Sessions:              settingProduct.Sessions.String,
-		CreatedAt:             settingProduct.CreatedAt,
-		UpdatedAt:             settingProduct.UpdatedAt,
-		DeletedAt:             settingProduct.DeletedAt.String,
-		SettingProductFeature: settingProductFeatures,
-		SettingProductPeriods: settingProductPeriods,
-	}
+	res = uc.buildBody(settingProduct)
 
 	return res, err
 }
@@ -412,4 +282,35 @@ func (uc SettingProductUseCase) countBy(ID, column, value string) (res int, err 
 	res, err = repository.CountBy(ID, column, value)
 
 	return res, err
+}
+
+func (uc SettingProductUseCase) buildBody(data models.SettingProduct) (res viewmodel.SettingProductVm){
+	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
+	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
+
+	var settingProductFeatures []viewmodel.SettingProductFeatureVm
+	var settingProductPeriods []viewmodel.SettingProductPeriodVm
+	settingProductFeatures, _ = settingProductFeatureUc.BrowseBySettingProductID(data.ID)
+	settingProductPeriods, _ = settingProductPeriodUc.BrowseBySettingProductID(data.ID)
+
+	return viewmodel.SettingProductVm{
+		ID:                    data.ID,
+		ProductID:             data.ProductID,
+		ProductName:           data.ProductName,
+		Price:                 data.Price,
+		PriceUnit:             data.PriceUnit.String,
+		MaintenancePrice:      data.MaintenancePrice.Int32,
+		Discount:              data.Discount.Int32,
+		DiscountType:          data.DiscountType.String,
+		DiscountPeriodStart:   data.DiscountPeriodStart.String,
+		DiscountPeriodEnd:     data.DiscountPeriodEnd.String,
+		DiscountPeriod:        data.DiscountPeriodStart.String + ` - ` + data.DiscountPeriodEnd.String,
+		Description:           data.Description,
+		Sessions:              data.Sessions.String,
+		CreatedAt:             data.CreatedAt,
+		UpdatedAt:             data.UpdatedAt,
+		DeletedAt:             data.DeletedAt.String,
+		SettingProductFeature: settingProductFeatures,
+		SettingProductPeriods: settingProductPeriods,
+	}
 }

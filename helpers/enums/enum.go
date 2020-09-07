@@ -79,3 +79,8 @@ const KeyRememberCalender7 = 1440
 const ValueRememberCalender7 = "1 day before"
 const KeyRememberCalender8 = 2880
 const ValueRememberCalender8 = "2 days before"
+
+const KeyDueDateAging1 = 7
+const ValueDueDateAging1 = "7 Hari Setelah Terbit Tagihan"
+const KeyDueDateAging2 = 14
+const ValueDueDateAging2 = "14 Hari Setelah Terbit Tagihan"

@@ -10,6 +10,8 @@ type IMasterProductRepository interface {
 
 	BrowseAll() (data []models.MasterProduct,err error)
 
+	BrowseExtraProducts() (data []models.MasterProduct,err error)
+
 	ReadBy(column, value string) (data models.MasterProduct, err error)
 
 	Edit(input viewmodel.MasterProductVm) (res string, err error)

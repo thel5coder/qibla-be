@@ -19,6 +19,8 @@ type IUserRepository interface {
 
 	EditPassword(ID,password,updatedAt string) (res string,err error)
 
+	EditUserName(ID,userName,updatedAt string,tx *sql.Tx) (err error)
+
 	Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error)
 
 	Delete(ID, updatedAt, deletedAt string, tx *sql.Tx) (err error)

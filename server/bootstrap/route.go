@@ -207,6 +207,13 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	crmBoardRoutes.RegisterRoute()
 
+	//partner routes
+	partnerRoutes := routes.PartnerRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	partnerRoutes.RegisterRoute()
+
 	faspayRoutes := routes.FaspayRoutes{
 		RouteGroup: apiV1,
 		Handler:    handlerType,

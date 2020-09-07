@@ -135,7 +135,7 @@ func main() {
 	}
 
 	//youtube
-	youtubeCred := &google.YoutubeCred{
+	youtubeCred := google.YoutubeCred{
 		TokenFile:  os.Getenv("YOUTUBE_TOKEN_FILE"),
 		SecretFile: os.Getenv("YOUTUBE_SECRET_FILE"),
 		Scope:      youtube.YoutubeReadonlyScope,

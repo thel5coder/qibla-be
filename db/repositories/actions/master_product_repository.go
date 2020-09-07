@@ -5,6 +5,7 @@ import (
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
+	"qibla-backend/helpers/enums"
 	"qibla-backend/usecase/viewmodel"
 	"strings"
 	"time"
@@ -57,6 +58,34 @@ func (repository MasterProductRepository) Browse(search, order, sort string, lim
 func (repository MasterProductRepository) BrowseAll() (data []models.MasterProduct,err error) {
 	statement := `select * from "master_products" where "deleted_at" is null`
 	rows, err := repository.DB.Query(statement)
+	if err != nil {
+		return data, err
+	}
+
+	for rows.Next() {
+		dataTemp := models.MasterProduct{}
+		err = rows.Scan(
+			&dataTemp.ID,
+			&dataTemp.Slug,
+			&dataTemp.Name,
+			&dataTemp.SubscriptionType,
+			&dataTemp.CreatedAt,
+			&dataTemp.UpdatedAt,
+			&dataTemp.DeletedAt,
+		)
+		if err != nil {
+			return data, err
+		}
+
+		data = append(data, dataTemp)
+	}
+
+	return data,err
+}
+
+func (repository MasterProductRepository) BrowseExtraProducts() (data []models.MasterProduct,err error) {
+	statement := `select * from "master_products" where "subscription_type"<>$1 and "deleted_at" is null`
+	rows, err := repository.DB.Query(statement,enums.KeySubscriptionEnum1)
 	if err != nil {
 		return data, err
 	}

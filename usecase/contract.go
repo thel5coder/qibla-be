@@ -186,3 +186,14 @@ func (uc UcContract) Read(object string, criteria *odoo.Criteria, options *odoo.
 
 	return err
 }
+
+func (uc UcContract) InitDBTransaction() (err error){
+	uc.TX,err = uc.DB.Begin()
+	if err != nil {
+		uc.TX.Rollback()
+
+		return err
+	}
+
+	return nil
+}

@@ -19,6 +19,7 @@ func (route MasterProductRoutes) RegisterRoute() {
 	masterProductRoute.Use(jwtMiddleware.JWTWithConfig)
 	masterProductRoute.GET("", handler.Browse)
 	masterProductRoute.GET("/all", handler.BrowseAll)
+	masterProductRoute.GET("/extra-product",handler.BrowseExtraProducts)
 	masterProductRoute.GET("/:id", handler.Read)
 	masterProductRoute.PUT("/:id", handler.Edit)
 	masterProductRoute.POST("", handler.Add)

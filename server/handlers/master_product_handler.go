@@ -33,6 +33,13 @@ func(handler MasterProductHandler) BrowseAll(ctx echo.Context) error{
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
+func(handler MasterProductHandler) BrowseExtraProducts(ctx echo.Context) error{
+	uc := usecase.MasterProductUseCase{UcContract: handler.UseCaseContract}
+	res, err := uc.BrowseExtraProducts()
+
+	return handler.SendResponse(ctx, res, nil, err)
+}
+
 func (handler MasterProductHandler) Read(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
