@@ -6,6 +6,7 @@ type SettingProduct struct {
 	ID                  string         `db:"id"`
 	ProductID           string         `db:"product_id"`
 	ProductName         string         `db:"product_name"`
+	ProductType         string         `db:"product_type"`
 	Price               int            `db:"price"`
 	PriceUnit           sql.NullString `db:"price_unit"`
 	MaintenancePrice    sql.NullInt32  `db:"maintenance_price"`

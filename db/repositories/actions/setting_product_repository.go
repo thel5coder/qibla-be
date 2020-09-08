@@ -21,7 +21,7 @@ func NewSettingProductRepository(DB *sql.DB) contracts.ISettingProductRepository
 
 func (repository SettingProductRepository) Browse(search, order, sort string, limit, offset int) (data []models.SettingProduct, count int, err error) {
 	fmt.Print(offset)
-	statement := `select sp.*,mp."name" from "setting_products" sp 
+	statement := `select sp.*,mp."name",mp."subscription_type" from "setting_products" sp 
                  inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null
                 where sp."deleted_at" is null order by sp.` + order + ` ` + sort + ` limit $1 offset $2`
 	rows, err := repository.DB.Query(statement, limit, offset)
@@ -48,6 +48,7 @@ func (repository SettingProductRepository) Browse(search, order, sort string, li
 			&dataTemp.UpdatedAt,
 			&dataTemp.DeletedAt,
 			&dataTemp.ProductName,
+			&dataTemp.ProductType,
 		)
 		if err != nil {
 			return data, count, err
@@ -68,7 +69,7 @@ func (repository SettingProductRepository) Browse(search, order, sort string, li
 }
 
 func (repository SettingProductRepository) BrowseBy(column, value, operator string) (data []models.SettingProduct, err error) {
-	statement := `select sp.*,mp."name" from "setting_products" sp 
+	statement := `select sp.*,mp."name",mp."subscription_type" from "setting_products" sp 
                  inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null
                 where ` + column + `` + operator + `$1 and sp."deleted_at" is null
                 order by sp."id" asc`
@@ -96,6 +97,7 @@ func (repository SettingProductRepository) BrowseBy(column, value, operator stri
 			&dataTemp.UpdatedAt,
 			&dataTemp.DeletedAt,
 			&dataTemp.ProductName,
+			&dataTemp.ProductType,
 		)
 		if err != nil {
 			return data, err
@@ -134,6 +136,7 @@ func (repository SettingProductRepository) BrowseAll() (data []models.SettingPro
 			&dataTemp.UpdatedAt,
 			&dataTemp.DeletedAt,
 			&dataTemp.ProductName,
+			&dataTemp.ProductType,
 		)
 		if err != nil {
 			return data, err
@@ -146,7 +149,7 @@ func (repository SettingProductRepository) BrowseAll() (data []models.SettingPro
 }
 
 func (repository SettingProductRepository) ReadBy(column, value string) (data models.SettingProduct, err error) {
-	statement := `select sp.*,mp."name" from "setting_products" sp 
+	statement := `select sp.*,mp."name",mp."subscription_type" from "setting_products" sp 
                  inner join "master_products" mp on mp."id"=sp."product_id" and mp."deleted_at" is null
                  where ` + column + `=$1 and sp."deleted_at" is null`
 	err = repository.DB.QueryRow(statement, value).Scan(
@@ -165,6 +168,7 @@ func (repository SettingProductRepository) ReadBy(column, value string) (data mo
 		&data.UpdatedAt,
 		&data.DeletedAt,
 		&data.ProductName,
+		&data.ProductType,
 	)
 
 	return data, err

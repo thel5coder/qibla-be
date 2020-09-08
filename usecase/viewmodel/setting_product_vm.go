@@ -4,6 +4,7 @@ type SettingProductVm struct {
 	ID                    string                    `json:"id"`
 	ProductID             string                    `json:"product_id"`
 	ProductName           string                    `json:"product_name"`
+	ProductType           string                    `json:"product_type"`
 	Price                 int                       `json:"price"`
 	PriceUnit             string                    `json:"price_unit"`
 	MaintenancePrice      int32                     `json:"maintenance_price"`
