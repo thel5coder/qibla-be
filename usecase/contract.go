@@ -40,6 +40,11 @@ const (
 	defaultMaxResultYoutubeData = 10
 	defaultYoutubeSearchType    = "video"
 	defaultYoutubeOrder         = "date"
+	defaultFaspayTerminal       = 10
+	defaultFaspayPayType        = 1
+	defaultFaspayTenor          = "00"
+	defaultFaspayPaymentPlan    = "01"
+	defaultFaspayCurrency = "IDR"
 )
 
 //globalsmscounter
@@ -187,8 +192,8 @@ func (uc UcContract) Read(object string, criteria *odoo.Criteria, options *odoo.
 	return err
 }
 
-func (uc UcContract) InitDBTransaction() (err error){
-	uc.TX,err = uc.DB.Begin()
+func (uc UcContract) InitDBTransaction() (err error) {
+	uc.TX, err = uc.DB.Begin()
 	if err != nil {
 		uc.TX.Rollback()
 

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 )
 
@@ -61,7 +62,7 @@ func (uc PartnerExtraProductUseCase) DeleteBy(column, value string) (err error) 
 	return err
 }
 
-func (uc PartnerExtraProductUseCase) Store(partnerID string, extraProducts []string) (err error) {
+func (uc PartnerExtraProductUseCase) Store(partnerID string, extraProducts []requests.ExtraProductRequest) (err error) {
 	count,err := uc.CountBy("partner_id",partnerID)
 	if err != nil {
 		return err
@@ -75,7 +76,7 @@ func (uc PartnerExtraProductUseCase) Store(partnerID string, extraProducts []str
 	}
 
 	for _, product := range extraProducts {
-		err = uc.Add(partnerID,product)
+		err = uc.Add(partnerID,product.ID)
 		if err != nil {
 			return err
 		}
