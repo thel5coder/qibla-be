@@ -14,8 +14,8 @@ func NewPartnerExtraProductRepository(DB *sql.DB) contracts.IPartnerExtraProduct
 	return &PartnerExtraProductRepository{DB: DB}
 }
 
-const partnerExtraProductSelectStatement = `select pep."id",pep."partner_id",mp."id",mp."name",sp."price",sp."price_unit",sp."sessions"
-                        from "partner_extra_products" pep
+const partnerExtraProductSelectStatement = `select pep."id",pep."partner_id",mp."id",mp."name",mp."subscription_type",sp."price",sp."price_unit",sp."sessions"
+                        from "partner_product_subscriptions" pep
                        inner join "master_products" mp on mp."id"=pep."product_id"
                        inner join "setting_products" sp on sp."product_id"=mp."id"`
 
@@ -33,6 +33,7 @@ func (repository PartnerExtraProductRepository) BrowseByPartnerID(partnerID stri
 			&dataTemp.PartnerID,
 			&dataTemp.Product.ID,
 			&dataTemp.Product.Name,
+			&dataTemp.Product.SubscriptionType,
 			&dataTemp.Product.Price,
 			&dataTemp.Product.PriceUnit,
 			&dataTemp.Product.Session,
@@ -53,6 +54,7 @@ func (repository PartnerExtraProductRepository) ReadBy(column, value string) (da
 		&data.PartnerID,
 		&data.Product.ID,
 		&data.Product.Name,
+		&data.Product.SubscriptionType,
 		&data.Product.Price,
 		&data.Product.PriceUnit,
 		&data.Product.Session,
@@ -62,7 +64,7 @@ func (repository PartnerExtraProductRepository) ReadBy(column, value string) (da
 }
 
 func (PartnerExtraProductRepository) Add(partnerID, productID string, tx *sql.Tx) (err error) {
-	statement := `insert into "partner_extra_products" ("partner_id","product_id") values($1,$2) returning "id"`
+	statement := `insert into partner_extra_products ("partner_id","product_id") values($1,$2) returning "id"`
 	_, err = tx.Exec(
 		statement,
 		partnerID,

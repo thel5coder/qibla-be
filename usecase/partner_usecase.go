@@ -78,7 +78,7 @@ func (uc PartnerUseCase) Edit(ID string, input *requests.PartnerRegisterRequest)
 		return err
 	}
 
-	partnerExtraProductUc := PartnerExtraProductUseCase{UcContract:uc.UcContract}
+	partnerExtraProductUc := PartnerExtraProductUseCase{UcContract: uc.UcContract}
 	err = partnerExtraProductUc.Store(ID,input.ExtraProducts)
 	if err != nil {
 		uc.TX.Rollback()
@@ -131,11 +131,16 @@ func (uc PartnerUseCase) EditVerify(ID string,input *requests.PartnerVerifyReque
 	return nil
 }
 
-func (uc PartnerUseCase) EditBoolStatus(ID,column string,value bool) (err error){
+func (uc PartnerUseCase) EditBoolStatus(ID,column,reason,userID,password string,value bool) (err error){
 	repository := actions.NewParterRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
+	adminUc := AdminUseCase{UcContract:uc.UcContract}
 
-	_,err = repository.EditBoolStatus(ID,column,now,value)
+	err = adminUc.IsPasswordValid(userID,password)
+	if err != nil {
+		return err
+	}
+	_,err = repository.EditBoolStatus(ID,column,reason,now,value)
 	if err != nil {
 		return err
 	}
@@ -198,7 +203,7 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error)
 	}
 
 	//add extra product
-	partnerExtraProductUc := PartnerExtraProductUseCase{UcContract:uc.UcContract}
+	partnerExtraProductUc := PartnerExtraProductUseCase{UcContract: uc.UcContract}
 	err = partnerExtraProductUc.Store(body.ID,input.ExtraProducts)
 	if err != nil {
 		uc.TX.Rollback()
@@ -247,7 +252,7 @@ func (uc PartnerUseCase) DeleteByPk(ID string) (err error){
 		return err
 	}
 
-	partnerExtraProductUc := PartnerExtraProductUseCase{UcContract:uc.UcContract}
+	partnerExtraProductUc := PartnerExtraProductUseCase{UcContract: uc.UcContract}
 	err = partnerExtraProductUc.DeleteBy("partner_id",ID)
 	if err != nil {
 		uc.TX.Rollback()

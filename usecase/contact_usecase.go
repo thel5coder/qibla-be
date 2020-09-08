@@ -109,12 +109,13 @@ func (uc ContactUseCase) BrowseAll(search string,isZakatPartner bool) (res []vie
 func (uc ContactUseCase) ReadBy(column, value string) (res viewmodel.ContactVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
 	fileUc := FileUseCase{UcContract: uc.UcContract}
+	var file viewmodel.FileVm
 	contact, err := repository.ReadBy(column, value)
 	if err != nil {
 		return res, err
 	}
 
-	file, _ := fileUc.ReadByPk(contact.Logo)
+	file, _ = fileUc.ReadByPk(contact.Logo)
 
 	res = viewmodel.ContactVm{
 		ID:                   contact.ID,
@@ -285,6 +286,7 @@ func (uc ContactUseCase) duplicateCheck(ID string, input *requests.ContactReques
 func (uc ContactUseCase) ReadByPk(ID string) (res viewmodel.ContactVm, err error) {
 	res, err = uc.ReadBy("id", ID)
 	if err != nil {
+		fmt.Println(err.Error())
 		return res, err
 	}
 

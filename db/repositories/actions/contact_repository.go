@@ -78,10 +78,10 @@ func (repository ContactRepository) Browse(search, order, sort string, limit, of
 func (repository ContactRepository) BrowseAll(search string,isZakatPartner bool) (data []models.Contact, err error) {
 	var rows *sql.Rows
 	if search == "" {
-		statement := `select * from "contacts" where "is_zakat_partner"=$1`
+		statement := `select * from "contacts" where "is_zakat_partner"=$1 and "deleted_at" is null`
 		rows, err = repository.DB.Query(statement,isZakatPartner)
 	} else {
-		statement := `select * from "contacts" where (lower("travel_agent_name") like $1 or lower("branch_name") like $1) and "is_zakat_partner"=$2`
+		statement := `select * from "contacts" where (lower("travel_agent_name") like $1 or lower("branch_name") like $1) and "is_zakat_partner"=$2 and "deleted_at" is null`
 		rows, err = repository.DB.Query(statement, "%"+strings.ToLower(search)+"%",isZakatPartner)
 	}
 	if err != nil {

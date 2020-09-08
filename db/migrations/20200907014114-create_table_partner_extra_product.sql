@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS "partner_extra_products"
     "deleted_at" timestamp
 );
 -- +migrate Down
-DROP TABLE IF EXISTS "partner_extra_products";
+DROP TABLE IF EXISTS partner_extra_products;

@@ -290,9 +290,9 @@ func (repository PartnerRepository) EditVerified(input viewmodel.PartnerVm) (res
 	return res, err
 }
 
-func (repository PartnerRepository) EditBoolStatus(ID, column, updatedAt string, value bool) (res string, err error) {
-	statement := `update "partners" set ` + column + `=$1, "updated_at"=$2 where "id"=$2 returning "id"`
-	err = repository.DB.QueryRow(statement, value, datetime.StrParseToTime(updatedAt, time.RFC3339), ID).Scan(&res)
+func (repository PartnerRepository) EditBoolStatus(ID, column, reason, updatedAt string, value bool) (res string, err error) {
+	statement := `update "partners" set ` + column + `=$1, "reason"=$2, "updated_at"=$3 where "id"=$4 returning "id"`
+	err = repository.DB.QueryRow(statement, value, reason, datetime.StrParseToTime(updatedAt, time.RFC3339), ID).Scan(&res)
 
 	return res, err
 }

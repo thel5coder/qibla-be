@@ -233,3 +233,18 @@ func (uc AdminUseCase) Delete(ID string) (err error) {
 
 	return nil
 }
+
+func (uc AdminUseCase) IsPasswordValid(userID,password string) (err error){
+	repository := actions.NewUserRepository(uc.DB)
+	user,err := repository.ReadBy("id",userID)
+	if err != nil {
+		return errors.New(messages.CredentialDoNotMatch)
+	}
+
+	isValid := hashing.CheckHashString(password,user.Password)
+	if !isValid {
+		return errors.New(messages.CredentialDoNotMatch)
+	}
+
+	return nil
+}

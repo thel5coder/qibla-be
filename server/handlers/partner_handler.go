@@ -4,6 +4,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
+	"qibla-backend/helpers/jwt"
+	"qibla-backend/helpers/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"
@@ -82,13 +84,47 @@ func (handler PartnerHandler) EditVerify(ctx echo.Context) error {
 	return handler.SendResponse(ctx, nil, nil, err)
 }
 
-func (handler PartnerHandler) EditStatusBy(ctx echo.Context) error {
+func (handler PartnerHandler) EditAccountStatus(ctx echo.Context) error {
 	ID := ctx.Param("id")
-	column := ctx.Param("column")
 	input := new(requests.PartnerStatusRequest)
+	claims := ctx.Get("user").(*jwt.CustomClaims)
+	if err := ctx.Bind(input); err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	if err := handler.Validate.Struct(input); err != nil {
+		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
+	}
 
 	uc := usecase.PartnerUseCase{UcContract: handler.UseCaseContract}
-	err := uc.EditBoolStatus(ID, column, input.IsActive)
+	err := uc.EditBoolStatus(ID, "is_active", input.Reason, claims.Id, input.Password, input.IsActive)
+	if err != nil {
+		if err.Error() == messages.CredentialDoNotMatch{
+			return handler.SendResponseUnauthorized(ctx,err)
+		}
+	}
+
+	return handler.SendResponse(ctx, nil, nil, err)
+}
+
+func (handler PartnerHandler) EditWebinarStatus(ctx echo.Context) error {
+	ID := ctx.Param("id")
+	input := new(requests.PartnerStatusRequest)
+	claims := ctx.Get("user").(*jwt.CustomClaims)
+
+	if err := ctx.Bind(input); err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	if err := handler.Validate.Struct(input); err != nil {
+		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
+	}
+
+	uc := usecase.PartnerUseCase{UcContract: handler.UseCaseContract}
+	err := uc.EditBoolStatus(ID, "webinar_status", input.Reason, claims.Id, input.Password, input.IsActive)
+	if err != nil {
+		if err.Error() == messages.CredentialDoNotMatch{
+			return handler.SendResponseUnauthorized(ctx,err)
+		}
+	}
 
 	return handler.SendResponse(ctx, nil, nil, err)
 }
