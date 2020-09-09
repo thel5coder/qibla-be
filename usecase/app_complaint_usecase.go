@@ -71,11 +71,11 @@ func (uc AppComplaintUseCase) Edit(ID string, input *requests.AppComplaintReques
 	now := time.Now().UTC().Format(time.RFC3339)
 
 	body := viewmodel.AppComplaintVm{
-		ID:            ID,
-		Complaint:     input.Complaint,
-		Solution:      input.Solution,
-		Status:        input.Status,
-		UpdatedAt:     now,
+		ID:        ID,
+		Complaint: input.Complaint,
+		Solution:  input.Solution,
+		Status:    input.Status,
+		UpdatedAt: now,
 	}
 	_, err = repository.Edit(body)
 	if err != nil {
@@ -97,6 +97,7 @@ func (uc AppComplaintUseCase) Add(input *requests.AppComplaintRequest) (err erro
 		Complaint:     input.Complaint,
 		Solution:      input.Solution,
 		Status:        "open",
+		CreatedAt:     now,
 		UpdatedAt:     now,
 	}
 	_, err = repository.Add(body)
@@ -163,7 +164,7 @@ func (uc AppComplaintUseCase) GetTicketNumber() (res string, err error) {
 	} else if count > 9 {
 		res = `0000` + strconv.Itoa(count)
 	} else {
-		res = `00000`+strconv.Itoa(count)
+		res = `00000` + strconv.Itoa(count)
 	}
 
 	return res, err
