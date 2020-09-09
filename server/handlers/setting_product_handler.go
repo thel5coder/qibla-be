@@ -57,6 +57,15 @@ func (handler SettingProductHandler) Read(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
+func (handler SettingProductHandler) ReadByProductID(ctx echo.Context) error{
+	ID := ctx.Param("id")
+
+	uc := usecase.SettingProductUseCase{UcContract: handler.UseCaseContract}
+	res, err := uc.ReadBy("product_id",ID)
+
+	return handler.SendResponse(ctx, res, nil, err)
+}
+
 func (handler SettingProductHandler) Edit(ctx echo.Context) error {
 	input := new(requests.SettingProductRequest)
 	ID := ctx.Param("id")

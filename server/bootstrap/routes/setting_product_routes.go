@@ -21,6 +21,7 @@ func (route SettingProductRoutes) RegisterRoute() {
 	settingProductRoute.GET("/all", handler.BrowseAll)
 	settingProductRoute.GET("/subscription-product", handler.BrowseSubscriptionProduct)
 	settingProductRoute.GET("/webinar-website-product", handler.BrowseWebinarAndWebsiteProduct)
+	settingProductRoute.GET("/product/:id", handler.ReadByProductID)
 	settingProductRoute.GET("/:id", handler.Read)
 	settingProductRoute.PUT("/:id", handler.Edit)
 	settingProductRoute.POST("", handler.Add)

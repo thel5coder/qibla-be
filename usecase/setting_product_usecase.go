@@ -48,9 +48,9 @@ func (uc SettingProductUseCase) BrowseAll() (res []viewmodel.SettingProductVm, e
 	return res, err
 }
 
-func (uc SettingProductUseCase) BrowseBy(column,value,operator string) (res []viewmodel.SettingProductVm,err error){
+func (uc SettingProductUseCase) BrowseBy(column, value, operator string) (res []viewmodel.SettingProductVm, err error) {
 	repository := actions.NewSettingProductRepository(uc.DB)
-	settingProducts,err := repository.BrowseBy(column,value,operator)
+	settingProducts, err := repository.BrowseBy(column, value, operator)
 
 	for _, settingProduct := range settingProducts {
 		res = append(res, uc.buildBody(settingProduct))
@@ -284,7 +284,7 @@ func (uc SettingProductUseCase) countBy(ID, column, value string) (res int, err 
 	return res, err
 }
 
-func (uc SettingProductUseCase) buildBody(data models.SettingProduct) (res viewmodel.SettingProductVm){
+func (uc SettingProductUseCase) buildBody(data models.SettingProduct) (res viewmodel.SettingProductVm) {
 	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
 	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
 
@@ -297,6 +297,7 @@ func (uc SettingProductUseCase) buildBody(data models.SettingProduct) (res viewm
 		ID:                    data.ID,
 		ProductID:             data.ProductID,
 		ProductName:           data.ProductName,
+		ProductType:           data.ProductType,
 		Price:                 data.Price,
 		PriceUnit:             data.PriceUnit.String,
 		MaintenancePrice:      data.MaintenancePrice.Int32,
