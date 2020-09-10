@@ -17,6 +17,7 @@ after_script:
 build:
   stage: build
   script:
+    - docker system prune -f
     - docker build . --compress --no-cache -t ${DOCKER}
   only:
     - dev
@@ -32,13 +33,13 @@ push:
 pull:
   stage: pull
   script:
-    - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER} && docker system prune -f"
+    - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER}"
   only:
     - dev
 
 deploy:
   stage: deploy
   script:
-    - ssh -tq ${SERVER_DEV} "cd ${FOLDER} && docker-compose up -d"
+    - ssh -tq ${SERVER_DEV} "cd ${FOLDER} && docker-compose up -d && docker system prune -f"
   only:
     - dev
