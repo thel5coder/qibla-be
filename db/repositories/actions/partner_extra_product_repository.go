@@ -15,12 +15,12 @@ func NewPartnerExtraProductRepository(DB *sql.DB) contracts.IPartnerExtraProduct
 }
 
 const partnerExtraProductSelectStatement = `select pep."id",pep."partner_id",mp."id",mp."name",mp."subscription_type",sp."price",sp."price_unit",sp."sessions"
-                        from "partner_product_subscriptions" pep
+                        from "partner_extra_products" pep
                        inner join "master_products" mp on mp."id"=pep."product_id"
                        inner join "setting_products" sp on sp."product_id"=mp."id"`
 
 func (repository PartnerExtraProductRepository) BrowseByPartnerID(partnerID string) (data []models.PartnerExtraProduct, err error) {
-	statement := partnerExtraProductSelectStatement + ` where pep."partner_id"=$1 and pep."deleted_at" is null`
+	statement := partnerExtraProductSelectStatement + ` where pep."partner_id"=$1`
 	rows, err := repository.DB.Query(statement, partnerID)
 	if err != nil {
 		return data, err
