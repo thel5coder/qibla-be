@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
@@ -139,7 +138,6 @@ func (handler PartnerHandler) Add(ctx echo.Context) error {
 	if err := handler.Validate.Struct(input); err != nil {
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 	}
-	fmt.Println(input.ProductID)
 
 	uc := usecase.PartnerUseCase{UcContract: handler.UseCaseContract}
 	err := uc.Add(input)

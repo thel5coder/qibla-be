@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -299,7 +298,6 @@ func (repository PartnerRepository) EditBoolStatus(ID, column, reason, updatedAt
 }
 
 func (PartnerRepository) Add(input viewmodel.PartnerVm, tx *sql.Tx) (res string, err error) {
-	fmt.Println(input.Product.ID)
 	statement := `insert into "partners"
                  ("contact_id","user_id","product_id","subscription_period","webinar_status","website_status","is_active","is_paid","is_subscription_expired",
                  "created_at","updated_at")
