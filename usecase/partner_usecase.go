@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/hashing"
@@ -151,6 +152,7 @@ func (uc PartnerUseCase) EditBoolStatus(ID,column,reason,userID,password string,
 func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error){
 	repository := actions.NewParterRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
+	fmt.Println(input.ProductID)
 
 	contactUc := ContactUseCase{UcContract:uc.UcContract}
 	contact,err := contactUc.ReadByPk(input.ContactID)

@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -257,7 +258,7 @@ func (PartnerRepository) Edit(input viewmodel.PartnerVm, tx *sql.Tx) (err error)
 	_, err = tx.Exec(
 		statement,
 		input.Contact.ID,
-		input.Product.ID,
+		input.Product.ProductID,
 		input.WebinarStatus,
 		input.WebsiteStatus,
 		input.SubscriptionPeriod,
@@ -298,6 +299,7 @@ func (repository PartnerRepository) EditBoolStatus(ID, column, reason, updatedAt
 }
 
 func (PartnerRepository) Add(input viewmodel.PartnerVm, tx *sql.Tx) (res string, err error) {
+	fmt.Println(input.Product.ID)
 	statement := `insert into "partners"
                  ("contact_id","user_id","product_id","subscription_period","webinar_status","website_status","is_active","is_paid","is_subscription_expired",
                  "created_at","updated_at")
@@ -306,7 +308,7 @@ func (PartnerRepository) Add(input viewmodel.PartnerVm, tx *sql.Tx) (res string,
 		statement,
 		input.Contact.ID,
 		input.UserID,
-		input.Product.ID,
+		input.Product.ProductID,
 		input.SubscriptionPeriod,
 		input.WebinarStatus,
 		input.WebsiteStatus,
