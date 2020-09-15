@@ -1,5 +1,129 @@
 package usecase
 
+import (
+	"errors"
+	"os"
+	"qibla-backend/db/repositories/actions"
+	"qibla-backend/helpers/enums"
+	"qibla-backend/helpers/messages"
+	"qibla-backend/server/requests"
+	"qibla-backend/usecase/viewmodel"
+	"strconv"
+	"time"
+)
+
 type TransactionUseCase struct {
 	*UcContract
+}
+
+func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber, bankName string, paymentMethodCode, dueDateAging int, extraProducts []requests.ExtraProductRequest, contact viewmodel.ContactVm) (err error) {
+	repository := actions.NewTransactionRepository(uc.DB)
+	now := time.Now().UTC()
+	dueDate := now.AddDate(0, 0, dueDateAging).Format("2006-01-02")
+	dueDateFaspay := now.AddDate(0,0,dueDateAging).Format("2006-01-02 15:04:05")
+	var total float32
+	var faspayItem []requests.FaspayItemRequest
+
+	var details []viewmodel.TransactionDetailVm
+	for _, extraProduct := range extraProducts {
+		subTotal := float32(extraProduct.Price * 1)
+		total = total + subTotal
+		details = append(details, viewmodel.TransactionDetailVm{
+			ID:       "",
+			Name:     extraProduct.Name,
+			Fee:      0,
+			Price:    float32(extraProduct.Price),
+			Quantity: 1,
+			SubTotal: float32(extraProduct.Price * 1),
+		})
+		faspayItem = append(faspayItem, requests.FaspayItemRequest{
+			Product:     extraProduct.Name,
+			Amount:      extraProduct.Price,
+			Qty:         1,
+			PaymentPlan: defaultFaspayPaymentPlan,
+			Tenor:       defaultFaspayTenor,
+			MerchantID:  os.Getenv("FASPAY_MERCHANT_ID"),
+		})
+	}
+
+	faspayUc := FaspayUseCase{UcContract: uc.UcContract}
+	faspayRequest := requests.FaspayPostRequest{
+		RequestTransaction: enums.KeyTransactionType5,
+		InvoiceNumber:      invoiceNumber,
+		TransactionDate:    now.UTC().Format("2006-01-02 15:04:05"),
+		DueDate:            dueDateFaspay,
+		TransactionDesc:    enums.KeyTransactionType5,
+		UserID:             userID,
+		Total:              total,
+		PaymentChannel:     paymentMethodCode,
+		Item:               faspayItem,
+	}
+	faspayRes, err := faspayUc.PostData(faspayRequest, contact)
+	if err != nil {
+		return errors.New(messages.PaymentFailed)
+	}
+
+	body := viewmodel.TransactionVm{
+		ID:                "",
+		UserID:            userID,
+		InvoiceNumber:     invoiceNumber,
+		TrxID:             faspayRes["trx_id"].(string),
+		DueDate:           dueDate,
+		DueDatePeriod:     int32(dueDateAging),
+		PaymentStatus:     enums.KeyPaymentStatus1,
+		PaymentMethodCode: paymentMethodCode,
+		VaNumber:          faspayRes["trx_id"].(string),
+		BankName:          bankName,
+		Direction:         enums.KeyTransactionDirection1,
+		TransactionType:   enums.KeyTransactionType3,
+		PaidDate:          "",
+		TransactionDate:   now.Format(time.RFC3339),
+		UpdatedAt:         now.Format(time.RFC3339),
+		Details:           details,
+	}
+	err = repository.Add(body, uc.TX)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc TransactionUseCase) GetInvoiceNumber() (res string, err error) {
+	repository := actions.NewTransactionRepository(uc.DB)
+	year, month, _ := time.Now().UTC().Date()
+	var invoiceCount string
+	count, err := repository.GetInvoiceCount(int(month))
+	if err != nil {
+		return res, err
+	}
+	res = `INV-QBL/` + strconv.Itoa(int(year)) + `/` + strconv.Itoa(int(month))
+
+	count = count + 1
+	if count > 99999 {
+		invoiceCount = strconv.Itoa(count)
+	} else if count > 9999 {
+		invoiceCount = `0` + strconv.Itoa(count)
+	} else if count > 999 {
+		invoiceCount = `00` + strconv.Itoa(count)
+	} else if count > 99 {
+		invoiceCount = `000` + strconv.Itoa(count)
+	} else if count > 9 {
+		invoiceCount = `0000` + strconv.Itoa(count)
+	} else {
+		invoiceCount = `00000` + strconv.Itoa(count)
+	}
+	res = res + `/` + invoiceCount
+
+	return res, err
+}
+
+func (uc TransactionUseCase) ReadBy(ID, column, value string) (res int, err error) {
+	repository := actions.NewTransactionRepository(uc.DB)
+	res, err = repository.CountBy(ID, column, value)
+	if err != nil {
+		return res, err
+	}
+
+	return res, err
 }

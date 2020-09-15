@@ -1,6 +1,21 @@
 package models
 
+import "database/sql"
+
 type Transaction struct {
-	ID        string `json:"id"`
-	InvoiceID string `json:"invoice_id"`
+	ID                string         `json:"id"`
+	UserID            string         `json:"user_id"`
+	InvoiceNumber     string         `json:"invoice_number"`
+	TrxID             sql.NullString `json:"trx_id"`
+	DueDate           string         `json:"due_date"`
+	DueDatePeriod     sql.NullInt32  `json:"due_date_period"`
+	PaymentStatus     string         `json:"payment_status"`
+	PaymentMethodCode sql.NullString `json:"payment_method_code"`
+	VaNumber          sql.NullString `json:"va_number"`
+	BankName          sql.NullString `json:"bank_name"`
+	Direction         string         `json:"direction"`
+	TransactionType   string         `json:"transaction_type"`
+	PaidDate          sql.NullString `json:"paid_date"`
+	TransactionDate   string         `json:"transaction_date"`
+	UpdatedAt         string         `json:"updated_at"`
 }

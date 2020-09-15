@@ -24,7 +24,6 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 	}
 
 	for _, contact := range contacts {
-		fmt.Println(contact.Logo)
 		file, _ := fileUc.ReadByPk(contact.Logo)
 		res = append(res, viewmodel.ContactVm{
 			ID:                   contact.ID,

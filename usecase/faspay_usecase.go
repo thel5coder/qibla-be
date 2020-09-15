@@ -5,10 +5,14 @@ import (
 	"crypto/md5"
 	"crypto/sha1"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"qibla-backend/helpers/messages"
+	"qibla-backend/helpers/str"
+	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 )
 
@@ -59,12 +63,45 @@ func (uc FaspayUseCase) GetLisPaymentMethods() (res map[string]interface{}, err 
 	return res, err
 }
 
-func (uc FaspayUseCase) PostData(input viewmodel.FaspayPostDataVm) (res map[string]interface{}, err error) {
-	compose := os.Getenv("FASPAY_USER_ID") + `` + os.Getenv("FASPAY_PASSWORD") + `` + input.BillNo
+func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest, contact viewmodel.ContactVm) (res map[string]interface{}, err error) {
+	compose := os.Getenv("FASPAY_USER_ID") + `` + os.Getenv("FASPAY_PASSWORD") + `` + input.InvoiceNumber
+	phoneNumber := str.StringToInt(contact.PhoneNumber)
 	signature := uc.getSignature(compose)
-	input.Signature = signature
-	bodyPost, _ := json.Marshal(input)
+	var items []viewmodel.ItemFaspayPostDataVm
+	for _, item := range input.Item{
+		items = append(items,viewmodel.ItemFaspayPostDataVm{
+			Product:     item.Product,
+			Amount:      item.Amount,
+			Qty:         item.Qty,
+			PaymentPlan: item.PaymentPlan,
+			Tenor:       item.Tenor,
+			MerchantID:  os.Getenv("FASPAY_MERCHANT_ID"),
+		})
+	}
+	body := viewmodel.FaspayPostDataVm{
+		Request:        input.RequestTransaction,
+		MerchantID:     os.Getenv("FASPAY_MERCHANT_ID"),
+		Merchant:       contact.TravelAgentName,
+		BillNo:         input.InvoiceNumber,
+		BillDate:       input.TransactionDate,
+		BillExpired:    input.DueDate,
+		BillDesc:       input.TransactionDesc,
+		BillCurrency:   defaultFaspayCurrency,
+		BillTotal:      input.Total,
+		PaymentChannel: input.PaymentChannel,
+		PayType:        defaultFaspayPayType,
+		CustNo:         input.UserID,
+		CustName:       contact.TravelAgentName,
+		Msisdn:         phoneNumber,
+		Email:          contact.Email,
+		Terminal:       defaultFaspayTerminal,
+		Signature:      signature,
+		Item:           items,
+	}
+	bodyPost, _ := json.Marshal(body)
 	var client http.Client
+	fmt.Printf(string(bodyPost))
+
 
 	request, err := http.NewRequest("POST", fasPayBaseUrl+"/300011/10", bytes.NewBuffer(bodyPost))
 	if err != nil {
@@ -76,13 +113,17 @@ func (uc FaspayUseCase) PostData(input viewmodel.FaspayPostDataVm) (res map[stri
 	}
 	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(response.Body)
+	responseBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return res, err
 	}
-	err = json.Unmarshal(body, &res)
+	err = json.Unmarshal(responseBody, &res)
 	if err != nil {
 		return res, err
+	}
+	fmt.Println(res)
+	if res["response_code"] != "00"{
+		return res,errors.New(messages.PaymentFailed)
 	}
 
 	return res, err

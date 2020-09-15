@@ -29,7 +29,6 @@ func (repository TransactionDetailRepository) BrowseByTransactionID(transactionI
 			&dataTemp.Fee,
 			&dataTemp.Price,
 			&dataTemp.TransactionID,
-			&dataTemp.Unit,
 			&dataTemp.Quantity,
 			)
 		if err != nil {
@@ -41,13 +40,12 @@ func (repository TransactionDetailRepository) BrowseByTransactionID(transactionI
 	return data,err
 }
 
-func (TransactionDetailRepository) Add(transactionID, name, unit string, fee, price float32, quantity int, tx *sql.Tx) (err error) {
-	statement := `insert into "transaction_details" ("transaction_id","name","unit","fee","price","quantity") values($1,$2,$3,$4,$5,%6)`
+func (TransactionDetailRepository) Add(transactionID, name string, fee, price float32, quantity int, tx *sql.Tx) (err error) {
+	statement := `insert into "transaction_details" ("transaction_id","name","fee","price","quantity") values($1,$2,$3,$4,$5,%6)`
 	_,err = tx.Exec(
 		statement,
 		transactionID,
 		name,
-		unit,
 		fee,
 		price,
 		quantity,
@@ -56,7 +54,7 @@ func (TransactionDetailRepository) Add(transactionID, name, unit string, fee, pr
 	return err
 }
 
-func (TransactionDetailRepository) Edit(transactionID, name, unit string, fee, price float32, quantity int, tx *sql.Tx) (err error) {
+func (TransactionDetailRepository) Edit(transactionID, name string, fee, price float32, quantity int, tx *sql.Tx) (err error) {
 	panic("implement me")
 }
 

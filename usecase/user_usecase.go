@@ -10,6 +10,29 @@ type UserUseCase struct {
 	*UcContract
 }
 
+func (uc UserUseCase) ReadBy(column,value string) (res viewmodel.AdminVm,err error){
+	repository := actions.NewUserRepository(uc.DB)
+	user,err := repository.ReadBy(column,value)
+	if err != nil {
+		return res,err
+	}
+
+	res = viewmodel.AdminVm{
+		ID:              user.ID,
+		UserName:        user.UserName,
+		Email:           user.Email,
+		Name:            user.Name.String,
+		MobilePhone:     user.MobilePhone.String,
+		ProfilePicture:  user.ProfilePicture.String,
+		IsActive:        user.IsActive,
+		CreatedAt:       user.CreatedAt,
+		UpdatedAt:       user.UpdatedAt,
+		DeletedAt:       user.DeletedAt.String,
+	}
+
+	return res,err
+}
+
 func (uc UserUseCase) Edit(ID, name, userName, email, mobilePhone, roleID, password string, isActive, isAdminPanel bool) (err error) {
 	repository := actions.NewUserRepository(uc.DB)
 	now := time.Now().UTC()

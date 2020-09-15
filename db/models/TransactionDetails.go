@@ -6,6 +6,5 @@ type TransactionDetails struct {
 	Name          string  `db:"name"`
 	Fee           float32 `db:"fee"`
 	Price         float32 `db:"price"`
-	Unit          string  `db:"unit"`
 	Quantity      int     `db:"quantity"`
 }

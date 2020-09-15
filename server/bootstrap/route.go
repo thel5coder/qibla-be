@@ -220,6 +220,12 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	faspayRoutes.RegisterRoute()
 
+	transactionRoutes := routes.TransactionRoute{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	transactionRoutes.RegisterRoute()
+
 
 	//mobile
 	//video kajian routes

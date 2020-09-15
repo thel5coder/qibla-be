@@ -33,4 +33,5 @@ var (
 	DateInvalid            = "invalid date"
 	RoleNotFound           = "role not found"
 	OtpNotMatch            = "otp not match"
+	PaymentFailed          = "payment failed"
 )

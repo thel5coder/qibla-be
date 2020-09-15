@@ -84,3 +84,16 @@ const KeyDueDateAging1 = 7
 const ValueDueDateAging1 = "7 Hari Setelah Terbit Tagihan"
 const KeyDueDateAging2 = 14
 const ValueDueDateAging2 = "14 Hari Setelah Terbit Tagihan"
+
+const KeyPaymentStatus1 = "pending"
+const KeyPaymentStatus2 = "gagal"
+const KeyPaymentStatus3 = "sukses"
+
+const KeyTransactionDirection1 = "in"
+const KeyTransactionDirection2 = "out"
+
+const KeyTransactionType1 = "zakat"
+const KeyTransactionType2 = "tour"
+const KeyTransactionType3 = "product_subscription"
+const KeyTransactionType4 = "tour_promotion"
+const KeyTransactionType5 = "extra_product_subscription"

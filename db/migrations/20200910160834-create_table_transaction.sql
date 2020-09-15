@@ -6,8 +6,7 @@ CREATE TABLE IF NOT EXISTS "transactions"
     "invoice_number"      varchar(20),
     "trx_id"              varchar(30),
     "due_date"            date,
-    "periode_start_date"  date,
-    "period_end_date"     date,
+    "due_date_period"     int,
     "payment_status"      payment_status_enum,
     "payment_method_code" char(3),
     "va_number"           varchar(20),
@@ -16,8 +15,7 @@ CREATE TABLE IF NOT EXISTS "transactions"
     "transaction_type"    transaction_type_enum,
     "paid_date"           date,
     "transaction_date"    timestamp,
-    "updated_at"          timestamp,
-    "deleted_at"          timestamp
+    "updated_at"          timestamp
 );
 
 -- +migrate Down

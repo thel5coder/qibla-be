@@ -26,7 +26,6 @@ func (uc TransactionDetailUseCase) BrowseByTransactionID(transactionID string) (
 		res = append(res, viewmodel.TransactionDetailVm{
 			ID:       transactionDetail.ID,
 			Name:     transactionDetail.Name,
-			Unit:     transactionDetail.Unit,
 			Fee:      transactionDetail.Fee,
 			Price:    transactionDetail.Price,
 			Quantity: transactionDetail.Quantity,
@@ -37,9 +36,9 @@ func (uc TransactionDetailUseCase) BrowseByTransactionID(transactionID string) (
 	return res, err
 }
 
-func (uc TransactionDetailUseCase) Add(transactionID, name, unit string, fee, price float32, quantity int) (err error) {
+func (uc TransactionDetailUseCase) Add(transactionID, name string, fee, price float32, quantity int) (err error) {
 	repository := actions.NewTransactionDetailRepository(uc.DB)
-	err = repository.Add(transactionID, name, unit, fee, price, quantity, uc.TX)
+	err = repository.Add(transactionID, name, fee, price, quantity, uc.TX)
 
 	return err
 }
@@ -65,7 +64,7 @@ func (uc TransactionDetailUseCase) Store(transactionID string, inputs []viewmode
 	}
 
 	for _, input := range inputs {
-		err = uc.Add(transactionID, input.Name, input.Unit,input.Fee, input.Price,input.Quantity)
+		err = uc.Add(transactionID, input.Name,input.Fee, input.Price,input.Quantity)
 		if err != nil {
 			return err
 		}

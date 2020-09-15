@@ -54,24 +54,24 @@ func (uc PartnerUseCase) BrowseProfilePartner(search, order, sort string, page, 
 	return res, pagination, err
 }
 
-func (uc PartnerUseCase) ReadBy(column,value string) (res viewmodel.PartnerVm,err error){
+func (uc PartnerUseCase) ReadBy(column, value string) (res viewmodel.PartnerVm, err error) {
 	repository := actions.NewParterRepository(uc.DB)
-	partner,err := repository.ReadBy(column,value)
+	partner, err := repository.ReadBy(column, value)
 
-	return uc.buildBody(partner),err
+	return uc.buildBody(partner), err
 }
 
-func (uc PartnerUseCase) Edit(ID string, input *requests.PartnerRegisterRequest) (err error){
+func (uc PartnerUseCase) Edit(ID string, input *requests.PartnerRegisterRequest) (err error) {
 	repository := actions.NewParterRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	err = uc.ValidateIsPartnerExist(ID,input.ContactID)
+	err = uc.ValidateIsPartnerExist(ID, input.ContactID)
 	if err != nil {
 		return err
 	}
 
 	//init transaction
-	uc.TX,err = uc.DB.Begin()
+	uc.TX, err = uc.DB.Begin()
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -79,24 +79,24 @@ func (uc PartnerUseCase) Edit(ID string, input *requests.PartnerRegisterRequest)
 	}
 
 	partnerExtraProductUc := PartnerExtraProductUseCase{UcContract: uc.UcContract}
-	err = partnerExtraProductUc.Store(ID,input.ExtraProducts)
+	err = partnerExtraProductUc.Store(ID, input.ExtraProducts)
 	if err != nil {
 		uc.TX.Rollback()
 
 		return err
 	}
-	
+
 	body := viewmodel.PartnerVm{
-		ID:                          ID,
-		WebinarStatus:               input.WebinarStatus,
-		WebsiteStatus:               input.WebsiteStatus,
-		SubscriptionPeriod:          input.SubscriptionPeriod,
-		UpdatedAt:                   now,
-		Contact:                     viewmodel.ContactVm{ID: input.ContactID},
-		Product:                     viewmodel.SettingProductVm{ProductID: input.ProductID},
+		ID:                 ID,
+		WebinarStatus:      input.WebinarStatus,
+		WebsiteStatus:      input.WebsiteStatus,
+		SubscriptionPeriod: input.SubscriptionPeriod,
+		UpdatedAt:          now,
+		Contact:            viewmodel.ContactVm{ID: input.ContactID},
+		Product:            viewmodel.SettingProductVm{ProductID: input.ProductID},
 	}
 
-	err = repository.Edit(body,uc.TX)
+	err = repository.Edit(body, uc.TX)
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -107,23 +107,23 @@ func (uc PartnerUseCase) Edit(ID string, input *requests.PartnerRegisterRequest)
 	return nil
 }
 
-func (uc PartnerUseCase) EditVerify(ID string,input *requests.PartnerVerifyRequest) (err error){
+func (uc PartnerUseCase) EditVerify(ID string, input *requests.PartnerVerifyRequest) (err error) {
 	repository := actions.NewParterRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
 	body := viewmodel.PartnerVm{
-		ID:ID,
-		DomainSite: input.DomainSite,
-		DomainErp: input.DomainErp,
-		Database: input.Database,
-		Reason: input.Reason,
-		DueDateAging: input.DueDateAging,
-		IsActive: input.IsActive,
-		VerifiedAt: now,
+		ID:                 ID,
+		DomainSite:         input.DomainSite,
+		DomainErp:          input.DomainErp,
+		Database:           input.Database,
+		Reason:             input.Reason,
+		DueDateAging:       input.DueDateAging,
+		IsActive:           input.IsActive,
+		VerifiedAt:         now,
 		InvoicePublishDate: input.InvoicePublishDate,
-		ContractNumber: input.ContractNumber,
+		ContractNumber:     input.ContractNumber,
 	}
-	_,err = repository.EditVerified(body)
+	_, err = repository.EditVerified(body)
 	if err != nil {
 		return err
 	}
@@ -131,16 +131,16 @@ func (uc PartnerUseCase) EditVerify(ID string,input *requests.PartnerVerifyReque
 	return nil
 }
 
-func (uc PartnerUseCase) EditBoolStatus(ID,column,reason,userID,password string,value bool) (err error){
+func (uc PartnerUseCase) EditBoolStatus(ID, column, reason, userID, password string, value bool) (err error) {
 	repository := actions.NewParterRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
-	adminUc := AdminUseCase{UcContract:uc.UcContract}
+	adminUc := AdminUseCase{UcContract: uc.UcContract}
 
-	err = adminUc.IsPasswordValid(userID,password)
+	err = adminUc.IsPasswordValid(userID, password)
 	if err != nil {
 		return err
 	}
-	_,err = repository.EditBoolStatus(ID,column,reason,now,value)
+	_, err = repository.EditBoolStatus(ID, column, reason, now, value)
 	if err != nil {
 		return err
 	}
@@ -148,23 +148,23 @@ func (uc PartnerUseCase) EditBoolStatus(ID,column,reason,userID,password string,
 	return nil
 }
 
-func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error){
+func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error) {
 	repository := actions.NewParterRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	contactUc := ContactUseCase{UcContract:uc.UcContract}
-	contact,err := contactUc.ReadByPk(input.ContactID)
+	contactUc := ContactUseCase{UcContract: uc.UcContract}
+	contact, err := contactUc.ReadByPk(input.ContactID)
 	if err != nil {
 		return err
 	}
 
-	err = uc.ValidateIsPartnerExist("",input.ContactID)
+	err = uc.ValidateIsPartnerExist("", input.ContactID)
 	if err != nil {
 		return err
 	}
 
 	//init transaction
-	uc.TX,err = uc.DB.Begin()
+	uc.TX, err = uc.DB.Begin()
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -172,9 +172,9 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error)
 	}
 
 	//add user
-	userUc := UserUseCase{UcContract:uc.UcContract}
-	password,_ := hashing.HashAndSalt(str.RandomString(6))
-	userID,err := userUc.Add(contact.TravelAgentName,input.UserName,contact.Email,contact.PhoneNumber,"ee694491-5166-441b-8262-9745bf866aa9",password,true,false)
+	userUc := UserUseCase{UcContract: uc.UcContract}
+	password, _ := hashing.HashAndSalt(str.RandomString(6))
+	userID, err := userUc.Add(contact.TravelAgentName, input.UserName, contact.Email, contact.PhoneNumber, "ee694491-5166-441b-8262-9745bf866aa9", password, true, false)
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -183,19 +183,19 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error)
 
 	//add partners
 	body := viewmodel.PartnerVm{
-		Contact: viewmodel.ContactVm{ID: input.ContactID},
-		UserID: userID,
-		Product: viewmodel.SettingProductVm{ProductID: input.ProductID},
-		SubscriptionPeriod: input.SubscriptionPeriod,
-		WebsiteStatus: input.WebsiteStatus,
-		WebinarStatus: input.WebinarStatus,
-		IsActive: false,
-		IsPaid: false,
+		Contact:                     viewmodel.ContactVm{ID: input.ContactID},
+		UserID:                      userID,
+		Product:                     viewmodel.SettingProductVm{ProductID: input.ProductID},
+		SubscriptionPeriod:          input.SubscriptionPeriod,
+		WebsiteStatus:               input.WebsiteStatus,
+		WebinarStatus:               input.WebinarStatus,
+		IsActive:                    false,
+		IsPaid:                      false,
 		IsSubscriptionPeriodExpired: false,
-		CreatedAt: now,
-		UpdatedAt: now,
+		CreatedAt:                   now,
+		UpdatedAt:                   now,
 	}
-	body.ID,err = repository.Add(body,uc.TX)
+	body.ID, err = repository.Add(body, uc.TX)
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -203,12 +203,21 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error)
 	}
 
 	//add extra product
-	partnerExtraProductUc := PartnerExtraProductUseCase{UcContract: uc.UcContract}
-	err = partnerExtraProductUc.Store(body.ID,input.ExtraProducts)
-	if err != nil {
-		uc.TX.Rollback()
+	if len(input.ExtraProducts) > 0 {
+		partnerExtraProductUc := PartnerExtraProductUseCase{UcContract: uc.UcContract}
+		err = partnerExtraProductUc.Store(body.ID, input.ExtraProducts)
+		if err != nil {
+			uc.TX.Rollback()
 
-		return err
+			return err
+		}
+		transactionUc := TransactionUseCase{UcContract: uc.UcContract}
+		err = transactionUc.AddTransactionRegisterPartner(userID, input.InvoiceNumber, input.BankName, input.PaymentMethodCode, 7, input.ExtraProducts, contact)
+		if err != nil {
+			uc.TX.Rollback()
+
+			return err
+		}
 	}
 
 	uc.TX.Commit()
@@ -216,17 +225,17 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error)
 	return nil
 }
 
-func (uc PartnerUseCase) DeleteBy(column,value string) (err error){
+func (uc PartnerUseCase) DeleteBy(column, value string) (err error) {
 	repository := actions.NewParterRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	count,err := uc.countBy("",column,value)
+	count, err := uc.countBy("", column, value)
 	if err != nil {
 		return err
 	}
 
 	if count > 0 {
-		err = repository.DeleteBy(column,value,now,now,uc.TX)
+		err = repository.DeleteBy(column, value, now, now, uc.TX)
 		if err != nil {
 
 			return err
@@ -236,16 +245,16 @@ func (uc PartnerUseCase) DeleteBy(column,value string) (err error){
 	return nil
 }
 
-func (uc PartnerUseCase) DeleteByPk(ID string) (err error){
+func (uc PartnerUseCase) DeleteByPk(ID string) (err error) {
 	//init transaction
-	uc.TX,err = uc.DB.Begin()
+	uc.TX, err = uc.DB.Begin()
 	if err != nil {
 		uc.TX.Rollback()
 
 		return err
 	}
 
-	err = uc.DeleteBy("id",ID)
+	err = uc.DeleteBy("id", ID)
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -253,7 +262,7 @@ func (uc PartnerUseCase) DeleteByPk(ID string) (err error){
 	}
 
 	partnerExtraProductUc := PartnerExtraProductUseCase{UcContract: uc.UcContract}
-	err = partnerExtraProductUc.DeleteBy("partner_id",ID)
+	err = partnerExtraProductUc.DeleteBy("partner_id", ID)
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -265,8 +274,8 @@ func (uc PartnerUseCase) DeleteByPk(ID string) (err error){
 	return nil
 }
 
-func (uc PartnerUseCase) ValidateIsPartnerExist(ID,contactID string) (err error){
-	count,err := uc.countBy(ID,"contact_id",contactID)
+func (uc PartnerUseCase) ValidateIsPartnerExist(ID, contactID string) (err error) {
+	count, err := uc.countBy(ID, "contact_id", contactID)
 	if err != nil {
 		return err
 	}
@@ -277,11 +286,11 @@ func (uc PartnerUseCase) ValidateIsPartnerExist(ID,contactID string) (err error)
 	return nil
 }
 
-func (uc PartnerUseCase) countBy(ID,column,value string) (res int,err error){
+func (uc PartnerUseCase) countBy(ID, column, value string) (res int, err error) {
 	repository := actions.NewParterRepository(uc.DB)
-	res,err = repository.CountBy(ID,column,value)
+	res, err = repository.CountBy(ID, column, value)
 
-	return res,err
+	return res, err
 }
 
 func (uc PartnerUseCase) buildBody(data models.Partner) (res viewmodel.PartnerVm) {
@@ -290,7 +299,7 @@ func (uc PartnerUseCase) buildBody(data models.Partner) (res viewmodel.PartnerVm
 	partnerExtraProductUc := PartnerExtraProductUseCase{UcContract: uc.UcContract}
 
 	file, _ := fileUc.ReadByPk(data.Contact.Logo)
-	product, _ := settingProductUc.ReadBy("product_id",data.ProductID)
+	product, _ := settingProductUc.ReadBy("product_id", data.ProductID)
 	partnerExtraProducts, _ := partnerExtraProductUc.BrowseByPartnerID(data.ID)
 
 	return viewmodel.PartnerVm{

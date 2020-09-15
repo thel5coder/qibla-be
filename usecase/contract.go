@@ -44,7 +44,8 @@ const (
 	defaultFaspayPayType        = 1
 	defaultFaspayTenor          = "00"
 	defaultFaspayPaymentPlan    = "01"
-	defaultFaspayCurrency = "IDR"
+	defaultFaspayCurrency       = "IDR"
+	defaultInvoiceDueDate       = 7
 )
 
 //globalsmscounter
