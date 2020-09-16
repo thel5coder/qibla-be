@@ -45,7 +45,14 @@ func (uc JamaahUseCase) ReadBy(column, value string) (res viewmodel.JamaahVm, er
 }
 
 func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest, ID string) (err error) {
+	uc.TX,err = uc.DB.Begin()
+	if err != nil {
+		uc.TX.Rollback()
+
+		return err
+	}
 	userUc := UserUseCase{UcContract: uc.UcContract}
+
 	isEmailExist, err := userUc.IsEmailExist(ID, input.Email)
 	if err != nil {
 		return err
@@ -54,7 +61,7 @@ func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest, ID string) (err
 		return errors.New(messages.EmailAlreadyExist)
 	}
 
-	err = userUc.Edit(ID, input.FullName, input.Email, input.Email, input.MobilePhone, "jamaah", input.Password, true, false)
+	err = userUc.Edit(ID, input.FullName, input.Email, input.Email, input.MobilePhone, "guest", input.Password, true, false)
 	if err != nil {
 		return err
 	}

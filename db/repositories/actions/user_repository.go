@@ -243,7 +243,7 @@ func (repository UserRepository) CountBy(ID, column, value string) (res int, err
 		statement := `select count("id") from "users" where ` + column + `=$1 and "deleted_at" is null`
 		err = repository.DB.QueryRow(statement, value).Scan(&res)
 	} else {
-		statement := `select count("id") from "users" where (` + column + `=$1 and "id"<>$2) and "deleted_at" is null`
+		statement := `select count("id") from "users" where (` + column + `=$1 and "deleted_at" is null) and "id"<>$2`
 		err = repository.DB.QueryRow(statement, value, ID).Scan(&res)
 	}
 
