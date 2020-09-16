@@ -6,6 +6,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"os"
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/helpers/facebook"
 	"qibla-backend/helpers/google"
 	"qibla-backend/helpers/hashing"
 	"qibla-backend/helpers/messages"
@@ -157,26 +158,44 @@ func (uc AuthenticationUseCase) ForgotPassword(email string) (err error) {
 	return nil
 }
 
-func (uc AuthenticationUseCase) RegisterByGmail(input *requests.RegisterByGmailRequest) (res viewmodel.UserJwtTokenVm, err error) {
-	userUc := UserUseCase{UcContract: uc.UcContract}
-	jamaahUc := JamaahUseCase{UcContract: uc.UcContract}
-	var jamaah viewmodel.JamaahVm
-	var userID string
+func (uc AuthenticationUseCase) RegisterByOauth(input *requests.RegisterByOauthRequest) (res viewmodel.UserJwtTokenVm, err error) {
+	var profile map[string]interface{}
+	var email,name string
 
-	//get email profile
-	emailProfile, err := google.GetGoogleProfile(input.Token)
-	if err != nil {
-		return res, errors.New(messages.CredentialDoNotMatch)
+	if input.Type == "gmail" {
+		profile, err = google.GetGoogleProfile(input.Token)
+		if err != nil {
+			return res, errors.New(messages.CredentialDoNotMatch)
+		}
+		email = profile["email"].(string)
+		name = profile["name"].(string)
+	}else{
+		profile,err = facebook.GetFacebookProfile(input.Token)
+		if err != nil {
+			return res,err
+		}
+		fmt.Println(profile)
+		email = profile["email"].(string)
+		name = profile["name"].(string)
 	}
 
+	return uc.registerUserByOauth(email,name)
+}
+
+func (uc AuthenticationUseCase) registerUserByOauth(email,name string) (res viewmodel.UserJwtTokenVm, err error) {
+	var jamaah viewmodel.JamaahVm
+	var userID string
+	userUc := UserUseCase{UcContract: uc.UcContract}
+	jamaahUc := JamaahUseCase{UcContract: uc.UcContract}
+
 	//count email by email profile
-	count, err := userUc.CountBy("", "email", emailProfile["email"].(string))
+	count, err := userUc.CountBy("", "email", email)
 	if err != nil {
 		fmt.Print(1)
 		return res, err
 	}
 	if count > 0 {
-		jamaah, err = jamaahUc.ReadBy("email", emailProfile["email"].(string))
+		jamaah, err = jamaahUc.ReadBy("email", email)
 		if err != nil {
 			fmt.Println(2)
 			return res, err
@@ -193,7 +212,7 @@ func (uc AuthenticationUseCase) RegisterByGmail(input *requests.RegisterByGmailR
 
 		//add user jamaah
 		password := str.RandomString(6)
-		userID, err = jamaahUc.Add(emailProfile["name"].(string), "guest", emailProfile["email"].(string), password, "")
+		userID, err = jamaahUc.Add(name, "guest", email, password, "")
 		if err != nil {
 			fmt.Println(3)
 			uc.TX.Rollback()
@@ -205,7 +224,7 @@ func (uc AuthenticationUseCase) RegisterByGmail(input *requests.RegisterByGmailR
 
 	jwePayload, _ := uc.Jwe.GenerateJwePayload(userID)
 	session, _ := uc.UpdateSessionLogin(userID)
-	token, refreshToken, tokenExpiredAt, refreshTokenExpiredAt, err := uc.GenerateJwtToken(jwePayload, emailProfile["email"].(string), session)
+	token, refreshToken, tokenExpiredAt, refreshTokenExpiredAt, err := uc.GenerateJwtToken(jwePayload, email, session)
 	if err != nil {
 		return res, err
 	}
@@ -220,3 +239,4 @@ func (uc AuthenticationUseCase) RegisterByGmail(input *requests.RegisterByGmailR
 
 	return res, nil
 }
+

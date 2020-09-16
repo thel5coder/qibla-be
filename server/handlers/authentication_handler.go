@@ -32,8 +32,8 @@ func (handler AuthenticationHandler) Login(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, nil, nil)
 }
 
-func (handler AuthenticationHandler) RegisterByGmail(ctx echo.Context) error {
-	input := new(requests.RegisterByGmailRequest)
+func (handler AuthenticationHandler) RegisterByOauth(ctx echo.Context) error {
+	input := new(requests.RegisterByOauthRequest)
 
 	if err := ctx.Bind(input); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
@@ -43,7 +43,7 @@ func (handler AuthenticationHandler) RegisterByGmail(ctx echo.Context) error {
 	}
 
 	uc := usecase.AuthenticationUseCase{UcContract: handler.UseCaseContract}
-	res,err := uc.RegisterByGmail(input)
+	res,err := uc.RegisterByOauth(input)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }

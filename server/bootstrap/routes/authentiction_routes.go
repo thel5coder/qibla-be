@@ -19,7 +19,8 @@ func (route AuthenticationRoutes) RegisterRoute() {
 	authenticationRoute.POST("/login", authenticationHandler.Login)
 	authenticationRoute.POST("/register", authenticationHandler.RegisterJamaahByEmail)
 	authenticationRoute.POST("/forgot", authenticationHandler.ForgotPassword)
-	authenticationRoute.POST("/register-by-gmail",authenticationHandler.RegisterByGmail)
+	authenticationRoute.POST("/register-by-gmail",authenticationHandler.RegisterByOauth)
+	authenticationRoute.POST("/oauth",authenticationHandler.RegisterByOauth)
 
 	setPinRoute := authenticationRoute.Group("/set-pin")
 	setPinRoute.Use(jwtMiddleware.JWTWithConfig)
