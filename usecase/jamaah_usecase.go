@@ -55,6 +55,8 @@ func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest, ID string) (err
 
 	isEmailExist, err := userUc.IsEmailExist(ID, input.Email)
 	if err != nil {
+		uc.TX.Rollback()
+
 		return err
 	}
 	if isEmailExist {
@@ -63,8 +65,11 @@ func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest, ID string) (err
 
 	err = userUc.Edit(ID, input.FullName, input.Email, input.Email, input.MobilePhone, "guest", input.Password, true, false)
 	if err != nil {
+		uc.TX.Rollback()
+
 		return err
 	}
+	uc.TX.Commit()
 
 	return err
 }
