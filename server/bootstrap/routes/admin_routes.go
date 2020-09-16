@@ -13,6 +13,7 @@ type AdminRoutes struct {
 
 func (route AdminRoutes) RegisterRoute() {
 	userHandler := handlers.AdminHandler{Handler: route.Handler}
+	jamaahHandler := handlers.JamaahHandler{Handler:route.Handler}
 	jwtMiddleware := middleware.JwtVerify{UcContract: route.Handler.UseCaseContract}
 
 	userRoute := route.RouteGroup.Group("/user")
@@ -23,4 +24,6 @@ func (route AdminRoutes) RegisterRoute() {
 	userRoute.POST("", userHandler.Add)
 	userRoute.DELETE("/:id", userHandler.Delete)
 	userRoute.GET("/current", userHandler.GetCurrentAdminUser)
+	userRoute.GET("/profile",jamaahHandler.ReadProfile)
+	userRoute.POST("/profile",jamaahHandler.EditProfile)
 }

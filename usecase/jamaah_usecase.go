@@ -1,8 +1,11 @@
 package usecase
 
 import (
+	"errors"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/hashing"
+	"qibla-backend/helpers/messages"
+	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"
 )
@@ -39,7 +42,25 @@ func (uc JamaahUseCase) ReadBy(column, value string) (res viewmodel.JamaahVm, er
 	return res, err
 }
 
-func (uc JamaahUseCase) Add(name, roleSlug, email, password string) (res string,err error) {
+func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest,ID string) (err error){
+	userUc := UserUseCase{UcContract:uc.UcContract}
+	isEmailExist,err := userUc.IsEmailExist(ID,input.Email)
+	if err != nil {
+		return err
+	}
+	if isEmailExist {
+		return errors.New(messages.EmailAlreadyExist)
+	}
+
+	err = userUc.Edit(ID,input.FullName,input.Email,input.Email,input.MobilePhone,"jamaah",input.Password,true,false)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (uc JamaahUseCase) Add(name, roleSlug, email, password,mobilePhone string) (res string,err error) {
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	roleUc := RoleUseCase{UcContract: uc.UcContract}
 
@@ -49,7 +70,7 @@ func (uc JamaahUseCase) Add(name, roleSlug, email, password string) (res string,
 	}
 
 	encryptedPassword, _ := hashing.HashAndSalt(password)
-	res, err = userUc.Add(name, email, email, "", role.ID, encryptedPassword, true, false)
+	res, err = userUc.Add(name, email, email, mobilePhone, role.ID, encryptedPassword, true, false)
 	if err != nil {
 		return res,err
 	}
