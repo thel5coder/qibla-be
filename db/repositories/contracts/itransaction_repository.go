@@ -11,7 +11,7 @@ type ITransactionRepository interface {
 
 	ReadBy(column, value, operator string) (data models.Transaction, err error)
 
-	Add(input viewmodel.TransactionVm, tx *sql.Tx) (err error)
+	Add(input viewmodel.TransactionVm, tx *sql.Tx) (res string,err error)
 
 	EditDueDate(ID, dueDate, updatedAt string, dueDatePeriod int) (res string, err error)
 

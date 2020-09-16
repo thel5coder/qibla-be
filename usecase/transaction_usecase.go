@@ -81,7 +81,13 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber
 		UpdatedAt:         now.Format(time.RFC3339),
 		Details:           details,
 	}
-	err = repository.Add(body, uc.TX)
+	body.ID,err = repository.Add(body, uc.TX)
+	if err != nil {
+		return err
+	}
+
+	transactionDetailUc := TransactionDetailUseCase{UcContract:uc.UcContract}
+	err = transactionDetailUc.Store(body.ID,body.Details)
 	if err != nil {
 		return err
 	}
