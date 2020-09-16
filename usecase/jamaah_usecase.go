@@ -33,6 +33,8 @@ func (uc JamaahUseCase) ReadBy(column, value string) (res viewmodel.JamaahVm, er
 		Name:           user.Name.String,
 		MobilePhone:    user.MobilePhone.String,
 		ProfilePicture: user.ProfilePicture.String,
+		RoleID:         user.RoleID.String,
+		RoleName:       user.RoleModel.Name,
 		IsActive:       user.IsActive,
 		IsPinSet:       isPinSet,
 		CreatedAt:      user.CreatedAt,
@@ -42,9 +44,9 @@ func (uc JamaahUseCase) ReadBy(column, value string) (res viewmodel.JamaahVm, er
 	return res, err
 }
 
-func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest,ID string) (err error){
-	userUc := UserUseCase{UcContract:uc.UcContract}
-	isEmailExist,err := userUc.IsEmailExist(ID,input.Email)
+func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest, ID string) (err error) {
+	userUc := UserUseCase{UcContract: uc.UcContract}
+	isEmailExist, err := userUc.IsEmailExist(ID, input.Email)
 	if err != nil {
 		return err
 	}
@@ -52,7 +54,7 @@ func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest,ID string) (err 
 		return errors.New(messages.EmailAlreadyExist)
 	}
 
-	err = userUc.Edit(ID,input.FullName,input.Email,input.Email,input.MobilePhone,"jamaah",input.Password,true,false)
+	err = userUc.Edit(ID, input.FullName, input.Email, input.Email, input.MobilePhone, "jamaah", input.Password, true, false)
 	if err != nil {
 		return err
 	}
@@ -60,22 +62,22 @@ func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest,ID string) (err 
 	return err
 }
 
-func (uc JamaahUseCase) Add(name, roleSlug, email, password,mobilePhone string) (res string,err error) {
+func (uc JamaahUseCase) Add(name, roleSlug, email, password, mobilePhone string) (res string, err error) {
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	roleUc := RoleUseCase{UcContract: uc.UcContract}
 
 	role, err := roleUc.ReadBy("slug", roleSlug)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
 	encryptedPassword, _ := hashing.HashAndSalt(password)
 	res, err = userUc.Add(name, email, email, mobilePhone, role.ID, encryptedPassword, true, false)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
-	return res,nil
+	return res, nil
 }
 
 func (uc JamaahUseCase) EditPassword(ID, password string) (err error) {
@@ -95,7 +97,7 @@ func (uc JamaahUseCase) EditPin(ID string, PIN string) (err error) {
 	repository := actions.NewUserRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	encryptedPin,_ := hashing.HashAndSalt(PIN)
+	encryptedPin, _ := hashing.HashAndSalt(PIN)
 	_, err = repository.EditPIN(ID, encryptedPin, now)
 	if err != nil {
 		return err

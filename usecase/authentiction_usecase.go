@@ -120,7 +120,7 @@ func (uc AuthenticationUseCase) RegisterByEmail(input *requests.RegisterByMailRe
 
 	//add user jamaah
 	jamaahUc := JamaahUseCase{UcContract: uc.UcContract}
-	_, err = jamaahUc.Add(input.Name, "jamaah", input.Email, input.Password, "")
+	_, err = jamaahUc.Add(input.Name, "guest", input.Email, input.Password, "")
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -193,7 +193,7 @@ func (uc AuthenticationUseCase) RegisterByGmail(input *requests.RegisterByGmailR
 
 		//add user jamaah
 		password := str.RandomString(6)
-		userID, err = jamaahUc.Add(emailProfile["name"].(string), "jamaah", emailProfile["email"].(string), password, "")
+		userID, err = jamaahUc.Add(emailProfile["name"].(string), "guest", emailProfile["email"].(string), password, "")
 		if err != nil {
 			fmt.Println(3)
 			uc.TX.Rollback()
