@@ -105,6 +105,22 @@ func (uc ContactUseCase) BrowseAll(search string,isZakatPartner bool) (res []vie
 	return res, err
 }
 
+func (uc ContactUseCase) BrowseAllZakatPlace(search string) (res []viewmodel.ZakatPlaceVm,err error){
+	contactZakats,err := uc.BrowseAll(search,true)
+	if err != nil {
+		return res,err
+	}
+
+	for _,contactZakat := range contactZakats{
+		res = append(res,viewmodel.ZakatPlaceVm{
+			ID:   contactZakat.ID,
+			Name: contactZakat.TravelAgentName,
+		})
+	}
+
+	return res,err
+}
+
 func (uc ContactUseCase) ReadBy(column, value string) (res viewmodel.ContactVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
 	fileUc := FileUseCase{UcContract: uc.UcContract}

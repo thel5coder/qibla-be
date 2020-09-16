@@ -235,4 +235,11 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	videoKajianRoutes.RegisterRoute()
 
+	//zakat
+	zakatRoutes := routes.ZakatRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	zakatRoutes.RegisterRoute()
+
 }
