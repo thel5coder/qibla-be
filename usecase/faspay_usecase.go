@@ -128,3 +128,13 @@ func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest, contact viewm
 
 	return res, err
 }
+
+func (uc FaspayUseCase) CheckPaymentStatus(invoiceID string) (res map[string]interface{},err error){
+	transactionUc := TransactionUseCase{UcContract:uc.UcContract}
+	_,err = transactionUc.CountBy("","id",invoiceID)
+	if err != nil {
+		return res,err
+	}
+
+	return res,err
+}

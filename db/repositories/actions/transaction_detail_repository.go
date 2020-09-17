@@ -41,7 +41,7 @@ func (repository TransactionDetailRepository) BrowseByTransactionID(transactionI
 }
 
 func (TransactionDetailRepository) Add(transactionID, name string, fee, price float32, quantity int, tx *sql.Tx) (err error) {
-	statement := `insert into "transaction_details" ("transaction_id","name","fee","price","quantity") values($1,$2,$3,$4,$5,%6)`
+	statement := `insert into "transaction_details" ("transaction_id","name","fee","price","quantity") values($1,$2,$3,$4,$5)`
 	_,err = tx.Exec(
 		statement,
 		transactionID,

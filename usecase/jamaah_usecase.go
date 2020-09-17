@@ -45,13 +45,13 @@ func (uc JamaahUseCase) ReadBy(column, value string) (res viewmodel.JamaahVm, er
 }
 
 func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest, ID string) (err error) {
-	uc.TX,err = uc.DB.Begin()
+	uc.TX, err = uc.DB.Begin()
 	if err != nil {
 		uc.TX.Rollback()
 
 		return err
 	}
-	user,err := uc.ReadBy("id",ID)
+	user, err := uc.ReadBy("id", ID)
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -69,8 +69,8 @@ func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest, ID string) (err
 		return errors.New(messages.EmailAlreadyExist)
 	}
 
-	hashedPassword,_ := hashing.HashAndSalt(input.Password)
-	err = userUc.Edit(ID, input.FullName, input.Email, input.Email, input.MobilePhone, user.RoleID, hashedPassword	, true, false)
+	hashedPassword, _ := hashing.HashAndSalt(input.Password)
+	err = userUc.Edit(ID, input.FullName, input.Email, input.Email, input.MobilePhone, user.RoleID, hashedPassword, input.ProfilePictureID, true, false)
 	if err != nil {
 		uc.TX.Rollback()
 

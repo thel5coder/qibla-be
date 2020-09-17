@@ -16,7 +16,7 @@ type TransactionUseCase struct {
 	*UcContract
 }
 
-func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber, bankName string, paymentMethodCode, dueDateAging int, extraProducts []requests.ExtraProductRequest, contact viewmodel.ContactVm) (err error) {
+func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber, bankName string, paymentMethodID, dueDateAging int, extraProducts []requests.ExtraProductRequest, contact viewmodel.ContactVm) (res viewmodel.TransactionVm,err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 	now := time.Now().UTC()
 	dueDate := now.AddDate(0, 0, dueDateAging).Format("2006-01-02")
@@ -55,12 +55,12 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber
 		TransactionDesc:    enums.KeyTransactionType5,
 		UserID:             userID,
 		Total:              total,
-		PaymentChannel:     paymentMethodCode,
+		PaymentChannel:     paymentMethodID,
 		Item:               faspayItem,
 	}
 	faspayRes, err := faspayUc.PostData(faspayRequest, contact)
 	if err != nil {
-		return errors.New(messages.PaymentFailed)
+		return res,errors.New(messages.PaymentFailed)
 	}
 
 	body := viewmodel.TransactionVm{
@@ -71,7 +71,7 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber
 		DueDate:           dueDate,
 		DueDatePeriod:     int32(dueDateAging),
 		PaymentStatus:     enums.KeyPaymentStatus1,
-		PaymentMethodCode: paymentMethodCode,
+		PaymentMethodCode: paymentMethodID,
 		VaNumber:          faspayRes["trx_id"].(string),
 		BankName:          bankName,
 		Direction:         enums.KeyTransactionDirection1,
@@ -83,16 +83,24 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber
 	}
 	body.ID,err = repository.Add(body, uc.TX)
 	if err != nil {
-		return err
+		return res,err
 	}
 
 	transactionDetailUc := TransactionDetailUseCase{UcContract:uc.UcContract}
 	err = transactionDetailUc.Store(body.ID,body.Details)
 	if err != nil {
-		return err
+		return res,err
 	}
 
-	return nil
+	transactionHistoryUc := TransactionHistoryUseCase{UcContract:uc.UcContract}
+	err = transactionHistoryUc.Add(faspayRes["trx_id"].(string),enums.KeyPaymentStatus1,faspayRes)
+	if err != nil {
+		return res,err
+	}
+	body.FaspayResponse = faspayRes
+	res = body
+
+	return res,err
 }
 
 func (uc TransactionUseCase) GetInvoiceNumber() (res string, err error) {
@@ -124,7 +132,7 @@ func (uc TransactionUseCase) GetInvoiceNumber() (res string, err error) {
 	return res, err
 }
 
-func (uc TransactionUseCase) ReadBy(ID, column, value string) (res int, err error) {
+func (uc TransactionUseCase) CountBy(ID, column, value string) (res int, err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 	res, err = repository.CountBy(ID, column, value)
 	if err != nil {

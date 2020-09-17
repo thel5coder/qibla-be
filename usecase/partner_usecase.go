@@ -148,19 +148,19 @@ func (uc PartnerUseCase) EditBoolStatus(ID, column, reason, userID, password str
 	return nil
 }
 
-func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error) {
+func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (res viewmodel.TransactionVm, err error) {
 	repository := actions.NewParterRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
 	contactUc := ContactUseCase{UcContract: uc.UcContract}
 	contact, err := contactUc.ReadByPk(input.ContactID)
 	if err != nil {
-		return err
+		return res, err
 	}
 
 	err = uc.ValidateIsPartnerExist("", input.ContactID)
 	if err != nil {
-		return err
+		return res, err
 	}
 
 	//init transaction
@@ -168,7 +168,7 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error)
 	if err != nil {
 		uc.TX.Rollback()
 
-		return err
+		return res, err
 	}
 
 	//add user
@@ -178,7 +178,7 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error)
 	if err != nil {
 		uc.TX.Rollback()
 
-		return err
+		return res, err
 	}
 
 	//add partners
@@ -199,7 +199,7 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error)
 	if err != nil {
 		uc.TX.Rollback()
 
-		return err
+		return res, err
 	}
 
 	//add extra product
@@ -209,20 +209,20 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (err error)
 		if err != nil {
 			uc.TX.Rollback()
 
-			return err
+			return res, err
 		}
 		transactionUc := TransactionUseCase{UcContract: uc.UcContract}
-		err = transactionUc.AddTransactionRegisterPartner(userID, input.InvoiceNumber, input.BankName, input.PaymentMethodCode, 7, input.ExtraProducts, contact)
+		res, err = transactionUc.AddTransactionRegisterPartner(userID, input.InvoiceNumber, input.BankName, input.PaymentMethodCode, 7, input.ExtraProducts, contact)
 		if err != nil {
 			uc.TX.Rollback()
 
-			return err
+			return res, err
 		}
 	}
 
 	uc.TX.Commit()
 
-	return nil
+	return res, nil
 }
 
 func (uc PartnerUseCase) DeleteBy(column, value string) (err error) {

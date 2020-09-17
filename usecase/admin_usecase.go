@@ -132,7 +132,7 @@ func (uc AdminUseCase) Edit(ID string, input *requests.AdminRequest) (err error)
 	if input.Password != "" {
 		password, _ = hashing.HashAndSalt(input.Password)
 	}
-	err = userUc.Edit(ID, input.UserName, input.UserName, input.Email, "", input.RoleID, password, input.IsActive, true)
+	err = userUc.Edit(ID, input.UserName, input.UserName, input.Email, "", input.RoleID, password,"", input.IsActive, true)
 	if err != nil {
 		uc.TX.Rollback()
 
