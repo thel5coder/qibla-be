@@ -265,6 +265,7 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 		ResponseDesc: "Sukses",
 		ResponseDate: now,
 	}
+	uc.TX.Commit()
 
 	return res,err,http.StatusOK
 }
