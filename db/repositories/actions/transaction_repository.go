@@ -90,17 +90,17 @@ func (repository TransactionRepository) EditDueDate(ID,dueDate,updatedAt string,
 }
 
 
-func (repository TransactionRepository) EditStatus(ID,paymentStatus,paidDate,updatedAt string) (res string,err error){
+func (repository TransactionRepository) EditStatus(ID,paymentStatus,paidDate,updatedAt string,tx *sql.Tx) (err error){
 	statement := `update "transactions" set "payment_status"=$1, "paid_date"=$2, "updated_at"=$3 where "id"=$3 returning "id"`
-	err = repository.DB.QueryRow(
+	_,err = tx.Exec(
 		statement,
 		paymentStatus,
-		paidDate,
+		datetime.StrParseToTime(paidDate,"2006-01-02 15:04:05"),
 		datetime.StrParseToTime(updatedAt,time.RFC3339),
 		ID,
-	).Scan(&res)
+	)
 
-	return res,err
+	return err
 }
 
 func (repository TransactionRepository) CountBy(ID,column,value string) (res int,err error){

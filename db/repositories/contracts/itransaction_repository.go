@@ -15,7 +15,7 @@ type ITransactionRepository interface {
 
 	EditDueDate(ID, dueDate, updatedAt string, dueDatePeriod int) (res string, err error)
 
-	EditStatus(ID, paymentStatus, paidDate, updatedAt string) (res string, err error)
+	EditStatus(ID, paymentStatus, paidDate, updatedAt string,tx *sql.Tx) (err error)
 
 	CountBy(ID, column, value string) (res int, err error)
 
