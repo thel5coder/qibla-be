@@ -19,4 +19,6 @@ func(route FaspayRoutes) RegisterRoute(){
 	faspayRoute := route.RouteGroup.Group("/faspay")
 	faspayRoute.Use(jwtMiddleware.JWTWithConfig)
 	faspayRoute.GET("/get-payment-method",handler.GetLisPaymentMethods)
+	faspayRoute.GET("/invoice/:invoiceId",handler.CheckPaymentNotification)
+	faspayRoute.POST("/notif",handler.PaymentNotification)
 }

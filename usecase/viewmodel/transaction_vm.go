@@ -8,7 +8,7 @@ type TransactionVm struct {
 	DueDate           string                 `json:"due_date"`
 	DueDatePeriod     int32                  `json:"due_date_period"`
 	PaymentStatus     string                 `json:"payment_status"`
-	PaymentMethodCode int                    `json:"payment_method_code"`
+	PaymentMethodCode int32                  `json:"payment_method_code"`
 	VaNumber          string                 `json:"va_number"`
 	BankName          string                 `json:"bank_name"`
 	Direction         string                 `json:"direction"`
@@ -16,6 +16,7 @@ type TransactionVm struct {
 	PaidDate          string                 `json:"paid_date"`
 	TransactionDate   string                 `json:"transaction_date"`
 	UpdatedAt         string                 `json:"updated_at"`
+	Total             float32                `json:"total"`
 	Details           []TransactionDetailVm  `json:"details"`
 	FaspayResponse    map[string]interface{} `json:"faspay_response"`
 }

@@ -10,7 +10,7 @@ type Transaction struct {
 	DueDate           string         `json:"due_date"`
 	DueDatePeriod     sql.NullInt32  `json:"due_date_period"`
 	PaymentStatus     string         `json:"payment_status"`
-	PaymentMethodCode sql.NullString `json:"payment_method_code"`
+	PaymentMethodCode sql.NullInt32  `json:"payment_method_code"`
 	VaNumber          sql.NullString `json:"va_number"`
 	BankName          sql.NullString `json:"bank_name"`
 	Direction         string         `json:"direction"`
@@ -18,4 +18,5 @@ type Transaction struct {
 	PaidDate          sql.NullString `json:"paid_date"`
 	TransactionDate   string         `json:"transaction_date"`
 	UpdatedAt         string         `json:"updated_at"`
+	Total             float32        `json:"total"`
 }

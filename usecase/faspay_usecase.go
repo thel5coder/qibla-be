@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"qibla-backend/helpers/enums"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/helpers/str"
 	"qibla-backend/server/requests"
@@ -67,7 +68,9 @@ func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest, contact viewm
 	compose := os.Getenv("FASPAY_USER_ID") + `` + os.Getenv("FASPAY_PASSWORD") + `` + input.InvoiceNumber
 	phoneNumber := str.StringToInt(contact.PhoneNumber)
 	signature := uc.getSignature(compose)
+	var client http.Client
 	var items []viewmodel.ItemFaspayPostDataVm
+
 	for _, item := range input.Item{
 		items = append(items,viewmodel.ItemFaspayPostDataVm{
 			Product:     item.Product,
@@ -99,8 +102,6 @@ func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest, contact viewm
 		Item:           items,
 	}
 	bodyPost, _ := json.Marshal(body)
-	var client http.Client
-	fmt.Printf(string(bodyPost))
 
 
 	request, err := http.NewRequest("POST", fasPayBaseUrl+"/300011/10", bytes.NewBuffer(bodyPost))
@@ -130,11 +131,46 @@ func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest, contact viewm
 }
 
 func (uc FaspayUseCase) CheckPaymentStatus(invoiceID string) (res map[string]interface{},err error){
+	var client http.Client
 	transactionUc := TransactionUseCase{UcContract:uc.UcContract}
-	_,err = transactionUc.CountBy("","id",invoiceID)
+	transaction,err := transactionUc.ReadBy("t.id",invoiceID,"=")
 	if err != nil {
 		return res,err
 	}
+	signature := uc.getSignature(os.Getenv("FASPAY_USER_ID")+``+os.Getenv("FASPAY_PASSWORD")+``+transaction.InvoiceNumber)
+	body := viewmodel.CheckPaymentStatus{
+		Request:    enums.KeyTransactionType6,
+		TrxID:      transaction.TrxID,
+		MerchantID: os.Getenv("FASPAY_MERCHANT_ID"),
+		BillNo:     transaction.InvoiceNumber,
+		Signature:  signature,
+	}
+
+	bodyPost,_ := json.Marshal(body)
+	request, err := http.NewRequest("POST", fasPayBaseUrl+"/100004/10", bytes.NewBuffer(bodyPost))
+	if err != nil {
+		return res, err
+	}
+	response, err := client.Do(request)
+	if err != nil {
+		return res, err
+	}
+	defer response.Body.Close()
+
+	responseBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(responseBody, &res)
+	if err != nil {
+		return res, err
+	}
+
+	return res,err
+}
+
+func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationRequest) (res map[string]interface{},err error){
+	fmt.Println(input)
 
 	return res,err
 }

@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"os"
+	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/enums"
 	"qibla-backend/helpers/messages"
@@ -16,11 +17,22 @@ type TransactionUseCase struct {
 	*UcContract
 }
 
-func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber, bankName string, paymentMethodID, dueDateAging int, extraProducts []requests.ExtraProductRequest, contact viewmodel.ContactVm) (res viewmodel.TransactionVm,err error) {
+func (uc TransactionUseCase) ReadBy(column, value, operator string) (res viewmodel.TransactionVm, err error) {
+	repository := actions.NewTransactionRepository(uc.DB)
+	transaction, err := repository.ReadBy(column, value, operator)
+	if err != nil {
+		return res, err
+	}
+	res = uc.buildBody(transaction)
+
+	return res, err
+}
+
+func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber, bankName string, paymentMethodID, dueDateAging int, extraProducts []requests.ExtraProductRequest, contact viewmodel.ContactVm) (res viewmodel.TransactionVm, err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 	now := time.Now().UTC()
 	dueDate := now.AddDate(0, 0, dueDateAging).Format("2006-01-02")
-	dueDateFaspay := now.AddDate(0,0,dueDateAging).Format("2006-01-02 15:04:05")
+	dueDateFaspay := now.AddDate(0, 0, dueDateAging).Format("2006-01-02 15:04:05")
 	var total float32
 	var faspayItem []requests.FaspayItemRequest
 
@@ -60,7 +72,7 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber
 	}
 	faspayRes, err := faspayUc.PostData(faspayRequest, contact)
 	if err != nil {
-		return res,errors.New(messages.PaymentFailed)
+		return res, errors.New(messages.PaymentFailed)
 	}
 
 	body := viewmodel.TransactionVm{
@@ -71,7 +83,7 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber
 		DueDate:           dueDate,
 		DueDatePeriod:     int32(dueDateAging),
 		PaymentStatus:     enums.KeyPaymentStatus1,
-		PaymentMethodCode: paymentMethodID,
+		PaymentMethodCode: int32(paymentMethodID),
 		VaNumber:          faspayRes["trx_id"].(string),
 		BankName:          bankName,
 		Direction:         enums.KeyTransactionDirection1,
@@ -81,26 +93,26 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber
 		UpdatedAt:         now.Format(time.RFC3339),
 		Details:           details,
 	}
-	body.ID,err = repository.Add(body, uc.TX)
+	body.ID, err = repository.Add(body, uc.TX)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
-	transactionDetailUc := TransactionDetailUseCase{UcContract:uc.UcContract}
-	err = transactionDetailUc.Store(body.ID,body.Details)
+	transactionDetailUc := TransactionDetailUseCase{UcContract: uc.UcContract}
+	err = transactionDetailUc.Store(body.ID, body.Details)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
-	transactionHistoryUc := TransactionHistoryUseCase{UcContract:uc.UcContract}
-	err = transactionHistoryUc.Add(faspayRes["trx_id"].(string),enums.KeyPaymentStatus1,faspayRes)
+	transactionHistoryUc := TransactionHistoryUseCase{UcContract: uc.UcContract}
+	err = transactionHistoryUc.Add(faspayRes["trx_id"].(string), enums.KeyPaymentStatus1, faspayRes)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 	body.FaspayResponse = faspayRes
 	res = body
 
-	return res,err
+	return res, err
 }
 
 func (uc TransactionUseCase) GetInvoiceNumber() (res string, err error) {
@@ -140,4 +152,29 @@ func (uc TransactionUseCase) CountBy(ID, column, value string) (res int, err err
 	}
 
 	return res, err
+}
+
+func (uc TransactionUseCase) buildBody(model models.Transaction) (res viewmodel.TransactionVm) {
+	res = viewmodel.TransactionVm{
+		ID:                model.ID,
+		UserID:            model.UserID,
+		InvoiceNumber:     model.InvoiceNumber,
+		TrxID:             model.TrxID.String,
+		DueDate:           model.DueDate,
+		DueDatePeriod:     model.DueDatePeriod.Int32,
+		PaymentStatus:     model.PaymentStatus,
+		PaymentMethodCode: model.PaymentMethodCode.Int32,
+		VaNumber:          model.VaNumber.String,
+		BankName:          model.BankName.String,
+		Direction:         model.Direction,
+		TransactionType:   model.TransactionType,
+		PaidDate:          model.PaidDate.String,
+		TransactionDate:   model.TransactionDate,
+		UpdatedAt:         model.UpdatedAt,
+		Total:             model.Total,
+		Details:           nil,
+		FaspayResponse:    nil,
+	}
+
+	return res
 }
