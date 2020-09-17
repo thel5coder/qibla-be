@@ -15,6 +15,7 @@ import (
 	"qibla-backend/helpers/str"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
+	"time"
 )
 
 type FaspayUseCase struct {
@@ -169,8 +170,48 @@ func (uc FaspayUseCase) CheckPaymentStatus(invoiceID string) (res map[string]int
 	return res,err
 }
 
-func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationRequest) (res map[string]interface{},err error){
-	fmt.Println(input)
+func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationRequest) (res viewmodel.PaymentNotificationVm,err error,code int){
+	now := time.Now().UTC().Format("2006-01-02 15:04:05")
+	transactionUc := TransactionUseCase{UcContract:uc.UcContract}
+	transaction,err := transactionUc.ReadBy("t.trx_id",input.TrxID,"=")
+	if err != nil {
+		res = viewmodel.PaymentNotificationVm{
+			Response:     "Payment Notification",
+			TrxID:        input.TrxID,
+			MerchantID:   input.MerchantID,
+			Merchant:     input.Merchant,
+			BillNo:       input.BillNo,
+			ResponseCode: "05",
+			ResponseDesc: "Tagihan tidak ditemukan",
+			ResponseDate: now,
+		}
+		return res,err,http.StatusUnprocessableEntity
+	}
+	signature := uc.getSignature(os.Getenv("FASPAY_USER_ID")+``+os.Getenv("FASPAY_PASSWORD")+``+transaction.InvoiceNumber+`2`)
+	if signature != input.Signature {
+		res = viewmodel.PaymentNotificationVm{
+			Response:     "Payment Notification",
+			TrxID:        input.TrxID,
+			MerchantID:   input.MerchantID,
+			Merchant:     input.Merchant,
+			BillNo:       input.BillNo,
+			ResponseCode: "09",
+			ResponseDesc: "Unknown",
+			ResponseDate: now,
+		}
+		return res,err,http.StatusUnauthorized
+	}
 
-	return res,err
+	res = viewmodel.PaymentNotificationVm{
+		Response:     "Payment Notification",
+		TrxID:        input.TrxID,
+		MerchantID:   input.MerchantID,
+		Merchant:     input.Merchant,
+		BillNo:       input.BillNo,
+		ResponseCode: "00",
+		ResponseDesc: "Sukses",
+		ResponseDate: now,
+	}
+
+	return res,err,http.StatusOK
 }

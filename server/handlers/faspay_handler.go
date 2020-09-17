@@ -38,7 +38,7 @@ func (handler FasPayHandler) PaymentNotification(ctx echo.Context) error {
 	}
 
 	uc := usecase.FaspayUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.PaymentNotification(input)
+	res, _, code := uc.PaymentNotification(input)
 
-	return handler.SendResponse(ctx, res, nil, err)
+	return ctx.JSON(code, res)
 }
