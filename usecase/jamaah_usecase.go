@@ -52,6 +52,12 @@ func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest, ID string) (err
 		return err
 	}
 	userUc := UserUseCase{UcContract: uc.UcContract}
+	user,err := userUc.ReadBy("id",ID)
+	if err != nil {
+		uc.TX.Rollback()
+
+		return err
+	}
 
 	isEmailExist, err := userUc.IsEmailExist(ID, input.Email)
 	if err != nil {
@@ -63,7 +69,7 @@ func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest, ID string) (err
 		return errors.New(messages.EmailAlreadyExist)
 	}
 
-	err = userUc.Edit(ID, input.FullName, input.Email, input.Email, input.MobilePhone, "guest", input.Password, true, false)
+	err = userUc.Edit(ID, input.FullName, input.Email, input.Email, input.MobilePhone, user.Role.ID, input.Password, true, false)
 	if err != nil {
 		uc.TX.Rollback()
 
