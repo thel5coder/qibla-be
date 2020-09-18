@@ -56,17 +56,69 @@ func (repository GlobalInfoCategorySettingRepository) Browse(globalInfoCategory,
 		data = append(data, dataTemp)
 	}
 
-	if globalInfoCategory == ""{
+	if globalInfoCategory == "" {
 		statement := `select count(gics."id") from "global_info_category_settings" gics
                  inner join "global_info_categories" gic on gic."id"=gics."global_info_category_id" and gic."deleted_at" is null
                  where (lower(gic."name") like $1 or lower(gics."description") like $1) and gics."deleted_at" is null`
 		err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
-	}else{
+	} else {
 		statement := `select count(gics."id") from "global_info_category_settings" gics
                  inner join "global_info_categories" gic on gic."id"=gics."global_info_category_id" and gic."deleted_at" is null
                  where gic."slug"=$1 and gics."deleted_at" is null`
 		err = repository.DB.QueryRow(statement, globalInfoCategory).Scan(&count)
 	}
+	if err != nil {
+		return data, count, err
+	}
+
+	return data, count, err
+}
+
+func (repository GlobalInfoCategorySettingRepository) Browse2(globalInfoCategory, search, order, sort string, limit, offset int) (data []models.GlobalInfoCategorySetting, count int, err error) {
+	var rows *sql.Rows
+
+	filterQuery := ``
+	filterAttr := []interface{}{}
+	if globalInfoCategory == "" {
+		filterQuery += `and (lower(gic."name") like $1 or lower(gics."description") like $1)`
+		filterAttr = append(filterAttr, "%"+strings.ToLower(search)+"%")
+	} else {
+		filterQuery += `and gic."slug"=$1`
+		filterAttr = append(filterAttr, globalInfoCategory)
+	}
+	paginationAttr := append(filterAttr, []interface{}{limit, offset}...)
+	statement := `select gics.*,gic."name" from "global_info_category_settings" gics
+                inner join "global_info_categories" gic on gic."id"=gics."global_info_category_id" and gic."deleted_at" is null
+                 where gics."deleted_at" is null ` + filterQuery + ` order by gic.` + order + ` ` + sort + ` limit $2 offset $3`
+	rows, err = repository.DB.Query(statement, paginationAttr...)
+	if err != nil {
+		return data, count, err
+	}
+
+	for rows.Next() {
+		dataTemp := models.GlobalInfoCategorySetting{}
+
+		err = rows.Scan(
+			&dataTemp.ID,
+			&dataTemp.GlobalInfoCategoryID,
+			&dataTemp.Description,
+			&dataTemp.IsActive,
+			&dataTemp.CreatedAt,
+			&dataTemp.UpdatedAt,
+			&dataTemp.DeletedAt,
+			&dataTemp.GlobalInfoCategoryName,
+		)
+		if err != nil {
+			return data, count, err
+		}
+
+		data = append(data, dataTemp)
+	}
+
+	statement = `select count(gics."id") from "global_info_category_settings" gics
+                 inner join "global_info_categories" gic on gic."id"=gics."global_info_category_id" and gic."deleted_at" is null
+                 where gics."deleted_at" is null ` + filterQuery
+	err = repository.DB.QueryRow(statement, filterAttr).Scan(&count)
 	if err != nil {
 		return data, count, err
 	}

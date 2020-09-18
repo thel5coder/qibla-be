@@ -1,5 +1,7 @@
 
 -- +migrate Up
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TYPE "register_from_enum" AS ENUM (
     'halaman_registrasi',
     'gmail',
@@ -34,7 +36,7 @@ CREATE TYPE "web_content_category_type_enum" AS ENUM (
     );
 
 CREATE TYPE "package_promotion_enum" AS ENUM (
-    'perhari',
+    'per_hari',
     'bundle'
     );
 
