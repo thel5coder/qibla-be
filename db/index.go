@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	migrate "github.com/rubenv/sql-migrate"
+	"log"
 	"time"
 )
 
@@ -31,8 +33,17 @@ func (c Connection) DbConnect() (*sql.DB, error) {
 			c.User, c.Password, c.Host, c.Port, c.DbName, c.SslMode, c.SslCert, c.SslKey, c.SslRootCert,
 		)
 	}
-
 	db, err := sql.Open("postgres", connStr)
+
+	migrations := &migrate.FileMigrationSource{
+		Dir: "db/migrations",
+	}
+	n,err := migrate.Exec(db, "postgres", migrations, migrate.Up)
+	if err != nil {
+		log.Fatal("Error migration := ",err.Error())
+	}
+	fmt.Printf("Applied %d migrations!\n", n)
+
 
 	return db, err
 }
