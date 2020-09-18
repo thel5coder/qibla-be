@@ -175,6 +175,7 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 	transactionUc := TransactionUseCase{UcContract:uc.UcContract}
 	transaction,err := transactionUc.ReadBy("t.trx_id",input.TrxID,"=")
 	if err != nil {
+		fmt.Println(1)
 		res = viewmodel.PaymentNotificationVm{
 			Response:     "Payment Notification",
 			TrxID:        input.TrxID,
@@ -189,6 +190,7 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 	}
 	signature := uc.getSignature(os.Getenv("FASPAY_USER_ID")+``+os.Getenv("FASPAY_PASSWORD")+``+transaction.InvoiceNumber+`2`)
 	if signature != input.Signature {
+		fmt.Println(2)
 		res = viewmodel.PaymentNotificationVm{
 			Response:     "Payment Notification",
 			TrxID:        input.TrxID,
@@ -204,6 +206,7 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 
 	uc.TX,err = uc.DB.Begin()
 	if err != nil {
+		fmt.Println(3)
 		uc.TX.Rollback()
 		res = viewmodel.PaymentNotificationVm{
 			Response:     "Payment Notification",
@@ -222,6 +225,7 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 	transactionUc.TX = uc.TX
 	err = transactionUc.EditStatus(transaction.ID,enums.KeyPaymentStatus3,input.PaymentDate)
 	if err != nil {
+		fmt.Println(4)
 		uc.TX.Rollback()
 		res = viewmodel.PaymentNotificationVm{
 			Response:     "Payment Notification",
@@ -240,6 +244,7 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 	transactionHistoryUc := TransactionHistoryUseCase{UcContract:uc.UcContract}
 	err = transactionHistoryUc.Add(input.TrxID,enums.KeyPaymentStatus3,map[string]interface{}{})
 	if err != nil {
+		fmt.Println(5)
 		uc.TX.Rollback()
 		res = viewmodel.PaymentNotificationVm{
 			Response:     "Payment Notification",
