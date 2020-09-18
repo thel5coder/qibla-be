@@ -18,4 +18,5 @@ func (route TransactionRoute) RegisterRoute(){
 	transactionRoute := route.RouteGroup.Group("/transaction")
 	transactionRoute.Use(jwtMiddleware.JWTWithConfig)
 	transactionRoute.GET("/invoice",handler.GetInvoiceCount)
+	transactionRoute.GET("/:trxId",handler.ReadByTrxID)
 }

@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -9,19 +10,18 @@ import (
 	"time"
 )
 
-type TransactionRepository struct{
+type TransactionRepository struct {
 	DB *sql.DB
 }
 
-func NewTransactionRepository(DB *sql.DB) contracts.ITransactionRepository{
+func NewTransactionRepository(DB *sql.DB) contracts.ITransactionRepository {
 	return &TransactionRepository{DB: DB}
 }
 
 const transactionSelect = `select t."id",t."user_id",t."invoice_number",t."trx_id",t."due_date",t."due_date_period",t."payment_status",
                          t."payment_method_code",t."va_number",t."bank_name",t."direction",t."transaction_type",t."paid_date",
-                         t."transaction_date",t."updated_date",sum(td."price")
-                         from "transactions" t 
-                         left join "transaction_details" td on td."transaction_id"=t."id"`
+                         t."transaction_date",t."updated_at",sum(td."price")`
+const joinQuery = `left join "transaction_details" td on td."transaction_id"=t."id"`
 const groupBy = `group by t."id"`
 
 func (TransactionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Transaction, count int, err error) {
@@ -29,8 +29,10 @@ func (TransactionRepository) Browse(search, order, sort string, limit, offset in
 }
 
 func (repository TransactionRepository) ReadBy(column, value, operator string) (data models.Transaction, err error) {
-	statement := transactionSelect+` from "transactions" where `+column+``+operator+`$1 `+ groupBy
-	err = repository.DB.QueryRow(statement,value).Scan(
+	fmt.Println(value)
+	statement := transactionSelect + ` from "transactions" t `+joinQuery+` where ` + column + `` + operator + `$1 ` + groupBy
+	fmt.Println(statement)
+	err = repository.DB.QueryRow(statement, value).Scan(
 		&data.ID,
 		&data.UserID,
 		&data.InvoiceNumber,
@@ -47,12 +49,12 @@ func (repository TransactionRepository) ReadBy(column, value, operator string) (
 		&data.TransactionDate,
 		&data.UpdatedAt,
 		&data.Total,
-		)
+	)
 
-	return data,err
+	return data, err
 }
 
-func (TransactionRepository) Add(input viewmodel.TransactionVm, tx *sql.Tx) (res string,err error) {
+func (TransactionRepository) Add(input viewmodel.TransactionVm, tx *sql.Tx) (res string, err error) {
 	statement := `insert into "transactions" ("user_id","invoice_number","trx_id","due_date","due_date_period","payment_status","payment_method_code","va_number",
                   "bank_name","direction","transaction_type","transaction_date","updated_at")
                   values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) returning "id"`
@@ -61,7 +63,7 @@ func (TransactionRepository) Add(input viewmodel.TransactionVm, tx *sql.Tx) (res
 		input.UserID,
 		input.InvoiceNumber,
 		input.TrxID,
-		datetime.StrParseToTime(input.DueDate,"2006-01-02"),
+		datetime.StrParseToTime(input.DueDate, "2006-01-02"),
 		input.DueDatePeriod,
 		input.PaymentStatus,
 		input.PaymentMethodCode,
@@ -69,55 +71,54 @@ func (TransactionRepository) Add(input viewmodel.TransactionVm, tx *sql.Tx) (res
 		input.BankName,
 		input.Direction,
 		input.TransactionType,
-		datetime.StrParseToTime(input.TransactionDate,time.RFC3339),
-		datetime.StrParseToTime(input.UpdatedAt,time.RFC3339),
-		).Scan(&res)
+		datetime.StrParseToTime(input.TransactionDate, time.RFC3339),
+		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
+	).Scan(&res)
 
-	return res,err
+	return res, err
 }
 
-func (repository TransactionRepository) EditDueDate(ID,dueDate,updatedAt string,dueDatePeriod int) (res string, err error) {
+func (repository TransactionRepository) EditDueDate(ID, dueDate, updatedAt string, dueDatePeriod int) (res string, err error) {
 	statement := `update "transactions" set "due_date"=$1, "due_date_period"=$2, "updated_at"=$3 where "id"=$3 returning "id"`
 	err = repository.DB.QueryRow(
 		statement,
-		datetime.StrParseToTime(dueDate,"2006-01-02"),
+		datetime.StrParseToTime(dueDate, "2006-01-02"),
 		dueDatePeriod,
-		datetime.StrParseToTime(updatedAt,time.RFC3339),
+		datetime.StrParseToTime(updatedAt, time.RFC3339),
 		ID,
-		).Scan(&res)
+	).Scan(&res)
 
-	return res,err
+	return res, err
 }
 
-
-func (repository TransactionRepository) EditStatus(ID,paymentStatus,paidDate,updatedAt string,tx *sql.Tx) (err error){
+func (repository TransactionRepository) EditStatus(ID, paymentStatus, paidDate, updatedAt string, tx *sql.Tx) (err error) {
 	statement := `update "transactions" set "payment_status"=$1, "paid_date"=$2, "updated_at"=$3 where "id"=$3 returning "id"`
-	_,err = tx.Exec(
+	_, err = tx.Exec(
 		statement,
 		paymentStatus,
-		datetime.StrParseToTime(paidDate,"2006-01-02 15:04:05"),
-		datetime.StrParseToTime(updatedAt,time.RFC3339),
+		datetime.StrParseToTime(paidDate, "2006-01-02 15:04:05"),
+		datetime.StrParseToTime(updatedAt, time.RFC3339),
 		ID,
 	)
 
 	return err
 }
 
-func (repository TransactionRepository) CountBy(ID,column,value string) (res int,err error){
-	if ID == ""{
-		statement := `select count("id") from "transactions" where `+column+`=$1`
-		err = repository.DB.QueryRow(statement,value).Scan(&res)
-	}else{
-		statement := `select count("id") from "transactions" where `+column+`=$1 and "id"<>$2`
-		err = repository.DB.QueryRow(statement,value,ID).Scan(&res)
+func (repository TransactionRepository) CountBy(ID, column, value string) (res int, err error) {
+	if ID == "" {
+		statement := `select count("id") from "transactions" where ` + column + `=$1`
+		err = repository.DB.QueryRow(statement, value).Scan(&res)
+	} else {
+		statement := `select count("id") from "transactions" where ` + column + `=$1 and "id"<>$2`
+		err = repository.DB.QueryRow(statement, value, ID).Scan(&res)
 	}
 
-	return res,err
+	return res, err
 }
 
-func (repository TransactionRepository) GetInvoiceCount(month int) (res int,err error){
+func (repository TransactionRepository) GetInvoiceCount(month int) (res int, err error) {
 	statement := `select count("id") from "transactions" where EXTRACT(month from "transaction_date")=$1`
-	err = repository.DB.QueryRow(statement,month).Scan(&res)
+	err = repository.DB.QueryRow(statement, month).Scan(&res)
 
-	return res,err
+	return res, err
 }
