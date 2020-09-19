@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -29,9 +28,7 @@ func (TransactionRepository) Browse(search, order, sort string, limit, offset in
 }
 
 func (repository TransactionRepository) ReadBy(column, value, operator string) (data models.Transaction, err error) {
-	fmt.Println(value)
 	statement := transactionSelect + ` from "transactions" t `+joinQuery+` where ` + column + `` + operator + `$1 ` + groupBy
-	fmt.Println(statement)
 	err = repository.DB.QueryRow(statement, value).Scan(
 		&data.ID,
 		&data.UserID,
