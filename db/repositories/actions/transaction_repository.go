@@ -93,7 +93,9 @@ func (repository TransactionRepository) EditStatus(ID, paymentStatus, paidDate, 
 	fmt.Println("dari uc")
 	fmt.Println(updatedAt)
 	fmt.Println("repo")
-	fmt.Println(datetime.StrParseToTime(updatedAt, time.RFC3339))
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	fmt.Println(datetime.StrParseToTime(now, time.RFC3339))
 	statement := `update "transactions" set "payment_status"=$1, "paid_date"=$2, "updated_at"=$3 where "id"=$3 returning "id"`
 	_, err = tx.Exec(
 		statement,
