@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -134,6 +135,8 @@ func (repository MasterProductRepository) Edit(input viewmodel.MasterProductVm) 
 }
 
 func (repository MasterProductRepository) Add(input viewmodel.MasterProductVm) (res string, err error) {
+	fmt.Println(input.UpdatedAt)
+	fmt.Println(input.UpdatedAt, time.RFC3339)
 	statement := `insert into "master_products" ("name","subscription_type","slug","created_at","updated_at") values($1,$2,$3,$4,$5) returning "id"`
 	err = repository.DB.QueryRow(
 		statement,
