@@ -228,7 +228,7 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 	transactionUc.TX = uc.TX
 	err = transactionUc.EditStatus(transaction.ID,enums.KeyPaymentStatus3,input.PaymentDate)
 	if err != nil {
-		fmt.Println(4)
+		fmt.Println(err.Error())
 		uc.TX.Rollback()
 		res = viewmodel.PaymentNotificationVm{
 			Response:     "Payment Notification",
