@@ -42,7 +42,7 @@ func (uc FaspayUseCase) GetLisPaymentMethods() (res map[string]interface{}, err 
 	var client http.Client
 	var bodyPost = []byte(`{"merchant_id":"` + os.Getenv("FASPAY_MERCHANT_ID") + `","signature":"` + signature + `"}`)
 
-	request, err := http.NewRequest("POST", fasPayBaseUrl+"/100001/10", bytes.NewBuffer(bodyPost))
+	request, err := http.NewRequest("POST", os.Getenv("FASPAY_BASE_URL")+"/100001/10", bytes.NewBuffer(bodyPost))
 	if err != nil {
 		fmt.Print(err.Error())
 		return res, err
@@ -105,7 +105,7 @@ func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest, contact viewm
 	bodyPost, _ := json.Marshal(body)
 
 
-	request, err := http.NewRequest("POST", fasPayBaseUrl+"/300011/10", bytes.NewBuffer(bodyPost))
+	request, err := http.NewRequest("POST", os.Getenv("FASPAY_BASE_URL")+"/300011/10", bytes.NewBuffer(bodyPost))
 	if err != nil {
 		return res, err
 	}
@@ -148,7 +148,7 @@ func (uc FaspayUseCase) CheckPaymentStatus(invoiceID string) (res map[string]int
 	}
 
 	bodyPost,_ := json.Marshal(body)
-	request, err := http.NewRequest("POST", fasPayBaseUrl+"/100004/10", bytes.NewBuffer(bodyPost))
+	request, err := http.NewRequest("POST", os.Getenv("FASPAY_BASE_URL")+"/100004/10", bytes.NewBuffer(bodyPost))
 	if err != nil {
 		return res, err
 	}

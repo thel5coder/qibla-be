@@ -2,20 +2,23 @@ package usecase
 
 import (
 	"errors"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/enums"
 	"qibla-backend/helpers/messages"
+	"qibla-backend/helpers/str"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
+	"strings"
 	"time"
 )
 
+// SettingProductUseCase ...
 type SettingProductUseCase struct {
 	*UcContract
 }
 
+// Browse ...
 func (uc SettingProductUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.SettingProductVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewSettingProductRepository(uc.DB)
 
@@ -26,13 +29,14 @@ func (uc SettingProductUseCase) Browse(search, order, sort string, page, limit i
 	}
 
 	for _, settingProduct := range settingProducts {
-		res = append(res, uc.buildBody(settingProduct))
+		res = append(res, uc.buildBody(&settingProduct))
 	}
 	pagination = uc.setPaginationResponse(page, limit, count)
 
 	return res, pagination, err
 }
 
+// BrowseAll ...
 func (uc SettingProductUseCase) BrowseAll() (res []viewmodel.SettingProductVm, err error) {
 	repository := actions.NewSettingProductRepository(uc.DB)
 
@@ -42,23 +46,25 @@ func (uc SettingProductUseCase) BrowseAll() (res []viewmodel.SettingProductVm, e
 	}
 
 	for _, settingProduct := range settingProducts {
-		res = append(res, uc.buildBody(settingProduct))
+		res = append(res, uc.buildBody(&settingProduct))
 	}
 
 	return res, err
 }
 
+// BrowseBy ...
 func (uc SettingProductUseCase) BrowseBy(column, value, operator string) (res []viewmodel.SettingProductVm, err error) {
 	repository := actions.NewSettingProductRepository(uc.DB)
 	settingProducts, err := repository.BrowseBy(column, value, operator)
 
 	for _, settingProduct := range settingProducts {
-		res = append(res, uc.buildBody(settingProduct))
+		res = append(res, uc.buildBody(&settingProduct))
 	}
 
 	return res, err
 }
 
+// ReadBy ...
 func (uc SettingProductUseCase) ReadBy(column, value string) (res viewmodel.SettingProductVm, err error) {
 	repository := actions.NewSettingProductRepository(uc.DB)
 	settingProduct, err := repository.ReadBy(column, value)
@@ -66,11 +72,12 @@ func (uc SettingProductUseCase) ReadBy(column, value string) (res viewmodel.Sett
 		return res, err
 	}
 
-	res = uc.buildBody(settingProduct)
+	res = uc.buildBody(&settingProduct)
 
 	return res, err
 }
 
+// ReadByPk ...
 func (uc SettingProductUseCase) ReadByPk(ID string) (res viewmodel.SettingProductVm, err error) {
 	res, err = uc.ReadBy("sp.id", ID)
 	if err != nil {
@@ -80,14 +87,8 @@ func (uc SettingProductUseCase) ReadByPk(ID string) (res viewmodel.SettingProduc
 	return res, err
 }
 
+// Edit ...
 func (uc SettingProductUseCase) Edit(ID string, input *requests.SettingProductRequest) (err error) {
-	repository := actions.NewSettingProductRepository(uc.DB)
-	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
-	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
-	masterProductUc := MasterProductUseCase{UcContract: uc.UcContract}
-	now := time.Now().UTC().Format(time.RFC3339)
-	var priceUnit string
-
 	count, err := uc.countBy(ID, "product_id", input.ProductID)
 	if err != nil {
 		return err
@@ -96,11 +97,13 @@ func (uc SettingProductUseCase) Edit(ID string, input *requests.SettingProductRe
 		return errors.New(messages.DataAlreadyExist)
 	}
 
+	masterProductUc := MasterProductUseCase{UcContract: uc.UcContract}
 	masterProduct, err := masterProductUc.ReadByPk(input.ProductID)
 	if err != nil {
 		return err
 	}
 
+	var priceUnit string
 	if masterProduct.SubscriptionType == enums.KeySubscriptionEnum1 {
 		priceUnit = enums.KeyPriceUnitEnum3
 	} else if masterProduct.SubscriptionType == enums.KeySubscriptionEnum3 {
@@ -109,13 +112,7 @@ func (uc SettingProductUseCase) Edit(ID string, input *requests.SettingProductRe
 		priceUnit = input.PriceUnit
 	}
 
-	uc.TX, err = uc.DB.Begin()
-	if err != nil {
-		uc.TX.Rollback()
-
-		return err
-	}
-
+	now := time.Now().UTC().Format(time.RFC3339)
 	body := viewmodel.SettingProductVm{
 		ID:                  ID,
 		ProductID:           input.ProductID,
@@ -130,41 +127,29 @@ func (uc SettingProductUseCase) Edit(ID string, input *requests.SettingProductRe
 		Sessions:            input.Sessions,
 		UpdatedAt:           now,
 	}
+	repository := actions.NewSettingProductRepository(uc.DB)
 	err = repository.Edit(body, uc.TX)
 	if err != nil {
-		uc.TX.Rollback()
-
 		return err
 	}
 
+	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
 	err = settingProductPeriodUc.Store(ID, input.SettingPeriods, uc.TX)
 	if err != nil {
-		fmt.Println("error")
-		uc.TX.Rollback()
-
 		return err
 	}
 
+	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
 	err = settingProductFeatureUc.Store(ID, input.SettingFeatures, uc.TX)
 	if err != nil {
-		uc.TX.Rollback()
-
 		return err
 	}
-
-	uc.TX.Commit()
 
 	return nil
 }
 
+// Add ...
 func (uc SettingProductUseCase) Add(input *requests.SettingProductRequest) (err error) {
-	repository := actions.NewSettingProductRepository(uc.DB)
-	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
-	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
-	masterProductUc := MasterProductUseCase{UcContract: uc.UcContract}
-	now := time.Now().UTC().Format(time.RFC3339)
-	var priceUnit string
-
 	count, err := uc.countBy("", "product_id", input.ProductID)
 	if err != nil {
 		return err
@@ -173,11 +158,13 @@ func (uc SettingProductUseCase) Add(input *requests.SettingProductRequest) (err 
 		return errors.New(messages.DataAlreadyExist)
 	}
 
+	masterProductUc := MasterProductUseCase{UcContract: uc.UcContract}
 	masterProduct, err := masterProductUc.ReadByPk(input.ProductID)
 	if err != nil {
 		return err
 	}
 
+	var priceUnit string
 	if masterProduct.SubscriptionType == enums.KeySubscriptionEnum1 {
 		priceUnit = enums.KeyPriceUnitEnum3
 	} else if masterProduct.SubscriptionType == enums.KeySubscriptionEnum3 {
@@ -186,13 +173,7 @@ func (uc SettingProductUseCase) Add(input *requests.SettingProductRequest) (err 
 		priceUnit = input.PriceUnit
 	}
 
-	uc.TX, err = uc.DB.Begin()
-	if err != nil {
-		uc.TX.Rollback()
-
-		return err
-	}
-
+	now := time.Now().UTC().Format(time.RFC3339)
 	body := viewmodel.SettingProductVm{
 		ProductID:           input.ProductID,
 		Price:               input.Price,
@@ -207,72 +188,49 @@ func (uc SettingProductUseCase) Add(input *requests.SettingProductRequest) (err 
 		CreatedAt:           now,
 		UpdatedAt:           now,
 	}
+	repository := actions.NewSettingProductRepository(uc.DB)
 	body.ID, err = repository.Add(body, uc.TX)
 	if err != nil {
-		uc.TX.Rollback()
-
 		return err
 	}
 
+	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
 	err = settingProductPeriodUc.Store(body.ID, input.SettingPeriods, uc.TX)
 	if err != nil {
-		uc.TX.Rollback()
-
 		return err
 	}
 
+	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
 	err = settingProductFeatureUc.Store(body.ID, input.SettingFeatures, uc.TX)
 	if err != nil {
-		uc.TX.Rollback()
-
 		return err
 	}
-
-	uc.TX.Commit()
 
 	return err
 }
 
+// Delete ...
 func (uc SettingProductUseCase) Delete(ID string) (err error) {
-	repository := actions.NewSettingProductRepository(uc.DB)
-	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
-	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
+	count, _ := uc.countBy("", "id", ID)
+	if count == 0 {
+		return errors.New(messages.DataNotFound)
+	}
+
 	now := time.Now().UTC().Format(time.RFC3339)
-
-	count, err := uc.countBy("", "id", ID)
+	repository := actions.NewSettingProductRepository(uc.DB)
+	err = repository.Delete(ID, now, now, uc.TX)
 	if err != nil {
 		return err
 	}
 
-	uc.TX, err = uc.DB.Begin()
+	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
+	err = settingProductFeatureUc.DeleteBySettingProductID(ID, uc.TX)
 	if err != nil {
-		uc.TX.Rollback()
-
 		return err
 	}
-	if count > 0 {
-		err = repository.Delete(ID, now, now, uc.TX)
-		if err != nil {
-			uc.TX.Rollback()
 
-			return err
-		}
-
-		err = settingProductFeatureUc.DeleteBySettingProductID(ID, uc.TX)
-		if err != nil {
-			uc.TX.Rollback()
-
-			return err
-		}
-
-		err = settingProductPeriodUc.DeleteBySettingProductID(ID, uc.TX)
-		if err != nil {
-			uc.TX.Rollback()
-
-			return err
-		}
-	}
-	uc.TX.Commit()
+	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
+	err = settingProductPeriodUc.DeleteBySettingProductID(ID, uc.TX)
 
 	return err
 }
@@ -284,14 +242,41 @@ func (uc SettingProductUseCase) countBy(ID, column, value string) (res int, err 
 	return res, err
 }
 
-func (uc SettingProductUseCase) buildBody(data models.SettingProduct) (res viewmodel.SettingProductVm) {
-	settingProductFeatureUc := SettingProductFeatureUseCase{UcContract: uc.UcContract}
-	settingProductPeriodUc := SettingProductPeriodUseCase{UcContract: uc.UcContract}
+func (uc SettingProductUseCase) buildSettingProductFeature(data string) (res []viewmodel.SettingProductFeatureVm) {
+	dataArr := str.Unique(strings.Split(data, "|"))
+	for _, d := range dataArr {
+		dSplit := strings.Split(d, "#")
+		if len(dSplit) != 2 {
+			continue
+		}
 
-	var settingProductFeatures []viewmodel.SettingProductFeatureVm
-	var settingProductPeriods []viewmodel.SettingProductPeriodVm
-	settingProductFeatures, _ = settingProductFeatureUc.BrowseBySettingProductID(data.ID)
-	settingProductPeriods, _ = settingProductPeriodUc.BrowseBySettingProductID(data.ID)
+		res = append(res, viewmodel.SettingProductFeatureVm{
+			ID:          dSplit[0],
+			FeatureName: dSplit[1],
+		})
+	}
+	return res
+}
+
+func (uc SettingProductUseCase) buildSettingProductPeriod(data string) (res []viewmodel.SettingProductPeriodVm) {
+	dataArr := str.Unique(strings.Split(data, "|"))
+	for _, d := range dataArr {
+		dSplit := strings.Split(d, "#")
+		if len(dSplit) != 2 {
+			continue
+		}
+
+		res = append(res, viewmodel.SettingProductPeriodVm{
+			ID:     dSplit[0],
+			Period: str.StringToInt(dSplit[1]),
+		})
+	}
+	return res
+}
+
+func (uc SettingProductUseCase) buildBody(data *models.SettingProduct) (res viewmodel.SettingProductVm) {
+	settingProductFeatures := uc.buildSettingProductFeature(data.Features.String)
+	settingProductPeriods := uc.buildSettingProductPeriod(data.Periods.String)
 
 	return viewmodel.SettingProductVm{
 		ID:                    data.ID,

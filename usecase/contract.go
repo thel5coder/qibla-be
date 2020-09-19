@@ -27,16 +27,19 @@ import (
 )
 
 const (
-	defaultLimit                = 10
-	maxLimit                    = 50
-	defaultOrderBy              = "id"
-	defaultSort                 = "asc"
-	PasswordLength              = 6
-	defaultLastPage             = 0
-	OtpLifeTime                 = "3m"
-	MaxOtpSubmitRetry           = 3
-	StaticBaseUrl               = "/statics"
-	fasPayBaseUrl               = "https://dev.faspay.co.id/cvr"
+	defaultLimit   = 10
+	maxLimit       = 50
+	defaultOrderBy = "id"
+	defaultSort    = "asc"
+	// PasswordLength ...
+	PasswordLength  = 6
+	defaultLastPage = 0
+	// OtpLifeTime ...
+	OtpLifeTime = "3m"
+	// MaxOtpSubmitRetry ...
+	MaxOtpSubmitRetry = 3
+	// StaticBaseURL ...
+	StaticBaseURL               = "/statics"
 	defaultMaxResultYoutubeData = 10
 	defaultYoutubeSearchType    = "video"
 	defaultYoutubeOrder         = "date"
@@ -48,7 +51,7 @@ const (
 	defaultInvoiceDueDate       = 7
 )
 
-//globalsmscounter
+// GlobalSmsCounter ...
 var GlobalSmsCounter int
 
 // AmqpConnection ...
@@ -60,6 +63,7 @@ var AmqpChannel *amqp.Channel
 //X-Request-ID
 var xRequestID interface{}
 
+// UcContract ...
 type UcContract struct {
 	E              *echo.Echo
 	DB             *sql.DB
@@ -81,19 +85,15 @@ func (uc UcContract) setPaginationParameter(page, limit int, order, sort string)
 	if page <= 0 {
 		page = 1
 	}
-
 	if limit <= 0 || limit > maxLimit {
 		limit = defaultLimit
 	}
-
 	if order == "" {
 		order = defaultOrderBy
 	}
-
 	if sort == "" {
 		sort = defaultSort
 	}
-
 	offset := (page - 1) * limit
 
 	return offset, limit, page, order, sort
@@ -122,6 +122,7 @@ func (uc UcContract) setPaginationResponse(page, limit, total int) (paginationRe
 	return paginationResponse
 }
 
+// GetRandomString ...
 func (uc UcContract) GetRandomString(length int) string {
 	if length == 0 {
 		length = PasswordLength
@@ -141,6 +142,7 @@ func (uc UcContract) GetRandomString(length int) string {
 	return password
 }
 
+// LimitRetryByKey ...
 func (uc UcContract) LimitRetryByKey(key string, limit float64) (err error) {
 	var count float64
 	res := map[string]interface{}{}
@@ -165,14 +167,17 @@ func (uc UcContract) LimitRetryByKey(key string, limit float64) (err error) {
 	return err
 }
 
+// SetXRequestID ...
 func (uc UcContract) SetXRequestID(ctx echo.Context) {
 	xRequestID = ctx.Get(echo.HeaderXRequestID)
 }
 
+// GetXRequestID ...
 func (uc UcContract) GetXRequestID() interface{} {
 	return xRequestID
 }
 
+// PushToQueue ...
 func (uc UcContract) PushToQueue(queueBody map[string]interface{}, queueType, deadLetterType string) (err error) {
 	mqueue := queue.NewQueue(AmqpConnection, AmqpChannel)
 
@@ -184,6 +189,7 @@ func (uc UcContract) PushToQueue(queueBody map[string]interface{}, queueType, de
 	return err
 }
 
+// Read ...
 func (uc UcContract) Read(object string, criteria *odoo.Criteria, options *odoo.Options, res interface{}) (err error) {
 	err = uc.Odoo.SearchRead(object, criteria, odoo.NewOptions().Limit(1), res)
 	if err != nil {
@@ -193,6 +199,7 @@ func (uc UcContract) Read(object string, criteria *odoo.Criteria, options *odoo.
 	return err
 }
 
+// InitDBTransaction ...
 func (uc UcContract) InitDBTransaction() (err error) {
 	uc.TX, err = uc.DB.Begin()
 	if err != nil {

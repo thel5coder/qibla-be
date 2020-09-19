@@ -10,10 +10,12 @@ import (
 	"strconv"
 )
 
+// SettingProductHandler ...
 type SettingProductHandler struct {
 	Handler
 }
 
+// Browse ..
 func (handler SettingProductHandler) Browse(ctx echo.Context) error {
 	search := ctx.QueryParam("search")
 	order := ctx.QueryParam("order")
@@ -27,20 +29,23 @@ func (handler SettingProductHandler) Browse(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, pagination, err)
 }
 
-func (handler SettingProductHandler) BrowseSubscriptionProduct(ctx echo.Context) error{
+// BrowseSubscriptionProduct ..
+func (handler SettingProductHandler) BrowseSubscriptionProduct(ctx echo.Context) error {
 	uc := usecase.SettingProductUseCase{UcContract: handler.UseCaseContract}
-	res,err := uc.BrowseBy("mp.subscription_type",enums.KeySubscriptionEnum1,"=")
+	res, err := uc.BrowseBy("mp.subscription_type", enums.KeySubscriptionEnum1, "=")
 
-	return handler.SendResponse(ctx,res,nil,err)
+	return handler.SendResponse(ctx, res, nil, err)
 }
 
-func (handler SettingProductHandler) BrowseWebinarAndWebsiteProduct(ctx echo.Context) error{
+// BrowseWebinarAndWebsiteProduct ...
+func (handler SettingProductHandler) BrowseWebinarAndWebsiteProduct(ctx echo.Context) error {
 	uc := usecase.SettingProductUseCase{UcContract: handler.UseCaseContract}
-	res,err := uc.BrowseBy("mp.subscription_type",enums.KeySubscriptionEnum1,"<>")
+	res, err := uc.BrowseBy("mp.subscription_type", enums.KeySubscriptionEnum1, "<>")
 
-	return handler.SendResponse(ctx,res,nil,err)
+	return handler.SendResponse(ctx, res, nil, err)
 }
 
+// BrowseAll ...
 func (handler SettingProductHandler) BrowseAll(ctx echo.Context) error {
 	uc := usecase.SettingProductUseCase{UcContract: handler.UseCaseContract}
 	res, err := uc.BrowseAll()
@@ -48,6 +53,7 @@ func (handler SettingProductHandler) BrowseAll(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
+// Read ...
 func (handler SettingProductHandler) Read(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
@@ -57,15 +63,17 @@ func (handler SettingProductHandler) Read(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
-func (handler SettingProductHandler) ReadByProductID(ctx echo.Context) error{
+// ReadByProductID ...
+func (handler SettingProductHandler) ReadByProductID(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
 	uc := usecase.SettingProductUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.ReadBy("product_id",ID)
+	res, err := uc.ReadBy("product_id", ID)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
+// Edit ...
 func (handler SettingProductHandler) Edit(ctx echo.Context) error {
 	input := new(requests.SettingProductRequest)
 	ID := ctx.Param("id")
@@ -77,12 +85,24 @@ func (handler SettingProductHandler) Edit(ctx echo.Context) error {
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 	}
 
+	var err error
+	handler.UseCaseContract.TX, err = handler.UseCaseContract.DB.Begin()
+	if err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+
 	uc := usecase.SettingProductUseCase{UcContract: handler.UseCaseContract}
-	err := uc.Edit(ID, input)
+	err = uc.Edit(ID, input)
+	if err != nil {
+		handler.UseCaseContract.TX.Rollback()
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	handler.UseCaseContract.TX.Commit()
 
 	return handler.SendResponse(ctx, nil, nil, err)
 }
 
+// Add ...
 func (handler SettingProductHandler) Add(ctx echo.Context) error {
 	input := new(requests.SettingProductRequest)
 
@@ -93,17 +113,40 @@ func (handler SettingProductHandler) Add(ctx echo.Context) error {
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 	}
 
+	var err error
+	handler.UseCaseContract.TX, err = handler.UseCaseContract.DB.Begin()
+	if err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+
 	uc := usecase.SettingProductUseCase{UcContract: handler.UseCaseContract}
-	err := uc.Add(input)
+	err = uc.Add(input)
+	if err != nil {
+		handler.UseCaseContract.TX.Rollback()
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	handler.UseCaseContract.TX.Commit()
 
 	return handler.SendResponse(ctx, nil, nil, err)
 }
 
+// Delete ...
 func (handler SettingProductHandler) Delete(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
+	var err error
+	handler.UseCaseContract.TX, err = handler.UseCaseContract.DB.Begin()
+	if err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+
 	uc := usecase.SettingProductUseCase{UcContract: handler.UseCaseContract}
-	err := uc.Delete(ID)
+	err = uc.Delete(ID)
+	if err != nil {
+		handler.UseCaseContract.TX.Rollback()
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	handler.UseCaseContract.TX.Commit()
 
 	return handler.SendResponse(ctx, nil, nil, err)
 }
