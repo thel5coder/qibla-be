@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
@@ -31,6 +32,8 @@ func (uc TransactionUseCase) ReadBy(column, value, operator string) (res viewmod
 func(uc TransactionUseCase) EditStatus(ID,paymentStatus,paidDate string) (err error){
 	repository := actions.NewTransactionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
+	fmt.Println("uc")
+	fmt.Println(now)
 
 	err = repository.EditStatus(ID,paymentStatus,paidDate,now,uc.TX)
 
