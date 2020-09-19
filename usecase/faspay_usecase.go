@@ -171,6 +171,7 @@ func (uc FaspayUseCase) CheckPaymentStatus(invoiceID string) (res map[string]int
 }
 
 func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationRequest) (res viewmodel.PaymentNotificationVm,err error,code int){
+	fmt.Println("uc")
 	fmt.Println(input.PaymentDate)
 	now := time.Now().UTC().Format("2006-01-02 15:04:05")
 	transactionUc := TransactionUseCase{UcContract:uc.UcContract}
