@@ -212,7 +212,7 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (res viewmo
 			return res, err
 		}
 		transactionUc := TransactionUseCase{UcContract: uc.UcContract}
-		res, err = transactionUc.AddTransactionRegisterPartner(userID, input.InvoiceNumber, input.BankName, input.PaymentMethodCode, 7, input.ExtraProducts, contact)
+		res, err = transactionUc.AddTransactionRegisterPartner(userID, input.BankName, input.PaymentMethodCode, 7, input.ExtraProducts, contact)
 		if err != nil {
 			uc.TX.Rollback()
 
