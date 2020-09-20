@@ -90,7 +90,8 @@ func (repository TransactionRepository) EditDueDate(ID, dueDate, updatedAt strin
 }
 
 func (repository TransactionRepository) EditStatus(ID, paymentStatus, paidDate, updatedAt string, tx *sql.Tx) (err error) {
-	fmt.Println()
+	fmt.Println(updatedAt)
+	fmt.Println(datetime.StrParseToTime(updatedAt, time.RFC3339))
 	statement := `update "transactions" set "payment_status"=$1, "paid_date"=$2, "updated_at"=$3 where "id"=$4 returning "id"`
 	_, err = tx.Exec(
 		statement,
