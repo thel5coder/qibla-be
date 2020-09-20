@@ -158,7 +158,7 @@ func (uc TransactionUseCase) buildBody(model models.Transaction) (res viewmodel.
 		TrxID:             model.TrxID.String,
 		DueDate:           model.DueDate,
 		DueDatePeriod:     model.DueDatePeriod.Int32,
-		PaymentStatus:     model.PaymentStatus,
+		PaymentStatus:     model.PaymentStatus.String,
 		PaymentMethodCode: model.PaymentMethodCode.Int32,
 		VaNumber:          model.VaNumber.String,
 		BankName:          model.BankName.String,
