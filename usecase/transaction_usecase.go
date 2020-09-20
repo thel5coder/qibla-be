@@ -179,6 +179,23 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, bankName stri
 	return res, err
 }
 
+func (uc TransactionUseCase) Delete(ID string) (err error) {
+	repository := actions.NewTransactionRepository(uc.DB)
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	count ,err := uc.CountBy("","id",ID)
+	if err != nil {
+		return err
+	}
+
+	_,err = repository.Delete(ID,now,now)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (uc TransactionUseCase) GetInvoiceNumber() (res string, err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 	year, month, _ := time.Now().UTC().Date()
