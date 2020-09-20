@@ -65,15 +65,14 @@ func (uc FaspayUseCase) GetLisPaymentMethods() (res map[string]interface{}, err 
 	return res, err
 }
 
-func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest, contact viewmodel.ContactVm) (res map[string]interface{}, err error) {
+func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest) (res map[string]interface{}, err error) {
 	compose := os.Getenv("FASPAY_USER_ID") + `` + os.Getenv("FASPAY_PASSWORD") + `` + input.InvoiceNumber
-	phoneNumber := str.StringToInt(contact.PhoneNumber)
 	signature := uc.getSignature(compose)
 	var client http.Client
 	var items []viewmodel.ItemFaspayPostDataVm
 
-	for _, item := range input.Item{
-		items = append(items,viewmodel.ItemFaspayPostDataVm{
+	for _, item := range input.Item {
+		items = append(items, viewmodel.ItemFaspayPostDataVm{
 			Product:     item.Product,
 			Amount:      item.Amount,
 			Qty:         item.Qty,
@@ -85,7 +84,7 @@ func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest, contact viewm
 	body := viewmodel.FaspayPostDataVm{
 		Request:        input.RequestTransaction,
 		MerchantID:     os.Getenv("FASPAY_MERCHANT_ID"),
-		Merchant:       contact.TravelAgentName,
+		Merchant:       os.Getenv("FASPAY_MERCHANT"),
 		BillNo:         input.InvoiceNumber,
 		BillDate:       input.TransactionDate,
 		BillExpired:    input.DueDate,
@@ -95,15 +94,14 @@ func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest, contact viewm
 		PaymentChannel: input.PaymentChannel,
 		PayType:        defaultFaspayPayType,
 		CustNo:         input.UserID,
-		CustName:       contact.TravelAgentName,
-		Msisdn:         phoneNumber,
-		Email:          contact.Email,
+		CustName:       input.CustomerName,
+		Msisdn:         str.StringToInt(input.CustomerPhoneNumber),
+		Email:          input.CustomerEmail,
 		Terminal:       defaultFaspayTerminal,
 		Signature:      signature,
 		Item:           items,
 	}
 	bodyPost, _ := json.Marshal(body)
-
 
 	request, err := http.NewRequest("POST", os.Getenv("FASPAY_BASE_URL")+"/300011/10", bytes.NewBuffer(bodyPost))
 	if err != nil {
@@ -124,21 +122,21 @@ func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest, contact viewm
 		return res, err
 	}
 	fmt.Println(res)
-	if res["response_code"] != "00"{
-		return res,errors.New(messages.PaymentFailed)
+	if res["response_code"] != "00" {
+		return res, errors.New(messages.PaymentFailed)
 	}
 
 	return res, err
 }
 
-func (uc FaspayUseCase) CheckPaymentStatus(invoiceID string) (res map[string]interface{},err error){
+func (uc FaspayUseCase) CheckPaymentStatus(invoiceID string) (res map[string]interface{}, err error) {
 	var client http.Client
-	transactionUc := TransactionUseCase{UcContract:uc.UcContract}
-	transaction,err := transactionUc.ReadBy("t.id",invoiceID,"=")
+	transactionUc := TransactionUseCase{UcContract: uc.UcContract}
+	transaction, err := transactionUc.ReadBy("t.id", invoiceID, "=")
 	if err != nil {
-		return res,err
+		return res, err
 	}
-	signature := uc.getSignature(os.Getenv("FASPAY_USER_ID")+``+os.Getenv("FASPAY_PASSWORD")+``+transaction.InvoiceNumber)
+	signature := uc.getSignature(os.Getenv("FASPAY_USER_ID") + `` + os.Getenv("FASPAY_PASSWORD") + `` + transaction.InvoiceNumber)
 	body := viewmodel.CheckPaymentStatus{
 		Request:    enums.KeyTransactionType6,
 		TrxID:      transaction.TrxID,
@@ -147,7 +145,7 @@ func (uc FaspayUseCase) CheckPaymentStatus(invoiceID string) (res map[string]int
 		Signature:  signature,
 	}
 
-	bodyPost,_ := json.Marshal(body)
+	bodyPost, _ := json.Marshal(body)
 	request, err := http.NewRequest("POST", os.Getenv("FASPAY_BASE_URL")+"/100004/10", bytes.NewBuffer(bodyPost))
 	if err != nil {
 		return res, err
@@ -167,13 +165,13 @@ func (uc FaspayUseCase) CheckPaymentStatus(invoiceID string) (res map[string]int
 		return res, err
 	}
 
-	return res,err
+	return res, err
 }
 
-func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationRequest) (res viewmodel.PaymentNotificationVm,err error,code int){
+func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationRequest) (res viewmodel.PaymentNotificationVm, err error, code int) {
 	now := time.Now().UTC().Format("2006-01-02 15:04:05")
-	transactionUc := TransactionUseCase{UcContract:uc.UcContract}
-	transaction,err := transactionUc.ReadBy("t.trx_id",input.TrxID,"=")
+	transactionUc := TransactionUseCase{UcContract: uc.UcContract}
+	transaction, err := transactionUc.ReadBy("t.trx_id", input.TrxID, "=")
 	if err != nil {
 		fmt.Println(1)
 
@@ -187,9 +185,9 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 			ResponseDesc: "Tagihan tidak ditemukan",
 			ResponseDate: now,
 		}
-		return res,err,http.StatusUnprocessableEntity
+		return res, err, http.StatusUnprocessableEntity
 	}
-	signature := uc.getSignature(os.Getenv("FASPAY_USER_ID")+``+os.Getenv("FASPAY_PASSWORD")+``+transaction.InvoiceNumber+`2`)
+	signature := uc.getSignature(os.Getenv("FASPAY_USER_ID") + `` + os.Getenv("FASPAY_PASSWORD") + `` + transaction.InvoiceNumber + `2`)
 	if signature != input.Signature {
 		fmt.Println(2)
 
@@ -203,10 +201,10 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 			ResponseDesc: "Unknown",
 			ResponseDate: now,
 		}
-		return res,err,http.StatusUnauthorized
+		return res, err, http.StatusUnauthorized
 	}
 
-	uc.TX,err = uc.DB.Begin()
+	uc.TX, err = uc.DB.Begin()
 	if err != nil {
 		fmt.Println(3)
 
@@ -222,11 +220,11 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 			ResponseDate: now,
 		}
 
-		return res,err,http.StatusUnprocessableEntity
+		return res, err, http.StatusUnprocessableEntity
 	}
 
 	transactionUc.TX = uc.TX
-	err = transactionUc.EditStatus(transaction.ID,enums.KeyPaymentStatus3,input.PaymentDate)
+	err = transactionUc.EditStatus(transaction.ID, enums.KeyPaymentStatus3, input.PaymentDate)
 	if err != nil {
 		fmt.Println(err.Error())
 		uc.TX.Rollback()
@@ -241,11 +239,11 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 			ResponseDate: now,
 		}
 
-		return res,err,http.StatusOK
+		return res, err, http.StatusOK
 	}
 
-	transactionHistoryUc := TransactionHistoryUseCase{UcContract:uc.UcContract}
-	err = transactionHistoryUc.Add(input.TrxID,enums.KeyPaymentStatus3,map[string]interface{}{})
+	transactionHistoryUc := TransactionHistoryUseCase{UcContract: uc.UcContract}
+	err = transactionHistoryUc.Add(input.TrxID, enums.KeyPaymentStatus3, map[string]interface{}{})
 	if err != nil {
 		fmt.Println(5)
 
@@ -261,7 +259,7 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 			ResponseDate: now,
 		}
 
-		return res,err,http.StatusOK
+		return res, err, http.StatusOK
 	}
 
 	res = viewmodel.PaymentNotificationVm{
@@ -276,5 +274,5 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 	}
 	uc.TX.Commit()
 
-	return res,err,http.StatusOK
+	return res, err, http.StatusOK
 }

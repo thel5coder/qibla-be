@@ -29,7 +29,7 @@ func (TransactionRepository) Browse(search, order, sort string, limit, offset in
 }
 
 func (repository TransactionRepository) ReadBy(column, value, operator string) (data models.Transaction, err error) {
-	statement := transactionSelect + ` from "transactions" t `+joinQuery+` where ` + column + `` + operator + `$1 ` + groupBy
+	statement := transactionSelect + ` from "transactions" t ` + joinQuery + ` where ` + column + `` + operator + `$1 ` + groupBy
 	err = repository.DB.QueryRow(statement, value).Scan(
 		&data.ID,
 		&data.UserID,
@@ -101,6 +101,18 @@ func (repository TransactionRepository) EditStatus(ID, paymentStatus, paidDate, 
 		statement,
 		paymentStatus,
 		datetime.StrParseToTime(paidDate, "2006-01-02 15:04:05"),
+		datetime.StrParseToTime(updatedAt, time.RFC3339),
+		ID,
+	)
+
+	return err
+}
+
+func (repository TransactionRepository) EditTrxID(ID, trxID string, updatedAt string, tx *sql.Tx) (err error) {
+	statement := `update "transactions" set "trx_id"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
+	_, err = tx.Exec(
+		statement,
+		trxID,
 		datetime.StrParseToTime(updatedAt, time.RFC3339),
 		ID,
 	)
