@@ -24,8 +24,8 @@ func (repository UserZakatRepository) scanRows(rows *sql.Rows) (d models.UserZak
 	err = rows.Scan(
 		&d.ID, &d.UserID, &d.TransactionID, &d.ContactID, &d.MasterZakatID, &d.TypeZakat,
 		&d.CurrentGoldPrice, &d.GoldNishab, &d.Wealth, &d.Total, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
-		&d.User.Email, &d.User.Name, &d.Transaction.InvoiceNumber, &d.Contact.BranchName,
-		&d.Contact.TravelAgentName,
+		&d.User.Email, &d.User.Name, &d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
+		&d.Transaction.PaymentStatus, &d.Contact.BranchName, &d.Contact.TravelAgentName,
 	)
 
 	return d, err
@@ -35,8 +35,8 @@ func (repository UserZakatRepository) scanRow(row *sql.Row) (d models.UserZakat,
 	err = row.Scan(
 		&d.ID, &d.UserID, &d.TransactionID, &d.ContactID, &d.MasterZakatID, &d.TypeZakat,
 		&d.CurrentGoldPrice, &d.GoldNishab, &d.Wealth, &d.Total, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
-		&d.User.Email, &d.User.Name, &d.Transaction.InvoiceNumber, &d.Contact.BranchName,
-		&d.Contact.TravelAgentName,
+		&d.User.Email, &d.User.Name, &d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
+		&d.Transaction.PaymentStatus, &d.Contact.BranchName, &d.Contact.TravelAgentName,
 	)
 
 	return d, err

@@ -9,7 +9,7 @@ type Transaction struct {
 	TrxID             sql.NullString `json:"trx_id"`
 	DueDate           string         `json:"due_date"`
 	DueDatePeriod     sql.NullInt32  `json:"due_date_period"`
-	PaymentStatus     string         `json:"payment_status"`
+	PaymentStatus     sql.NullString `json:"payment_status"`
 	PaymentMethodCode sql.NullInt32  `json:"payment_method_code"`
 	VaNumber          sql.NullString `json:"va_number"`
 	BankName          sql.NullString `json:"bank_name"`

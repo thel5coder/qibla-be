@@ -28,7 +28,8 @@ var (
 	UserZakatSelect = `SELECT uz."id", uz."user_id", uz."transaction_id", uz."contact_id",
 	uz."master_zakat_id", uz."type_zakat", uz."current_gold_price", uz."gold_nishab",
 	uz."wealth", uz."total", uz."created_at", uz."updated_at", uz."deleted_at",
-	u."email", u."name", t."invoice_number", c."branch_name", c."travel_agent_name"
+	u."email", u."name", t."invoice_number", t."payment_method_code", t."payment_status",
+	c."branch_name", c."travel_agent_name"
 	FROM "user_zakats" uz
 	LEFT JOIN "users" u ON u."id" = uz."user_id"
 	LEFT JOIN "transactions" t ON t."id" = uz."transaction_id"

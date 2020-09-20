@@ -53,6 +53,7 @@ func (jwtVerify JwtVerify) JWTWithConfig(next echo.HandlerFunc) echo.HandlerFunc
 			return apiHandler.SendResponseUnauthorized(ctx, errors.New(messages.FailedLoadPayload))
 		}
 		claims.Id = fmt.Sprintf("%v", jweRes["id"])
+		jwtVerify.UcContract.UserID = claims.Id
 
 		//sessionData := viewmodel.UserSessionVm{}
 		//jwtVerify.UcContract.GetFromRedis("session-"+claims.Id, &sessionData)

@@ -670,6 +670,7 @@ CREATE TABLE "user_zakats" (
   "user_id" char(36) NOT NULL,
   "transaction_id" char(36) NOT NULL,
   "contact_id" char(36) NOT NULL,
+  "payment_method_code" int4,
   "master_zakat_id" char(36) NOT NULL,
   "type_zakat" type_zakat_enum,
   "current_gold_price" int4,

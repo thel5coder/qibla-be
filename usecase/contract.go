@@ -79,6 +79,7 @@ type UcContract struct {
 	Pusher         pusher.Credential
 	GoMailConfig   mailing.GoMailConfig
 	YoutubeService *youtube.Service
+	UserID         string
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {
