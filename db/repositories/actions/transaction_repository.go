@@ -132,9 +132,17 @@ func (repository TransactionRepository) CountBy(ID, column, value string) (res i
 	return res, err
 }
 
+func (repository TransactionRepository) Delete(ID,updatedAt,deletedAt string) (res string,err error){
+	statement := `update "transactions" set "updated_at"=$1, "deleted_at"=$2 where "id"=$1`
+	err = repository.DB.QueryRow(statement,datetime.StrParseToTime(updatedAt,time.RFC3339),datetime.StrParseToTime(deletedAt,time.RFC3339),ID).Scan(&res)
+
+	return res,err
+}
+
 func (repository TransactionRepository) GetInvoiceCount(month int) (res int, err error) {
 	statement := `select count("id") from "transactions" where EXTRACT(month from "transaction_date")=$1`
 	err = repository.DB.QueryRow(statement, month).Scan(&res)
 
 	return res, err
 }
+

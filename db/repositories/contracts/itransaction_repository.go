@@ -19,6 +19,8 @@ type ITransactionRepository interface {
 
 	EditTrxID(ID,trxID string,updatedAt string,tx *sql.Tx) (err error)
 
+	Delete(ID,updatedAt,deletedAt string) (res string,err error)
+
 	CountBy(ID, column, value string) (res int, err error)
 
 	GetInvoiceCount(month int) (res int,err error)
