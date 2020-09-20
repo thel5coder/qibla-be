@@ -114,6 +114,7 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 	if err != nil {
 		return res, err
 	}
+	res.FaspayResponse = faspayRes
 
 	return res, err
 }
