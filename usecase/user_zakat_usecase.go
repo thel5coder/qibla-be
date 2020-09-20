@@ -121,6 +121,10 @@ func (uc UserZakatUseCase) EditPaymentMethod(ID string, input *requests.UserZaka
 	input.Wealth = userZakat.Wealth
 	input.Total = userZakat.Total
 	transactionUseCase := TransactionUseCase{UcContract: uc.UcContract}
+	err = transactionUseCase.Delete(ID)
+	if err != nil {
+		return err
+	}
 	transaction, err := transactionUseCase.AddTransactionZakat(input)
 	if err != nil {
 		return err
@@ -133,7 +137,7 @@ func (uc UserZakatUseCase) EditPaymentMethod(ID string, input *requests.UserZaka
 		UpdatedAt:     now,
 	}
 	repository := actions.NewUserZakatRepository(uc.DB)
-	err = repository.Edit(body, uc.TX)
+	err = repository.EditTransaction(body, uc.TX)
 	if err != nil {
 		return err
 	}

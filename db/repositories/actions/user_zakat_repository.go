@@ -147,7 +147,18 @@ func (UserZakatRepository) Edit(input viewmodel.UserZakatVm, tx *sql.Tx) (err er
 		str.EmptyString(input.UserID), str.EmptyString(input.TransactionID),
 		str.EmptyString(input.ContactID), str.EmptyString(input.MasterZakatID), input.TypeZakat,
 		input.CurrentGoldPrice, input.GoldNishab, input.Wealth, input.Total,
-		datetime.StrParseToTime(input.CreatedAt, time.RFC3339), datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
+		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID,
+	)
+
+	return err
+}
+
+// EditTransaction ...
+func (UserZakatRepository) EditTransaction(input viewmodel.UserZakatVm, tx *sql.Tx) (err error) {
+	statement := `UPDATE "user_zakats" set "transaction_id"=$1, "updated_at"=$2
+	WHERE "id"=$3 AND "deleted_at" IS NULL`
+	_, err = tx.Exec(statement,
+		str.EmptyString(input.TransactionID), datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
 		input.ID,
 	)
 

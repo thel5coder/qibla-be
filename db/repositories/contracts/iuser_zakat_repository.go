@@ -17,6 +17,8 @@ type IUserZakatRepository interface {
 
 	Edit(input viewmodel.UserZakatVm, tx *sql.Tx) (err error)
 
+	EditTransaction(input viewmodel.UserZakatVm, tx *sql.Tx) (err error)
+
 	Add(input viewmodel.UserZakatVm, tx *sql.Tx) (res string, err error)
 
 	Delete(ID, updatedAt, deletedAt string, tx *sql.Tx) (err error)
