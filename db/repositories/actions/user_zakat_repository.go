@@ -25,7 +25,8 @@ func (repository UserZakatRepository) scanRows(rows *sql.Rows) (d models.UserZak
 		&d.ID, &d.UserID, &d.TransactionID, &d.ContactID, &d.MasterZakatID, &d.TypeZakat,
 		&d.CurrentGoldPrice, &d.GoldNishab, &d.Wealth, &d.Total, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
 		&d.User.Email, &d.User.Name, &d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
-		&d.Transaction.PaymentStatus, &d.Contact.BranchName, &d.Contact.TravelAgentName,
+		&d.Transaction.PaymentStatus, &d.Transaction.DueDate, &d.Transaction.VaNumber,
+		&d.Transaction.BankName, &d.Contact.BranchName, &d.Contact.TravelAgentName,
 	)
 
 	return d, err
@@ -36,7 +37,8 @@ func (repository UserZakatRepository) scanRow(row *sql.Row) (d models.UserZakat,
 		&d.ID, &d.UserID, &d.TransactionID, &d.ContactID, &d.MasterZakatID, &d.TypeZakat,
 		&d.CurrentGoldPrice, &d.GoldNishab, &d.Wealth, &d.Total, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
 		&d.User.Email, &d.User.Name, &d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
-		&d.Transaction.PaymentStatus, &d.Contact.BranchName, &d.Contact.TravelAgentName,
+		&d.Transaction.PaymentStatus, &d.Transaction.DueDate, &d.Transaction.VaNumber,
+		&d.Transaction.BankName, &d.Contact.BranchName, &d.Contact.TravelAgentName,
 	)
 
 	return d, err
@@ -71,7 +73,7 @@ func (repository UserZakatRepository) Browse(search, order, sort string, limit, 
 // BrowseBy ...
 func (repository UserZakatRepository) BrowseBy(column, value, operator string) (data []models.UserZakat, err error) {
 	statement := models.UserZakatSelect + ` WHERE ` + column + `` + operator + `$1
-	AND uz."deleted_at" IS NULL ORDER BY sp."id" ASC`
+	AND uz."deleted_at" IS NULL ORDER BY uz."id" ASC`
 	rows, err := repository.DB.Query(statement, value)
 	if err != nil {
 		return data, err

@@ -1,9 +1,11 @@
 package usecase
 
 import (
+	"errors"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/enums"
+	"qibla-backend/helpers/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"
@@ -75,7 +77,7 @@ func (uc UserZakatUseCase) ReadBy(column, value string) (res viewmodel.UserZakat
 
 // ReadByPk ...
 func (uc UserZakatUseCase) ReadByPk(ID string) (res viewmodel.UserZakatVm, err error) {
-	res, err = uc.ReadBy("sp.id", ID)
+	res, err = uc.ReadBy("uz.id", ID)
 	if err != nil {
 		return res, err
 	}
@@ -83,11 +85,11 @@ func (uc UserZakatUseCase) ReadByPk(ID string) (res viewmodel.UserZakatVm, err e
 	return res, err
 }
 
-func (uc UserZakatUseCase) checkInput(input *requests.UserZakatRequest) (res int, err error) {
+func (uc UserZakatUseCase) checkInput(input *requests.UserZakatRequest) (err error) {
 	masterZakatUc := MasterZakatUseCase{UcContract: uc.UcContract}
 	masterZakat, err := masterZakatUc.ReadBy("type_zakat", input.TypeZakat)
 	if err != nil {
-		return res, err
+		return err
 	}
 	input.MasterZakatID = masterZakat.ID
 	input.CurrentGoldPrice = masterZakat.CurrentGoldPrice
@@ -99,24 +101,36 @@ func (uc UserZakatUseCase) checkInput(input *requests.UserZakatRequest) (res int
 		input.Total = int32(float64(input.Wealth) * 2.5 / 100)
 	}
 
-	return res, err
+	return err
 }
 
-// Edit ...
-func (uc UserZakatUseCase) Edit(ID string, input *requests.UserZakatRequest) (err error) {
+// EditPaymentMethod ...
+func (uc UserZakatUseCase) EditPaymentMethod(ID string, input *requests.UserZakatRequest) (err error) {
+	userZakat, err := uc.ReadByPk(ID)
+	if err != nil {
+		return err
+	}
+	if userZakat.TransactionPaymentMethodCode == input.PaymentMethodCode {
+		return errors.New(messages.SameMethod)
+	}
+
+	input.ContactID = userZakat.ContactID
+	input.TypeZakat = userZakat.TypeZakat
+	input.CurrentGoldPrice = userZakat.CurrentGoldPrice
+	input.GoldNishab = userZakat.GoldNishab
+	input.Wealth = userZakat.Wealth
+	input.Total = userZakat.Total
+	transactionUseCase := TransactionUseCase{UcContract: uc.UcContract}
+	transaction, err := transactionUseCase.AddTransactionZakat(input)
+	if err != nil {
+		return err
+	}
+
 	now := time.Now().UTC().Format(time.RFC3339)
 	body := viewmodel.UserZakatVm{
-		ID:               ID,
-		UserID:           uc.UserID,
-		TransactionID:    input.TransactionID,
-		ContactID:        input.ContactID,
-		MasterZakatID:    input.MasterZakatID,
-		TypeZakat:        input.TypeZakat,
-		CurrentGoldPrice: input.CurrentGoldPrice,
-		GoldNishab:       input.GoldNishab,
-		Wealth:           input.Wealth,
-		Total:            input.Total,
-		UpdatedAt:        now,
+		ID:            ID,
+		TransactionID: transaction.ID,
+		UpdatedAt:     now,
 	}
 	repository := actions.NewUserZakatRepository(uc.DB)
 	err = repository.Edit(body, uc.TX)
@@ -128,15 +142,20 @@ func (uc UserZakatUseCase) Edit(ID string, input *requests.UserZakatRequest) (er
 }
 
 // Add ...
-func (uc UserZakatUseCase) Add(input *requests.UserZakatRequest) (err error) {
+func (uc UserZakatUseCase) Add(input *requests.UserZakatRequest) (res viewmodel.UserZakatVm, err error) {
+	err = uc.checkInput(input)
+	if err != nil {
+		return res, err
+	}
+
 	transactionUseCase := TransactionUseCase{UcContract: uc.UcContract}
 	transaction, err := transactionUseCase.AddTransactionZakat(input)
 	if err != nil {
-		return err
+		return res, err
 	}
 
 	now := time.Now().UTC()
-	body := viewmodel.UserZakatVm{
+	res = viewmodel.UserZakatVm{
 		UserID:           uc.UserID,
 		TransactionID:    transaction.ID,
 		ContactID:        input.ContactID,
@@ -150,12 +169,12 @@ func (uc UserZakatUseCase) Add(input *requests.UserZakatRequest) (err error) {
 		UpdatedAt:        now.Format(time.RFC3339),
 	}
 	repository := actions.NewUserZakatRepository(uc.DB)
-	body.ID, err = repository.Add(body, uc.TX)
+	res.ID, err = repository.Add(res, uc.TX)
 	if err != nil {
-		return err
+		return res, err
 	}
 
-	return err
+	return res, err
 }
 
 // Delete ...
@@ -179,6 +198,7 @@ func (uc UserZakatUseCase) countBy(ID, column, value string) (res int, err error
 
 func (uc UserZakatUseCase) buildBody(data *models.UserZakat) (res viewmodel.UserZakatVm) {
 	return viewmodel.UserZakatVm{
+		ID:                           data.ID,
 		UserID:                       data.UserID.String,
 		UserEmail:                    data.User.Email.String,
 		UserName:                     data.User.Name.String,
@@ -186,6 +206,9 @@ func (uc UserZakatUseCase) buildBody(data *models.UserZakat) (res viewmodel.User
 		TransactionInvoiceNumber:     data.Transaction.InvoiceNumber.String,
 		TransactionPaymentMethodCode: data.Transaction.PaymentMethodCode.Int32,
 		TransactionPaymentStatus:     data.Transaction.PaymentStatus.String,
+		TransactionDueDate:           data.Transaction.DueDate.String,
+		TransactionVaNumber:          data.Transaction.VaNumber.String,
+		TransactionBankName:          data.Transaction.BankName.String,
 		ContactID:                    data.ContactID.String,
 		ContactBranchName:            data.Contact.BranchName.String,
 		ContactTravelAgentName:       data.Contact.TravelAgentName.String,

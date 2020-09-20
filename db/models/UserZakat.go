@@ -29,7 +29,7 @@ var (
 	uz."master_zakat_id", uz."type_zakat", uz."current_gold_price", uz."gold_nishab",
 	uz."wealth", uz."total", uz."created_at", uz."updated_at", uz."deleted_at",
 	u."email", u."name", t."invoice_number", t."payment_method_code", t."payment_status",
-	c."branch_name", c."travel_agent_name"
+	t."due_date", t."va_number", t."bank_name", c."branch_name", c."travel_agent_name"
 	FROM "user_zakats" uz
 	LEFT JOIN "users" u ON u."id" = uz."user_id"
 	LEFT JOIN "transactions" t ON t."id" = uz."transaction_id"

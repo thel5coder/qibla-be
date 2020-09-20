@@ -16,5 +16,6 @@ type UserZakatRequest struct {
 
 // UserZakatPaymentRequest ...
 type UserZakatPaymentRequest struct {
-	PaymentMethodCode int32 `json:"payment_method_code" validate:"required"`
+	PaymentMethodCode int32  `json:"payment_method_code" validate:"required"`
+	BankName          string `json:"bank_name" validate:"required"`
 }

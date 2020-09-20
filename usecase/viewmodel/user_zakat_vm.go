@@ -10,6 +10,9 @@ type UserZakatVm struct {
 	TransactionInvoiceNumber     string `json:"transaction_invoice_number"`
 	TransactionPaymentMethodCode int32  `json:"transaction_payment_method_code"`
 	TransactionPaymentStatus     string `json:"transaction_payment_status"`
+	TransactionDueDate           string `json:"transaction_due_date"`
+	TransactionVaNumber          string `json:"transaction_va_number"`
+	TransactionBankName          string `json:"transaction_bank_name"`
 	ContactID                    string `json:"contact_id"`
 	ContactBranchName            string `json:"contact_branch_name"`
 	ContactTravelAgentName       string `json:"contact_travel_agent_name"`

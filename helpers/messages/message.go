@@ -34,4 +34,5 @@ var (
 	RoleNotFound           = "role not found"
 	OtpNotMatch            = "otp not match"
 	PaymentFailed          = "payment failed"
+	SameMethod             = "same method"
 )

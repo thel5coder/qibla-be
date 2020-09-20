@@ -69,7 +69,7 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 			SubTotal: float32(transactionDetail.Quantity) * transactionDetail.Price,
 		})
 	}
-	body := viewmodel.TransactionVm{
+	res = viewmodel.TransactionVm{
 		UserID:            input.UserID,
 		InvoiceNumber:     invoiceNumber,
 		DueDate:           input.DueDate,
@@ -84,13 +84,13 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 		Details:           transactionDetails,
 		Total:             input.FaspayBody.Total,
 	}
-	body.ID, err = repository.Add(body, uc.TX)
+	res.ID, err = repository.Add(res, uc.TX)
 	if err != nil {
 		return res, err
 	}
 
 	transactionDetailUc := TransactionDetailUseCase{UcContract: uc.UcContract}
-	err = transactionDetailUc.Store(body.ID, body.Details)
+	err = transactionDetailUc.Store(res.ID, res.Details)
 	if err != nil {
 		return res, err
 	}
@@ -110,7 +110,7 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 	}
 
 	//update trxid or va number
-	err = uc.EditTrxID(body.ID, faspayRes["trx_id"].(string))
+	err = uc.EditTrxID(res.ID, faspayRes["trx_id"].(string))
 	if err != nil {
 		return res, err
 	}
@@ -255,7 +255,7 @@ func (uc TransactionUseCase) buildBody(model models.Transaction) (res viewmodel.
 		UserID:            model.UserID,
 		InvoiceNumber:     model.InvoiceNumber.String,
 		TrxID:             model.TrxID.String,
-		DueDate:           model.DueDate,
+		DueDate:           model.DueDate.String,
 		DueDatePeriod:     model.DueDatePeriod.Int32,
 		PaymentStatus:     model.PaymentStatus.String,
 		PaymentMethodCode: model.PaymentMethodCode.Int32,

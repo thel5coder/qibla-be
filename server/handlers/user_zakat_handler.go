@@ -47,33 +47,37 @@ func (handler UserZakatHandler) Read(ctx echo.Context) error {
 }
 
 // EditPayment ...
-// func (handler UserZakatHandler) EditPayment(ctx echo.Context) error {
-// 	input := new(requests.UserZakatRequest)
-// 	ID := ctx.Param("id")
+func (handler UserZakatHandler) EditPayment(ctx echo.Context) error {
+	input := new(requests.UserZakatPaymentRequest)
+	ID := ctx.Param("id")
 
-// 	if err := ctx.Bind(input); err != nil {
-// 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
-// 	}
-// 	if err := handler.Validate.Struct(input); err != nil {
-// 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
-// 	}
+	if err := ctx.Bind(input); err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	if err := handler.Validate.Struct(input); err != nil {
+		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
+	}
 
-// 	var err error
-// 	handler.UseCaseContract.TX, err = handler.UseCaseContract.DB.Begin()
-// 	if err != nil {
-// 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
-// 	}
+	var err error
+	handler.UseCaseContract.TX, err = handler.UseCaseContract.DB.Begin()
+	if err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
 
-// 	uc := usecase.UserZakatUseCase{UcContract: handler.UseCaseContract}
-// 	err = uc.Edit(ID, input)
-// 	if err != nil {
-// 		handler.UseCaseContract.TX.Rollback()
-// 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
-// 	}
-// 	handler.UseCaseContract.TX.Commit()
+	inputBody := requests.UserZakatRequest{
+		PaymentMethodCode: input.PaymentMethodCode,
+		BankName:          input.BankName,
+	}
+	uc := usecase.UserZakatUseCase{UcContract: handler.UseCaseContract}
+	err = uc.EditPaymentMethod(ID, &inputBody)
+	if err != nil {
+		handler.UseCaseContract.TX.Rollback()
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	handler.UseCaseContract.TX.Commit()
 
-// 	return handler.SendResponse(ctx, nil, nil, err)
-// }
+	return handler.SendResponse(ctx, nil, nil, err)
+}
 
 // Add ...
 func (handler UserZakatHandler) Add(ctx echo.Context) error {
@@ -93,14 +97,14 @@ func (handler UserZakatHandler) Add(ctx echo.Context) error {
 	}
 
 	uc := usecase.UserZakatUseCase{UcContract: handler.UseCaseContract}
-	err = uc.Add(input)
+	res, err := uc.Add(input)
 	if err != nil {
 		handler.UseCaseContract.TX.Rollback()
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
 	}
 	handler.UseCaseContract.TX.Commit()
 
-	return handler.SendResponse(ctx, nil, nil, err)
+	return handler.SendResponse(ctx, res, nil, err)
 }
 
 // Delete ...
