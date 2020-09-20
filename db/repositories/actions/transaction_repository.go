@@ -105,6 +105,8 @@ func (repository TransactionRepository) EditStatus(ID, paymentStatus, paidDate, 
 }
 
 func (repository TransactionRepository) EditTrxID(ID, trxID string, updatedAt string, tx *sql.Tx) (err error) {
+	fmt.Println(updatedAt)
+	fmt.Println(datetime.StrParseToTime(updatedAt, time.RFC3339))
 	statement := `update "transactions" set "trx_id"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
 	_, err = tx.Exec(
 		statement,
