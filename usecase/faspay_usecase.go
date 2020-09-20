@@ -173,6 +173,7 @@ func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationR
 	transactionUc := TransactionUseCase{UcContract: uc.UcContract}
 	transaction, err := transactionUc.ReadBy("t.trx_id", input.TrxID, "=")
 	if err != nil {
+		fmt.Println(err.Error())
 		fmt.Println(1)
 
 		res = viewmodel.PaymentNotificationVm{
