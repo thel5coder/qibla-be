@@ -10,7 +10,7 @@ type FaspayPostDataVm struct {
 	BillDesc       string                 `json:"bill_desc"`
 	BillCurrency   string                 `json:"bill_currency"`
 	BillTotal      float32                `json:"bill_total"`
-	PaymentChannel int                    `json:"payment_channel"`
+	PaymentChannel int32                    `json:"payment_channel"`
 	PayType        int                    `json:"pay_type"`
 	CustNo         string                 `json:"cust_no"`
 	CustName       string                 `json:"cust_name"`
