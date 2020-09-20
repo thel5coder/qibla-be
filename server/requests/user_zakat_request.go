@@ -5,6 +5,7 @@ type UserZakatRequest struct {
 	TransactionID     string `json:"transaction_id"`
 	ContactID         string `json:"contact_id" validate:"required"`
 	PaymentMethodCode int32  `json:"payment_method_code" validate:"required"`
+	BankName          string `json:"bank_name" validate:"required"`
 	MasterZakatID     string `json:"master_zakat_id"`
 	TypeZakat         string `json:"type_zakat" validate:"required,oneof=maal penghasilan"`
 	CurrentGoldPrice  int32  `json:"current_gold_price"`

@@ -129,10 +129,16 @@ func (uc UserZakatUseCase) Edit(ID string, input *requests.UserZakatRequest) (er
 
 // Add ...
 func (uc UserZakatUseCase) Add(input *requests.UserZakatRequest) (err error) {
-	now := time.Now().UTC().Format(time.RFC3339)
+	transactionUseCase := TransactionUseCase{UcContract: uc.UcContract}
+	transaction, err := transactionUseCase.AddTransactionZakat(input)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now().UTC()
 	body := viewmodel.UserZakatVm{
 		UserID:           uc.UserID,
-		TransactionID:    input.TransactionID,
+		TransactionID:    transaction.ID,
 		ContactID:        input.ContactID,
 		MasterZakatID:    input.MasterZakatID,
 		TypeZakat:        input.TypeZakat,
@@ -140,8 +146,8 @@ func (uc UserZakatUseCase) Add(input *requests.UserZakatRequest) (err error) {
 		GoldNishab:       input.GoldNishab,
 		Wealth:           input.Wealth,
 		Total:            input.Total,
-		CreatedAt:        now,
-		UpdatedAt:        now,
+		CreatedAt:        now.Format(time.RFC3339),
+		UpdatedAt:        now.Format(time.RFC3339),
 	}
 	repository := actions.NewUserZakatRepository(uc.DB)
 	body.ID, err = repository.Add(body, uc.TX)

@@ -183,17 +183,65 @@ func (uc TransactionUseCase) Delete(ID string) (err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	count ,err := uc.CountBy("","id",ID)
+	count, err := uc.CountBy("", "id", ID)
 	if err != nil {
 		return err
 	}
 
-	_,err = repository.Delete(ID,now,now)
-	if err != nil {
-		return err
+	if count > 0 {
+		_, err = repository.Delete(ID, now, now)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
+}
+func (uc TransactionUseCase) AddTransactionZakat(input *requests.UserZakatRequest) (res viewmodel.TransactionVm, err error) {
+	userUseCase := UserUseCase{UcContract: uc.UcContract}
+	user, err := userUseCase.ReadBy("id", uc.UserID)
+	if err != nil {
+		return res, err
+	}
+
+	now := time.Now().UTC()
+	transactionInput := requests.TransactionRequest{
+		UserID:             uc.UserID,
+		DueDate:            now.AddDate(0, 0, int(defaultInvoiceDueDate)).Format("2006-01-02"),
+		DueDateAging:       defaultInvoiceDueDate,
+		BankName:           input.BankName,
+		PaymentMethodeCode: input.PaymentMethodCode,
+		TransactionDetail:  []requests.TransactionDetailRequest{},
+		FaspayBody: requests.FaspayPostRequest{
+			RequestTransaction:  enums.KeyTransactionType1,
+			TransactionDate:     now.Format("2006-01-02 15:04:05"),
+			DueDate:             now.AddDate(0, 0, int(defaultInvoiceDueDate)).Format("2006-01-02 15:04:05"),
+			TransactionDesc:     enums.KeyTransactionType1,
+			UserID:              uc.UserID,
+			CustomerName:        user.Name,
+			CustomerEmail:       user.Email,
+			CustomerPhoneNumber: user.MobilePhone,
+			Total:               float32(input.Total),
+			PaymentChannel:      input.PaymentMethodCode,
+			Item: []requests.FaspayItemRequest{
+				{
+					Product:     enums.KeyTransactionType1,
+					Amount:      int(input.Total),
+					Qty:         1,
+					PaymentPlan: defaultFaspayPaymentPlan,
+					Tenor:       defaultFaspayTenor,
+					MerchantID:  os.Getenv("FASPAY_MERCHANT_ID"),
+				},
+			},
+		},
+	}
+	transactionUseCase := TransactionUseCase{UcContract: uc.UcContract}
+	res, err = transactionUseCase.Add(transactionInput)
+	if err != nil {
+		return res, err
+	}
+
+	return res, err
 }
 
 func (uc TransactionUseCase) GetInvoiceNumber() (res string, err error) {
