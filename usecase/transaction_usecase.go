@@ -82,6 +82,7 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 		TransactionDate:   now,
 		UpdatedAt:         now,
 		Details:           transactionDetails,
+		Total:             input.FaspayBody.Total,
 	}
 	body.ID, err = repository.Add(body, uc.TX)
 	if err != nil {
@@ -109,9 +110,9 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 	}
 
 	//update trxid or va number
-	err = uc.EditTrxID(body.ID,faspayRes["trx_id"].(string))
+	err = uc.EditTrxID(body.ID, faspayRes["trx_id"].(string))
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
 	return res, err
