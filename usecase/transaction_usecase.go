@@ -82,6 +82,7 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 		TransactionDate:   now,
 		UpdatedAt:         now,
 		Details:           transactionDetails,
+		Total:             input.FaspayBody.Total,
 	}
 	body.ID, err = repository.Add(body, uc.TX)
 	if err != nil {
@@ -148,7 +149,7 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, bankName stri
 
 	//add to table transaction
 	faspayRequest := requests.FaspayPostRequest{
-		RequestTransaction:  enums.KeyTransactionType3,
+		RequestTransaction:  enums.KeyTransactionType5,
 		InvoiceNumber:       "",
 		TransactionDate:     now.Format("2006-01-02 15:04:05"),
 		DueDate:             dueDateFaspay,
@@ -157,7 +158,7 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, bankName stri
 		CustomerName:        contact.TravelAgentName,
 		CustomerEmail:       contact.Email,
 		CustomerPhoneNumber: contact.PhoneNumber,
-		Total:               0,
+		Total:               total,
 		PaymentChannel:      paymentMethodCode,
 		Item:                faspayItem,
 	}

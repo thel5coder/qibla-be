@@ -8,7 +8,7 @@ type PartnerRegisterRequest struct {
 	SubscriptionPeriod int                   `json:"subscription_period"`
 	WebinarStatus      bool                  `json:"webinar_status"`
 	WebsiteStatus      bool                  `json:"website_status"`
-	PaymentMethodCode  int                   `json:"payment_method_code"`
+	PaymentMethodCode  int32                   `json:"payment_method_code"`
 	BankName           string                `json:"bank_name"`
 	VaNumber           string                `json:"va_number"`
 	ExtraProducts      []ExtraProductRequest `json:"extra_products"`
