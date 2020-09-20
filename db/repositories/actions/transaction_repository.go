@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -90,13 +89,7 @@ func (repository TransactionRepository) EditDueDate(ID, dueDate, updatedAt strin
 }
 
 func (repository TransactionRepository) EditStatus(ID, paymentStatus, paidDate, updatedAt string, tx *sql.Tx) (err error) {
-	fmt.Println("dari uc")
-	fmt.Println(updatedAt)
-	fmt.Println("repo")
-	now := time.Now().UTC().Format(time.RFC3339)
-
-	fmt.Println(datetime.StrParseToTime(now, time.RFC3339))
-	statement := `update "transactions" set "payment_status"=$1, "paid_date"=$2, "updated_at"=$3 where "id"=$3 returning "id"`
+	statement := `update "transactions" set "payment_status"=$1, "paid_date"=$2, "updated_at"=$3 where "id"=$4 returning "id"`
 	_, err = tx.Exec(
 		statement,
 		paymentStatus,
