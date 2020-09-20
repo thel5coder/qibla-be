@@ -29,13 +29,13 @@ func (uc TransactionUseCase) ReadBy(column, value, operator string) (res viewmod
 	return res, err
 }
 
-func(uc TransactionUseCase) EditStatus(ID,paymentStatus,paidDate string) (err error){
+func (uc TransactionUseCase) EditStatus(ID, paymentStatus, paidDate string) (err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 	fmt.Println("uc")
 	fmt.Println(now)
 
-	err = repository.EditStatus(ID,paymentStatus,paidDate,now,uc.TX)
+	err = repository.EditStatus(ID, paymentStatus, paidDate, now, uc.TX)
 
 	return err
 }
@@ -130,28 +130,12 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, invoiceNumber
 func (uc TransactionUseCase) GetInvoiceNumber() (res string, err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 	year, month, _ := time.Now().UTC().Date()
-	var invoiceCount string
 	count, err := repository.GetInvoiceCount(int(month))
 	if err != nil {
 		return res, err
 	}
 	res = `INV-QBL/` + strconv.Itoa(int(year)) + `/` + strconv.Itoa(int(month))
-
-	count = count + 1
-	if count > 99999 {
-		invoiceCount = strconv.Itoa(count)
-	} else if count > 9999 {
-		invoiceCount = `0` + strconv.Itoa(count)
-	} else if count > 999 {
-		invoiceCount = `00` + strconv.Itoa(count)
-	} else if count > 99 {
-		invoiceCount = `000` + strconv.Itoa(count)
-	} else if count > 9 {
-		invoiceCount = `0000` + strconv.Itoa(count)
-	} else {
-		invoiceCount = `00000` + strconv.Itoa(count)
-	}
-	res = res + `/` + invoiceCount
+	res += `/` + fmt.Sprintf("%05d", count+1)
 
 	return res, err
 }
@@ -170,7 +154,7 @@ func (uc TransactionUseCase) buildBody(model models.Transaction) (res viewmodel.
 	res = viewmodel.TransactionVm{
 		ID:                model.ID,
 		UserID:            model.UserID,
-		InvoiceNumber:     model.InvoiceNumber,
+		InvoiceNumber:     model.InvoiceNumber.String,
 		TrxID:             model.TrxID.String,
 		DueDate:           model.DueDate,
 		DueDatePeriod:     model.DueDatePeriod.Int32,

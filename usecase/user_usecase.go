@@ -20,7 +20,7 @@ func (uc UserUseCase) ReadBy(column, value string) (res viewmodel.AdminVm, err e
 	res = viewmodel.AdminVm{
 		ID:             user.ID,
 		UserName:       user.UserName,
-		Email:          user.Email,
+		Email:          user.Email.String,
 		Name:           user.Name.String,
 		MobilePhone:    user.MobilePhone.String,
 		ProfilePicture: user.ProfilePicture.String,

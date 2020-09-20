@@ -326,8 +326,8 @@ func (uc PartnerUseCase) buildBody(data models.Partner) (res viewmodel.PartnerVm
 		PaidAt:                      data.PaidAt.String,
 		Contact: viewmodel.ContactVm{
 			ID:                   data.Contact.ID,
-			BranchName:           data.Contact.BranchName,
-			TravelAgentName:      data.Contact.TravelAgentName,
+			BranchName:           data.Contact.BranchName.String,
+			TravelAgentName:      data.Contact.TravelAgentName.String,
 			Address:              data.Contact.Address.String,
 			Longitude:            data.Contact.Longitude.String,
 			Latitude:             data.Contact.Latitude.String,

@@ -26,7 +26,7 @@ func (uc AdminUseCase) Browse(search, order, sort string, page, limit int) (res 
 		res = append(res, viewmodel.AdminVm{
 			ID:       user.ID,
 			UserName: user.UserName,
-			Email:    user.Email,
+			Email:    user.Email.String,
 			IsActive: user.IsActive,
 			Role: viewmodel.RoleVm{
 				ID:        user.RoleModel.ID,
@@ -66,7 +66,7 @@ func (uc AdminUseCase) ReadBy(column, value string) (res viewmodel.AdminVm, err 
 	res = viewmodel.AdminVm{
 		ID:          user.ID,
 		UserName:    user.UserName,
-		Email:       user.Email,
+		Email:       user.Email.String,
 		MobilePhone: user.MobilePhone.String,
 		IsActive:    user.IsActive,
 		Role: viewmodel.RoleVm{
@@ -132,7 +132,7 @@ func (uc AdminUseCase) Edit(ID string, input *requests.AdminRequest) (err error)
 	if input.Password != "" {
 		password, _ = hashing.HashAndSalt(input.Password)
 	}
-	err = userUc.Edit(ID, input.UserName, input.UserName, input.Email, "", input.RoleID, password,"", input.IsActive, true)
+	err = userUc.Edit(ID, input.UserName, input.UserName, input.Email, "", input.RoleID, password, "", input.IsActive, true)
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -234,14 +234,14 @@ func (uc AdminUseCase) Delete(ID string) (err error) {
 	return nil
 }
 
-func (uc AdminUseCase) IsPasswordValid(userID,password string) (err error){
+func (uc AdminUseCase) IsPasswordValid(userID, password string) (err error) {
 	repository := actions.NewUserRepository(uc.DB)
-	user,err := repository.ReadBy("id",userID)
+	user, err := repository.ReadBy("id", userID)
 	if err != nil {
 		return errors.New(messages.CredentialDoNotMatch)
 	}
 
-	isValid := hashing.CheckHashString(password,user.Password)
+	isValid := hashing.CheckHashString(password, user.Password)
 	if !isValid {
 		return errors.New(messages.CredentialDoNotMatch)
 	}

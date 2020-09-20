@@ -29,7 +29,7 @@ func (uc JamaahUseCase) ReadBy(column, value string) (res viewmodel.JamaahVm, er
 	res = viewmodel.JamaahVm{
 		ID:             user.ID,
 		UserName:       user.UserName,
-		Email:          user.Email,
+		Email:          user.Email.String,
 		Name:           user.Name.String,
 		MobilePhone:    user.MobilePhone.String,
 		ProfilePicture: user.ProfilePicture.String,

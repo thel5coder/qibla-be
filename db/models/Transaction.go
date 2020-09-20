@@ -5,7 +5,7 @@ import "database/sql"
 type Transaction struct {
 	ID                string         `json:"id"`
 	UserID            string         `json:"user_id"`
-	InvoiceNumber     string         `json:"invoice_number"`
+	InvoiceNumber     sql.NullString `json:"invoice_number"`
 	TrxID             sql.NullString `json:"trx_id"`
 	DueDate           string         `json:"due_date"`
 	DueDatePeriod     sql.NullInt32  `json:"due_date_period"`

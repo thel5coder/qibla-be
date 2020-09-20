@@ -27,8 +27,8 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 		file, _ := fileUc.ReadByPk(contact.Logo)
 		res = append(res, viewmodel.ContactVm{
 			ID:                   contact.ID,
-			BranchName:           contact.BranchName,
-			TravelAgentName:      contact.TravelAgentName,
+			BranchName:           contact.BranchName.String,
+			TravelAgentName:      contact.TravelAgentName.String,
 			Address:              contact.Address.String,
 			Longitude:            contact.Longitude.String,
 			Latitude:             contact.Latitude.String,
@@ -61,10 +61,10 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 	return res, pagination, err
 }
 
-func (uc ContactUseCase) BrowseAll(search string,isZakatPartner bool) (res []viewmodel.ContactVm, err error) {
+func (uc ContactUseCase) BrowseAll(search string, isZakatPartner bool) (res []viewmodel.ContactVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
 	fileUc := FileUseCase{UcContract: uc.UcContract}
-	contacts, err := repository.BrowseAll(search,isZakatPartner)
+	contacts, err := repository.BrowseAll(search, isZakatPartner)
 	if err != nil {
 		return res, err
 	}
@@ -73,8 +73,8 @@ func (uc ContactUseCase) BrowseAll(search string,isZakatPartner bool) (res []vie
 		file, _ := fileUc.ReadByPk(contact.Logo)
 		res = append(res, viewmodel.ContactVm{
 			ID:                   contact.ID,
-			BranchName:           contact.BranchName,
-			TravelAgentName:      contact.TravelAgentName,
+			BranchName:           contact.BranchName.String,
+			TravelAgentName:      contact.TravelAgentName.String,
 			Address:              contact.Address.String,
 			Longitude:            contact.Longitude.String,
 			Latitude:             contact.Latitude.String,
@@ -105,20 +105,20 @@ func (uc ContactUseCase) BrowseAll(search string,isZakatPartner bool) (res []vie
 	return res, err
 }
 
-func (uc ContactUseCase) BrowseAllZakatPlace(search string) (res []viewmodel.ZakatPlaceVm,err error){
-	contactZakats,err := uc.BrowseAll(search,true)
+func (uc ContactUseCase) BrowseAllZakatPlace(search string) (res []viewmodel.ZakatPlaceVm, err error) {
+	contactZakats, err := uc.BrowseAll(search, true)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
-	for _,contactZakat := range contactZakats{
-		res = append(res,viewmodel.ZakatPlaceVm{
+	for _, contactZakat := range contactZakats {
+		res = append(res, viewmodel.ZakatPlaceVm{
 			ID:   contactZakat.ID,
 			Name: contactZakat.TravelAgentName,
 		})
 	}
 
-	return res,err
+	return res, err
 }
 
 func (uc ContactUseCase) ReadBy(column, value string) (res viewmodel.ContactVm, err error) {
@@ -134,8 +134,8 @@ func (uc ContactUseCase) ReadBy(column, value string) (res viewmodel.ContactVm, 
 
 	res = viewmodel.ContactVm{
 		ID:                   contact.ID,
-		BranchName:           contact.BranchName,
-		TravelAgentName:      contact.TravelAgentName,
+		BranchName:           contact.BranchName.String,
+		TravelAgentName:      contact.TravelAgentName.String,
 		Address:              contact.Address.String,
 		Longitude:            contact.Longitude.String,
 		Latitude:             contact.Latitude.String,

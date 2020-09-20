@@ -4,8 +4,8 @@ import "database/sql"
 
 type Contact struct {
 	ID                   string         `db:"id"`
-	BranchName           string         `db:"branch_name"`
-	TravelAgentName      string         `db:"travel_agent_name"`
+	BranchName           sql.NullString `db:"branch_name"`
+	TravelAgentName      sql.NullString `db:"travel_agent_name"`
 	Address              sql.NullString `db:"address"`
 	Longitude            sql.NullString `db:"longitude"`
 	Latitude             sql.NullString `db:"latitude"`
