@@ -63,7 +63,8 @@ deploy:two:
   needs: ["push:two"]
   script:
     - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER}:${SRC_SEND_NOTIFICATION}-${CI_COMMIT_REF_NAME}"
-  only: dev
+  only: 
+    - dev
 
 finish:one:
   stage: finish
@@ -78,10 +79,13 @@ finish:two:
   needs: ["deploy:two"]
   script:
     - ssh -tq ${SERVER_DEV} "cd ${SRC}/${SRC_SEND_NOTIFICATION} && docker-compose up -d"
-  only: dev
+  only: 
+    - dev
 
 cleanup:
   stage: clean
   script:
     - docker system prune -f
     - ssh -tq ${SERVER_DEV} "docker system prune -f"
+  only:
+    - dev
