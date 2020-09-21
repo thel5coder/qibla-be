@@ -22,6 +22,7 @@ WORKDIR /app
 COPY --from=0 /src/app .
 COPY --from=0 /src/key key/
 COPY --from=0 /src/db db/
+COPY --from=0 /src/statics statics/
 COPY --from=0 /src/dbconfig.yml dbconfig.yml
 
 EXPOSE 3000
