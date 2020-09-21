@@ -14,12 +14,14 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 	echoMiddleware "github.com/labstack/echo/middleware"
+	"github.com/rs/xid"
 	"github.com/skilld-labs/go-odoo"
 	"google.golang.org/api/youtube/v3"
 	"log"
 	"os"
 	"qibla-backend/db"
 	awsHelper "qibla-backend/helpers/aws"
+	"qibla-backend/helpers/fcm"
 	"qibla-backend/helpers/google"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
@@ -142,12 +144,18 @@ func main() {
 	}
 	youtubeService, err := youtubeCred.GetYoutubeService()
 
+	// FCM connection
+	fcmConnection := fcm.Connection{
+		APIKey: os.Getenv("FMC_KEY"),
+	}
+
 	//init validator
 	validatorInit()
 
 	e := echo.New()
 
 	ucContract := usecase.UcContract{
+		ReqID:          xid.New().String(),
 		E:              e,
 		DB:             database,
 		RedisClient:    redisClient,
@@ -161,6 +169,7 @@ func main() {
 		Pusher:         pusherCredential,
 		GoMailConfig:   goMailConfig,
 		YoutubeService: youtubeService,
+		Fcm:            fcmConnection,
 	}
 
 	bootApp := bootstrap.Bootstrap{

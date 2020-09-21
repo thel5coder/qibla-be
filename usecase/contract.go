@@ -9,6 +9,7 @@ import (
 	"os"
 	queue "qibla-backend/helpers/amqp"
 	"qibla-backend/helpers/aws"
+	"qibla-backend/helpers/fcm"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
 	"qibla-backend/helpers/mailing"
@@ -65,6 +66,7 @@ var xRequestID interface{}
 
 // UcContract ...
 type UcContract struct {
+	ReqID          string
 	E              *echo.Echo
 	DB             *sql.DB
 	TX             *sql.Tx
@@ -80,6 +82,7 @@ type UcContract struct {
 	GoMailConfig   mailing.GoMailConfig
 	YoutubeService *youtube.Service
 	UserID         string
+	Fcm            fcm.Connection
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {

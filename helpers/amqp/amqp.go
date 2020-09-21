@@ -17,6 +17,13 @@ const (
 	MailIncoming = "qibla.mail.incoming.queue"
 	//mail deadletter
 	MailDeadLetter = "qibla.mail.deadletter.queue"
+
+	// SendNotificationExchange ...
+	SendNotificationExchange = "qibla.send_notification.exchange"
+	// SendNotification ...
+	SendNotification = "qibla.send_notification.incoming.queue"
+	// SendNotificationDeadLetter ...
+	SendNotificationDeadLetter = "qibla.send_notification.deadletter.queue"
 )
 
 // queue ...
