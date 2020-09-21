@@ -32,21 +32,10 @@ func (repository UserRepository) BrowseNonUserAdminPanel(search, order, sort str
 		dataTemp := models.User{}
 
 		err = rows.Scan(
-			&dataTemp.ID,
-			&dataTemp.UserName,
-			&dataTemp.Email,
-			&dataTemp.Password,
-			&dataTemp.IsActive,
-			&dataTemp.RoleID,
-			&dataTemp.CreatedAt,
-			&dataTemp.UpdatedAt,
-			&dataTemp.DeletedAt,
-			&dataTemp.OdooUserID,
-			&dataTemp.Name,
-			&dataTemp.ProfilePicture,
-			&dataTemp.MobilePhone,
-			&dataTemp.PIN,
-			&dataTemp.IsAdminPanel,
+			&dataTemp.ID, &dataTemp.UserName, &dataTemp.Email, &dataTemp.Password, &dataTemp.IsActive,
+			&dataTemp.RoleID, &dataTemp.CreatedAt, &dataTemp.UpdatedAt, &dataTemp.DeletedAt,
+			&dataTemp.OdooUserID, &dataTemp.Name, &dataTemp.ProfilePicture,
+			&dataTemp.MobilePhone, &dataTemp.PIN, &dataTemp.IsAdminPanel, &dataTemp.FcmDeviceToken,
 		)
 		if err != nil {
 			return data, count, err
@@ -94,6 +83,7 @@ func (repository UserRepository) BrowseUserAdminPanel(search, order, sort string
 			&dataTemp.MobilePhone,
 			&dataTemp.PIN,
 			&dataTemp.IsAdminPanel,
+			&dataTemp.FcmDeviceToken,
 			&dataTemp.RoleModel.ID,
 			&dataTemp.RoleModel.Name,
 			&dataTemp.RoleModel.CreatedAt,
@@ -139,6 +129,7 @@ func (repository UserRepository) ReadBy(column, value string) (data models.User,
 		&data.MobilePhone,
 		&data.PIN,
 		&data.IsAdminPanel,
+		&data.FcmDeviceToken,
 		&data.RoleModel.ID,
 		&data.RoleModel.Name,
 	)
@@ -203,6 +194,13 @@ func (repository UserRepository) EditPassword(ID, password, updatedAt string) (r
 func (UserRepository) EditUserName(ID, userName, updatedAt string, tx *sql.Tx) (err error) {
 	statement := `update "users" set "username"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
 	_, err = tx.Exec(statement, userName, datetime.StrParseToTime(updatedAt, time.RFC3339), ID)
+
+	return err
+}
+
+func (UserRepository) EditFcmDeviceToken(ID, fcmDeviceToken, updatedAt string, tx *sql.Tx) (err error) {
+	statement := `update "users" set "fcm_device_token"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
+	_, err = tx.Exec(statement, fcmDeviceToken, datetime.StrParseToTime(updatedAt, time.RFC3339), ID)
 
 	return err
 }

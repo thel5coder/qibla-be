@@ -15,11 +15,13 @@ type IUserRepository interface {
 
 	Edit(input viewmodel.UserVm, password string, tx *sql.Tx) (err error)
 
-	EditPIN(ID,pin,updatedAt string) (res string,err error)
+	EditPIN(ID, pin, updatedAt string) (res string, err error)
 
-	EditPassword(ID,password,updatedAt string) (res string,err error)
+	EditPassword(ID, password, updatedAt string) (res string, err error)
 
-	EditUserName(ID,userName,updatedAt string,tx *sql.Tx) (err error)
+	EditUserName(ID, userName, updatedAt string, tx *sql.Tx) (err error)
+
+	EditFcmDeviceToken(ID, fcmDeviceToken, updatedAt string, tx *sql.Tx) (err error)
 
 	Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error)
 
@@ -27,5 +29,5 @@ type IUserRepository interface {
 
 	CountBy(ID, column, value string) (res int, err error)
 
-	CountByPk(ID string) (res int,err error)
+	CountByPk(ID string) (res int, err error)
 }

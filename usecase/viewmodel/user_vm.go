@@ -12,7 +12,8 @@ type UserVm struct {
 	IsActive       bool   `json:"is_active"`
 	IsAdminPanel   bool   `json:"is_admin_panel"`
 	RoleID         string `json:"role_id"`
-	OdooUserID     int `json:"odo_user_id"`
+	OdooUserID     int    `json:"odo_user_id"`
+	FcmDeviceToken string `json:"fcm_device_token"`
 	CreatedAt      string `json:"created_at"`
 	UpdatedAt      string `json:"updated_at"`
 }

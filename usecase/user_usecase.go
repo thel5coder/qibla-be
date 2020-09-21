@@ -66,6 +66,15 @@ func (uc UserUseCase) EditUserName(ID, userName string) (err error) {
 	return err
 }
 
+func (uc UserUseCase) EditFcmDeviceToken(ID, fcmDeviceToken string) (err error) {
+	repository := actions.NewUserRepository(uc.DB)
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	err = repository.EditFcmDeviceToken(ID, fcmDeviceToken, now, uc.TX)
+
+	return err
+}
+
 func (uc UserUseCase) Add(name, userName, email, mobilePhone, roleID, password string, isActive, isAdminPanel bool) (res string, err error) {
 	repository := actions.NewUserRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
