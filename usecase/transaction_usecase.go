@@ -32,8 +32,6 @@ func (uc TransactionUseCase) ReadBy(column, value, operator string) (res viewmod
 func (uc TransactionUseCase) EditStatus(ID, paymentStatus, paidDate string) (err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
-	fmt.Println("uc")
-	fmt.Println(now)
 
 	err = repository.EditStatus(ID, paymentStatus, paidDate, now, uc.TX)
 
@@ -77,8 +75,8 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 		PaymentStatus:     enums.KeyPaymentStatus1,
 		PaymentMethodCode: input.PaymentMethodeCode,
 		BankName:          input.BankName,
-		Direction:         enums.KeyTransactionDirection1,
-		TransactionType:   enums.KeyTransactionType3,
+		Direction:         input.TransactionDirection,
+		TransactionType:   input.TransactionType,
 		TransactionDate:   now,
 		UpdatedAt:         now,
 		Details:           transactionDetails,
@@ -114,6 +112,8 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 	if err != nil {
 		return res, err
 	}
+	res.TrxID = faspayRes["trx_id"].(string)
+	res.VaNumber = faspayRes["trx_id"].(string)
 	res.FaspayResponse = faspayRes
 
 	return res, err
@@ -164,13 +164,15 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, bankName stri
 		Item:                faspayItem,
 	}
 	transactionInput := requests.TransactionRequest{
-		UserID:             userID,
-		DueDate:            dueDate,
-		DueDateAging:       dueDateAging,
-		BankName:           bankName,
-		PaymentMethodeCode: paymentMethodCode,
-		TransactionDetail:  details,
-		FaspayBody:         faspayRequest,
+		UserID:               userID,
+		DueDate:              dueDate,
+		DueDateAging:         dueDateAging,
+		BankName:             bankName,
+		PaymentMethodeCode:   paymentMethodCode,
+		TransactionType:      enums.KeyTransactionType5,
+		TransactionDirection: enums.KeyTransactionDirection1,
+		TransactionDetail:    details,
+		FaspayBody:           faspayRequest,
 	}
 	res, err = uc.Add(transactionInput)
 	if err != nil {
@@ -207,12 +209,14 @@ func (uc TransactionUseCase) AddTransactionZakat(input *requests.UserZakatReques
 
 	now := time.Now().UTC()
 	transactionInput := requests.TransactionRequest{
-		UserID:             uc.UserID,
-		DueDate:            now.AddDate(0, 0, int(defaultInvoiceDueDate)).Format("2006-01-02"),
-		DueDateAging:       defaultInvoiceDueDate,
-		BankName:           input.BankName,
-		PaymentMethodeCode: input.PaymentMethodCode,
-		TransactionDetail:  []requests.TransactionDetailRequest{},
+		UserID:               uc.UserID,
+		DueDate:              now.AddDate(0, 0, int(defaultInvoiceDueDate)).Format("2006-01-02"),
+		DueDateAging:         defaultInvoiceDueDate,
+		BankName:             input.BankName,
+		PaymentMethodeCode:   input.PaymentMethodCode,
+		TransactionType:      enums.KeyTransactionType1,
+		TransactionDirection: enums.KeyTransactionDirection1,
+		TransactionDetail:    []requests.TransactionDetailRequest{},
 		FaspayBody: requests.FaspayPostRequest{
 			RequestTransaction:  enums.KeyTransactionType1,
 			TransactionDate:     now.Format("2006-01-02 15:04:05"),
