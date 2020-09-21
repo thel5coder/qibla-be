@@ -21,7 +21,6 @@ WORKDIR /app
 
 COPY --from=0 /src/app .
 COPY --from=0 /src/key key/
-COPY --from=0 /src/.env.example .env
 
 EXPOSE 3000
 
