@@ -20,7 +20,7 @@ RUN apk update && apk add --no-cache tzdata
 WORKDIR /app
 
 COPY --from=0 /src/app .
-COPY --from=0 /src/key key/
+COPY --from=0 /src/key /key/
 
 EXPOSE 3000
 
