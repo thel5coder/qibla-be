@@ -16,7 +16,7 @@ type JamaahHandler struct {
 func (handler JamaahHandler) ReadProfile(ctx echo.Context) error {
 	user := ctx.Get("user").(*jwt.CustomClaims)
 	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.ReadBy("id", user.Id)
+	res, err := uc.ReadBy("u.id", user.Id)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }

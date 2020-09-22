@@ -6,12 +6,12 @@ import (
 	"qibla-backend/server/middleware"
 )
 
-type AdminRoutes struct {
+type UserRoutes struct {
 	RouteGroup *echo.Group
 	Handler    handlers.Handler
 }
 
-func (route AdminRoutes) RegisterRoute() {
+func (route UserRoutes) RegisterRoute() {
 	userHandler := handlers.AdminHandler{Handler: route.Handler}
 	jamaahHandler := handlers.JamaahHandler{Handler:route.Handler}
 	jwtMiddleware := middleware.JwtVerify{UcContract: route.Handler.UseCaseContract}
