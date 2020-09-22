@@ -3,43 +3,89 @@ services:
   - docker:dind
 
 variables:
-  DOCKER: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}
+  DOCKER: ${CI_REGISTRY_IMAGE}
+  SRC_SERVER: server
+  SRC_SEND_NOTIFICATION: amqp_listener_send_notification
 
 stages:
   - build
   - push
-  - pull
   - deploy
+  - finish
+  - clean
+
+before_script:
+  - docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY}
 
 after_script:
   - docker logout ${REGISTRY}
 
-build:
+build:one:
   stage: build
   script:
-    - docker system prune -f
-    - docker build . --compress --no-cache -t ${DOCKER}
+    - docker build . -f ${SRC_SERVER}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_SERVER}-${CI_COMMIT_REF_NAME}
   only:
     - dev
 
-push:
+build:two:
+  stage: build
+  script:
+    - docker build . -f ${SRC_SEND_NOTIFICATION}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_SEND_NOTIFICATION}-${CI_COMMIT_REF_NAME}
+  only:
+    - dev
+
+push:one:
   stage: push
+  needs: ["build:one"]
   script:
-    - docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY}
-    - docker push ${DOCKER}
+    - docker push ${DOCKER}:${SRC_SERVER}-${CI_COMMIT_REF_NAME}
   only:
     - dev
 
-pull:
-  stage: pull
+push:two:
+  stage: push
+  needs: ["build:two"]
   script:
-    - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER}"
+    - docker push ${DOCKER}:${SRC_SEND_NOTIFICATION}-${CI_COMMIT_REF_NAME}
   only:
     - dev
 
-deploy:
+deploy:one:
   stage: deploy
+  needs: ["push:one"]
   script:
-    - ssh -tq ${SERVER_DEV} "cd ${FOLDER} && docker-compose up -d && docker system prune -f"
+    - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER}:${SRC_SERVER}-${CI_COMMIT_REF_NAME}"
+  only:
+    - dev
+
+deploy:two:
+  stage: deploy
+  needs: ["push:two"]
+  script:
+    - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER}:${SRC_SEND_NOTIFICATION}-${CI_COMMIT_REF_NAME}"
+  only: 
+    - dev
+
+finish:one:
+  stage: finish
+  needs: ["deploy:one"]
+  script:
+    - ssh -tq ${SERVER_DEV} "cd ${SRC}/${SRC_SERVER} && docker-compose up -d"
+  only:
+    - dev
+
+finish:two:
+  stage: finish
+  needs: ["deploy:two"]
+  script:
+    - ssh -tq ${SERVER_DEV} "cd ${SRC}/${SRC_SEND_NOTIFICATION} && docker-compose up -d"
+  only: 
+    - dev
+
+cleanup:
+  stage: clean
+  script:
+    - docker system prune -f
+    - ssh -tq ${SERVER_DEV} "docker system prune -f"
   only:
     - dev

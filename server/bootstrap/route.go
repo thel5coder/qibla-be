@@ -54,7 +54,7 @@ func (boot *Bootstrap) RegisterRouters() {
 	roleRoute.RegisterRoute()
 
 	//adminUserRoutes
-	adminUserRoutes := routes.AdminRoutes{
+	adminUserRoutes := routes.UserRoutes{
 		RouteGroup: apiV1,
 		Handler:    handlerType,
 	}

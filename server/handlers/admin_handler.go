@@ -21,8 +21,8 @@ func (handler AdminHandler) Browse(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
 
-	uc := usecase.AdminUseCase{UcContract: handler.UseCaseContract}
-	res, pagination, err := uc.Browse(search, order, sort, page, limit)
+	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
+	res, pagination, err := uc.BrowseUserAdmin(search, order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
 }
@@ -30,7 +30,7 @@ func (handler AdminHandler) Browse(ctx echo.Context) error {
 func (handler AdminHandler) Read(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
-	uc := usecase.AdminUseCase{UcContract: handler.UseCaseContract}
+	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
 	res, err := uc.ReadBy("id",ID)
 
 	return handler.SendResponse(ctx, res, nil, err)
@@ -38,7 +38,7 @@ func (handler AdminHandler) Read(ctx echo.Context) error {
 
 func (handler AdminHandler) Edit(ctx echo.Context) error {
 	ID := ctx.Param("id")
-	input := new(requests.AdminRequest)
+	input := new(requests.UserRequest)
 
 	if err := ctx.Bind(input); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
@@ -54,7 +54,7 @@ func (handler AdminHandler) Edit(ctx echo.Context) error {
 }
 
 func (handler AdminHandler) Add(ctx echo.Context) error {
-	input := new(requests.AdminRequest)
+	input := new(requests.UserRequest)
 
 	if err := ctx.Bind(input); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
@@ -81,7 +81,7 @@ func (handler AdminHandler) Delete(ctx echo.Context) error {
 func (handler AdminHandler) GetCurrentAdminUser(ctx echo.Context) error {
 	user := ctx.Get("user").(*jwt.CustomClaims)
 
-	uc := usecase.AdminUseCase{UcContract: handler.UseCaseContract}
+	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
 	res, err := uc.ReadBy("id",user.Id)
 
 	return handler.SendResponse(ctx, res, nil, err)

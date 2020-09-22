@@ -26,8 +26,8 @@ func (uc FileUseCase) ReadBy(column, value string) (res viewmodel.FileVm, err er
 		}
 		res = viewmodel.FileVm{
 			ID:        file.ID,
-			Name:      file.Name,
-			Path:      file.Path,
+			Name:      file.Name.String,
+			Path:      file.Path.String,
 			CreatedAt: file.CreatedAt,
 			UpdatedAt: file.UpdatedAt,
 			DeletedAt: file.DeletedAt.String,

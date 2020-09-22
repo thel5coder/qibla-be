@@ -12,6 +12,4 @@ type AdminVm struct {
 	UpdatedAt       string                 `json:"updated_at"`
 	DeletedAt       string                 `json:"deleted_at"`
 	OdooUserID      int                    `json:"odoo_user_id"`
-	Role            RoleVm                 `json:"role"`
-	MenuPermissions []MenuPermissionUserVm `json:"menu_permissions"`
 }

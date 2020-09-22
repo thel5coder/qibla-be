@@ -17,7 +17,9 @@ type IPartnerRepository interface {
 
 	EditVerified(input viewmodel.PartnerVm) (res string, err error)
 
-	EditBoolStatus(ID, column, reason,updatedAt string, value bool) (res string, err error)
+	EditBoolStatus(ID, column, reason, updatedAt string, value bool) (res string, err error)
+
+	EditPaymentStatus(ID, paidAt, updatedAt string, tx *sql.Tx) (err error)
 
 	Add(input viewmodel.PartnerVm, tx *sql.Tx) (res string, err error)
 

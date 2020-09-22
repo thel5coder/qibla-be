@@ -21,7 +21,7 @@ type IUserRepository interface {
 
 	EditUserName(ID, userName, updatedAt string, tx *sql.Tx) (err error)
 
-	EditFcmDeviceToken(ID, fcmDeviceToken, updatedAt string, tx *sql.Tx) (err error)
+	EditFcmDeviceToken(ID, fcmDeviceToken, updatedAt string) (res string, err error)
 
 	Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error)
 

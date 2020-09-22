@@ -297,6 +297,14 @@ func (repository PartnerRepository) EditBoolStatus(ID, column, reason, updatedAt
 	return res, err
 }
 
+func (PartnerRepository) EditPaymentStatus(ID, paidAt, updatedAt string, tx *sql.Tx) (err error) {
+	statement := `update "partners" set  "paid_at"=$1, "is_paid"=$2, "updated_at"=$3 where "id"=$4 returning "id"`
+	_,err = tx.Exec(statement, datetime.StrParseToTime(paidAt,time.RFC3339), datetime.StrParseToTime(updatedAt,time.RFC3339), ID)
+
+	return err
+}
+
+
 func (PartnerRepository) Add(input viewmodel.PartnerVm, tx *sql.Tx) (res string, err error) {
 	statement := `insert into "partners"
                  ("contact_id","user_id","product_id","subscription_period","webinar_status","website_status","is_active","is_paid","is_subscription_expired",
@@ -342,4 +350,10 @@ func (repository PartnerRepository) CountBy(ID, column, value string) (res int, 
 	}
 
 	return res, err
+}
+
+
+func scanRows(rows *sql.Rows) (data models.Partner,err error){
+
+	return data,err
 }

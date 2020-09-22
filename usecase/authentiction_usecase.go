@@ -5,10 +5,8 @@ import (
 	"fmt"
 	uuid "github.com/satori/go.uuid"
 	"os"
-	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/facebook"
 	"qibla-backend/helpers/google"
-	"qibla-backend/helpers/hashing"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/helpers/str"
 	"qibla-backend/server/requests"
@@ -45,37 +43,39 @@ func (uc AuthenticationUseCase) GenerateJwtToken(jwePayload, email, session stri
 	return token, refreshToken, expTokenAt, expRefreshTokenAt, err
 }
 
-func (uc AuthenticationUseCase) IsPasswordValid(ID, password, hashedPassword string) (err error) {
-	isValid := hashing.CheckHashString(password, hashedPassword)
-	if !isValid {
-		uc.RedisClient.RemoveFromRedis("session-" + ID)
-
-		return errors.New(messages.CredentialDoNotMatch)
-	}
-
-	return err
-}
-
-func (uc AuthenticationUseCase) Login(username, password string) (res viewmodel.UserJwtTokenVm, err error) {
-	repository := actions.NewUserRepository(uc.DB)
+func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string) (res viewmodel.UserJwtTokenVm, err error) {
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	isPinSet := false
 
 	isExist, err := userUc.IsUserNameExist("", username)
 	if err != nil {
+		fmt.Println(1)
 		return res, err
 	}
 	if !isExist {
+		fmt.Println(2)
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
-	user, err := repository.ReadBy("username", username)
+	user, err := userUc.ReadBy("u.username", username)
 	if err != nil {
+		fmt.Println(err.Error())
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
-	err = uc.IsPasswordValid(user.ID, password, user.Password)
+	isPasswordValid, err := userUc.IsPasswordValid(user.ID, password)
 	if err != nil {
+		fmt.Println(4)
+		return res, err
+	}
+	if !isPasswordValid {
+		fmt.Println(5)
+		return res, errors.New(messages.CredentialDoNotMatch)
+	}
+
+	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
+	if err != nil {
+		fmt.Println(6)
 		return res, err
 	}
 
@@ -83,9 +83,10 @@ func (uc AuthenticationUseCase) Login(username, password string) (res viewmodel.
 	session, _ := uc.UpdateSessionLogin(user.ID)
 	token, refreshToken, tokenExpiredAt, refreshTokenExpiredAt, err := uc.GenerateJwtToken(jwePayload, username, session)
 	if err != nil {
+		fmt.Println(7)
 		return res, err
 	}
-	if user.PIN.String != "" {
+	if user.PIN != "" {
 		isPinSet = true
 	}
 	res = viewmodel.UserJwtTokenVm{
@@ -134,7 +135,6 @@ func (uc AuthenticationUseCase) RegisterByEmail(input *requests.RegisterByMailRe
 
 func (uc AuthenticationUseCase) ForgotPassword(email string) (err error) {
 	userUc := UserUseCase{UcContract: uc.UcContract}
-	jamaahUc := JamaahUseCase{UcContract: uc.UcContract}
 
 	count, err := userUc.CountBy("", "email", email)
 	if err != nil {
@@ -142,12 +142,12 @@ func (uc AuthenticationUseCase) ForgotPassword(email string) (err error) {
 	}
 
 	if count > 0 {
-		jamaah, err := jamaahUc.ReadBy("email", email)
+		user, err := userUc.ReadBy("email", email)
 		if err != nil {
 			return err
 		}
 		password := str.RandomString(6)
-		err = jamaahUc.EditPassword(jamaah.ID, password)
+		err = userUc.EditPassword(user.ID, password)
 		if err != nil {
 			return err
 		}
@@ -160,7 +160,7 @@ func (uc AuthenticationUseCase) ForgotPassword(email string) (err error) {
 
 func (uc AuthenticationUseCase) RegisterByOauth(input *requests.RegisterByOauthRequest) (res viewmodel.UserJwtTokenVm, err error) {
 	var profile map[string]interface{}
-	var email,name string
+	var email, name string
 
 	if input.Type == "gmail" {
 		profile, err = google.GetGoogleProfile(input.Token)
@@ -169,21 +169,21 @@ func (uc AuthenticationUseCase) RegisterByOauth(input *requests.RegisterByOauthR
 		}
 		email = profile["email"].(string)
 		name = profile["name"].(string)
-	}else{
-		profile,err = facebook.GetFacebookProfile(input.Token)
+	} else {
+		profile, err = facebook.GetFacebookProfile(input.Token)
 		if err != nil {
-			return res,err
+			return res, err
 		}
 		fmt.Println(profile)
 		email = profile["email"].(string)
 		name = profile["name"].(string)
 	}
 
-	return uc.registerUserByOauth(email,name)
+	return uc.registerUserByOauth(email, name, input.FcmDeviceToken)
 }
 
-func (uc AuthenticationUseCase) registerUserByOauth(email,name string) (res viewmodel.UserJwtTokenVm, err error) {
-	var jamaah viewmodel.JamaahVm
+func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken string) (res viewmodel.UserJwtTokenVm, err error) {
+	var user viewmodel.UserVm
 	var userID string
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	jamaahUc := JamaahUseCase{UcContract: uc.UcContract}
@@ -195,12 +195,12 @@ func (uc AuthenticationUseCase) registerUserByOauth(email,name string) (res view
 		return res, err
 	}
 	if count > 0 {
-		jamaah, err = jamaahUc.ReadBy("email", email)
+		user, err = userUc.ReadBy("email", email)
 		if err != nil {
 			fmt.Println(2)
 			return res, err
 		}
-		userID = jamaah.ID
+		userID = user.ID
 	} else {
 		uc.TX, err = uc.DB.Begin()
 		if err != nil {
@@ -222,6 +222,11 @@ func (uc AuthenticationUseCase) registerUserByOauth(email,name string) (res view
 		uc.TX.Commit()
 	}
 
+	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
+	if err != nil {
+		return res, err
+	}
+
 	jwePayload, _ := uc.Jwe.GenerateJwePayload(userID)
 	session, _ := uc.UpdateSessionLogin(userID)
 	token, refreshToken, tokenExpiredAt, refreshTokenExpiredAt, err := uc.GenerateJwtToken(jwePayload, email, session)
@@ -234,9 +239,8 @@ func (uc AuthenticationUseCase) registerUserByOauth(email,name string) (res view
 		ExpTime:         tokenExpiredAt,
 		RefreshToken:    refreshToken,
 		ExpRefreshToken: refreshTokenExpiredAt,
-		IsPinSet:        jamaah.IsPinSet,
+		IsPinSet:        user.IsPINSet,
 	}
 
 	return res, nil
 }
-

@@ -4,7 +4,7 @@ RUN apk update && apk add --no-cache git ca-certificates
 
 WORKDIR /src
 
-COPY . ./
+COPY . .
 
 RUN go mod download
 
@@ -19,11 +19,8 @@ RUN apk update && apk add --no-cache tzdata
 
 WORKDIR /app
 
-COPY --from=0 /src/app /app/
+COPY --from=0 /src/app .
 COPY --from=0 /src/key /key/
-COPY --from=0 /src/log /log/
-COPY --from=0 /src/excel_template /excel_template/
-COPY --from=0 /src/.env.example /.env
 
 EXPOSE 3000
 

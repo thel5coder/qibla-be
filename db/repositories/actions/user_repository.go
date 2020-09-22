@@ -19,9 +19,14 @@ func NewUserRepository(DB *sql.DB) contracts.IUserRepository {
 	return &UserRepository{DB: DB}
 }
 
+const selectUser = `select u."id",u."username",u."email",u."password",u."is_active",u."created_at",u."updated_at",u."odo_user_id",u."name",
+                   u."mobile_phone",u."pin",u."is_admin_panel",u."fcm_device_token",r."id",r."slug",r."name",f."id",f."path",f."name" from "users" u 
+                   inner join "roles" r on r."id"=u."role_id" and r."deleted_at" is null
+                   left join "files" f on f."id"=u."profile_picture"`
+
 func (repository UserRepository) BrowseNonUserAdminPanel(search, order, sort string, limit, offset int) (data []models.User, count int, err error) {
-	statement := `select * from "users"
-                 where (lower("username") like $1 or lower("email") like $1) and "deleted_at" is null and "is_admin_panel" = false order by "users".` + order + ` ` + sort + ` limit $2 offset $3`
+	statement := selectUser + ` where (lower(u."username") like $1 or lower(u."email") like $1) and u."deleted_at" is null and u."is_admin_panel" = false 
+                 order by u.` + order + ` ` + sort + ` limit $2 offset $3`
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
 	if err != nil {
 		fmt.Print(err)
@@ -32,10 +37,25 @@ func (repository UserRepository) BrowseNonUserAdminPanel(search, order, sort str
 		dataTemp := models.User{}
 
 		err = rows.Scan(
-			&dataTemp.ID, &dataTemp.UserName, &dataTemp.Email, &dataTemp.Password, &dataTemp.IsActive,
-			&dataTemp.RoleID, &dataTemp.CreatedAt, &dataTemp.UpdatedAt, &dataTemp.DeletedAt,
-			&dataTemp.OdooUserID, &dataTemp.Name, &dataTemp.ProfilePicture,
-			&dataTemp.MobilePhone, &dataTemp.PIN, &dataTemp.IsAdminPanel, &dataTemp.FcmDeviceToken,
+			&dataTemp.ID,
+			&dataTemp.UserName,
+			&dataTemp.Email,
+			&dataTemp.Password,
+			&dataTemp.IsActive,
+			&dataTemp.CreatedAt,
+			&dataTemp.UpdatedAt,
+			&dataTemp.OdooUserID,
+			&dataTemp.Name,
+			&dataTemp.MobilePhone,
+			&dataTemp.PIN,
+			&dataTemp.IsAdminPanel,
+			&dataTemp.FcmDeviceToken,
+			&dataTemp.RoleModel.ID,
+			&dataTemp.RoleModel.Slug,
+			&dataTemp.RoleModel.Name,
+			&dataTemp.ProfilePictureID,
+			&dataTemp.FileModel.Path,
+			&dataTemp.FileModel.Name,
 		)
 		if err != nil {
 			return data, count, err
@@ -55,9 +75,8 @@ func (repository UserRepository) BrowseNonUserAdminPanel(search, order, sort str
 }
 
 func (repository UserRepository) BrowseUserAdminPanel(search, order, sort string, limit, offset int) (data []models.User, count int, err error) {
-	statement := `select "users".*,r.* from "users"
-                 inner join "roles" r on r."id"="users"."role_id"
-                 where (lower("users"."username") like $1 or lower("users"."email") like $1 or lower(r."name") like $1) and "users"."deleted_at" is null and "users"."is_admin_panel" = true order by "users".` + order + ` ` + sort + ` limit $2 offset $3`
+	statement := selectUser + ` where (lower(u."username") like $1 or lower(u."email") like $1 or lower(r."name") like $1) and u."deleted_at" is null and u."is_admin_panel" = true 
+                order by u.` + order + ` ` + sort + ` limit $2 offset $3`
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
 	if err != nil {
 		fmt.Print(err)
@@ -73,23 +92,20 @@ func (repository UserRepository) BrowseUserAdminPanel(search, order, sort string
 			&dataTemp.Email,
 			&dataTemp.Password,
 			&dataTemp.IsActive,
-			&dataTemp.RoleID,
 			&dataTemp.CreatedAt,
 			&dataTemp.UpdatedAt,
-			&dataTemp.DeletedAt,
 			&dataTemp.OdooUserID,
 			&dataTemp.Name,
-			&dataTemp.ProfilePicture,
 			&dataTemp.MobilePhone,
 			&dataTemp.PIN,
 			&dataTemp.IsAdminPanel,
 			&dataTemp.FcmDeviceToken,
 			&dataTemp.RoleModel.ID,
-			&dataTemp.RoleModel.Name,
-			&dataTemp.RoleModel.CreatedAt,
-			&dataTemp.RoleModel.UpdatedAt,
-			&dataTemp.RoleModel.DeletedAt,
 			&dataTemp.RoleModel.Slug,
+			&dataTemp.RoleModel.Name,
+			&dataTemp.ProfilePictureID,
+			&dataTemp.FileModel.Path,
+			&dataTemp.FileModel.Name,
 		)
 		if err != nil {
 			return data, count, err
@@ -110,28 +126,27 @@ func (repository UserRepository) BrowseUserAdminPanel(search, order, sort string
 }
 
 func (repository UserRepository) ReadBy(column, value string) (data models.User, err error) {
-	statement := `select users.*,r."id",r."name" from "users"
-                 left join "roles" r on r."id"=users."role_id"
-                 where "users".` + column + `=$1 and "users"."deleted_at" is null`
+	statement := selectUser + ` where ` + column + `=$1 and u."deleted_at" is null`
 	err = repository.DB.QueryRow(statement, value).Scan(
 		&data.ID,
 		&data.UserName,
 		&data.Email,
 		&data.Password,
 		&data.IsActive,
-		&data.RoleID,
 		&data.CreatedAt,
 		&data.UpdatedAt,
-		&data.DeletedAt,
 		&data.OdooUserID,
 		&data.Name,
-		&data.ProfilePicture,
 		&data.MobilePhone,
 		&data.PIN,
 		&data.IsAdminPanel,
 		&data.FcmDeviceToken,
 		&data.RoleModel.ID,
+		&data.RoleModel.Slug,
 		&data.RoleModel.Name,
+		&data.ProfilePictureID,
+		&data.FileModel.Path,
+		&data.FileModel.Name,
 	)
 
 	return data, err
@@ -148,10 +163,10 @@ func (repository UserRepository) Edit(input viewmodel.UserVm, password string, t
 			input.Email,
 			password,
 			input.IsActive,
-			input.RoleID,
+			input.Role.ID,
 			datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
 			input.Name,
-			input.ProfilePicture,
+			input.File.ID,
 			input.MobilePhone,
 			input.IsAdminPanel,
 			input.ID,
@@ -164,10 +179,10 @@ func (repository UserRepository) Edit(input viewmodel.UserVm, password string, t
 			input.UserName,
 			input.Email,
 			input.IsActive,
-			input.RoleID,
+			input.Role.ID,
 			datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
 			input.Name,
-			input.ProfilePicture,
+			input.File.ID,
 			input.MobilePhone,
 			input.IsAdminPanel,
 			input.ID,
@@ -198,11 +213,11 @@ func (UserRepository) EditUserName(ID, userName, updatedAt string, tx *sql.Tx) (
 	return err
 }
 
-func (UserRepository) EditFcmDeviceToken(ID, fcmDeviceToken, updatedAt string, tx *sql.Tx) (err error) {
+func (repository UserRepository) EditFcmDeviceToken(ID, deviceToken, updatedAt string) (res string, err error) {
 	statement := `update "users" set "fcm_device_token"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
-	_, err = tx.Exec(statement, fcmDeviceToken, datetime.StrParseToTime(updatedAt, time.RFC3339), ID)
+	err = repository.DB.QueryRow(statement, deviceToken, datetime.StrParseToTime(updatedAt, time.RFC3339), ID).Scan(&res)
 
-	return err
+	return res, err
 }
 
 func (repository UserRepository) Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error) {
@@ -214,11 +229,11 @@ func (repository UserRepository) Add(input viewmodel.UserVm, password string, tx
 		statement,
 		input.UserName,
 		input.Name,
-		input.ProfilePicture,
+		input.File.ID,
 		input.Email,
 		input.MobilePhone,
 		password,
-		input.RoleID,
+		input.Role.ID,
 		input.OdooUserID,
 		input.IsActive,
 		input.IsAdminPanel,

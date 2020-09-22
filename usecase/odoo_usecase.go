@@ -18,7 +18,7 @@ func (uc OdooUseCase) GetField(objectName string) (res map[string]interface{}, e
 
 func (uc OdooUseCase) Browse(objectName, search string, limit, offset int, res interface{}) (err error) {
 	var odooOption *odoo.Options
-	odoCriteria := odoo.NewCriteria().Add("is_active","=",true)
+	var odoCriteria *odoo.Criteria
 	err = uc.Odoo.SearchRead(objectName, odoCriteria, odooOption, res)
 	if err != nil {
 		return err
