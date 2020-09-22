@@ -19,7 +19,7 @@ func (uc JamaahUseCase) Edit(input *requests.EditProfileRequest, ID string) (err
 		return err
 	}
 	userUc := UserUseCase{UcContract: uc.UcContract}
-	user, err := userUc.ReadBy("id", ID)
+	user, err := userUc.ReadBy("u.id", ID)
 	if err != nil {
 		uc.TX.Rollback()
 
