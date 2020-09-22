@@ -154,12 +154,8 @@ func (uc RoleUseCase) IsNameExist(ID, name string) (res bool, err error) {
 	return count > 0, err
 }
 
-type TravelPackage struct {
-	DisplayName string `xmlrpc:"display_name"`
-	Name        string `xmlrpc:"name"`
-}
-
-func (uc RoleUseCase) GetRes() (res []TravelPackage, err error) {
+func (uc RoleUseCase) GetRes() (res map[string]interface{}, err error) {
+	res = make(map[string]interface{})
 	err = uc.Read("travel.package", odoo.NewCriteria().Add("display_name", "like", "paket"), odoo.NewOptions(), &res)
 	if err != nil {
 		return res, err

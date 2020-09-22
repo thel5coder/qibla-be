@@ -24,7 +24,7 @@ func (handler AuthenticationHandler) Login(ctx echo.Context) error {
 	}
 
 	uc := usecase.AuthenticationUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.Login(input.UserName, input.Password)
+	res, err := uc.Login(input.UserName, input.Password, input.FcmDeviceToken)
 	if err != nil {
 		return handler.SendResponseUnauthorized(ctx, err)
 	}
@@ -93,8 +93,8 @@ func (handler AuthenticationHandler) SetPin(ctx echo.Context) error {
 	user := ctx.Get("user").(*jwt.CustomClaims)
 	uc := usecase.AuthenticationUseCase{UcContract: handler.UseCaseContract}
 
-	jamaahUc := usecase.JamaahUseCase{UcContract: uc.UcContract}
-	err := jamaahUc.EditPin(user.Id, input.Pin)
+	userUc := usecase.UserUseCase{UcContract: uc.UcContract}
+	err := userUc.EditPin(user.Id, input.Pin)
 
 	return handler.SendResponse(ctx, nil, nil, err)
 }

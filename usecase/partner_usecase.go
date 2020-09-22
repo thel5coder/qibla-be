@@ -134,13 +134,28 @@ func (uc PartnerUseCase) EditVerify(ID string, input *requests.PartnerVerifyRequ
 func (uc PartnerUseCase) EditBoolStatus(ID, column, reason, userID, password string, value bool) (err error) {
 	repository := actions.NewParterRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
-	adminUc := AdminUseCase{UcContract: uc.UcContract}
+	userUc := UserUseCase{UcContract: uc.UcContract}
 
-	err = adminUc.IsPasswordValid(userID, password)
+	isPasswordValid,err := userUc.IsPasswordValid(userID, password)
 	if err != nil {
 		return err
 	}
+	if !isPasswordValid {
+		return err
+	}
 	_, err = repository.EditBoolStatus(ID, column, reason, now, value)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc PartnerUseCase) EditPaymentStatus(ID string) (err error){
+	repository := actions.NewParterRepository(uc.DB)
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	err = repository.EditPaymentStatus(ID,now,now,uc.TX)
 	if err != nil {
 		return err
 	}
@@ -174,7 +189,7 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (res viewmo
 	//add user
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	password, _ := hashing.HashAndSalt(str.RandomString(6))
-	userID, err := userUc.Add(contact.TravelAgentName, input.UserName, contact.Email, contact.PhoneNumber, "ee694491-5166-441b-8262-9745bf866aa9", password, true, false)
+	userID, err := userUc.Add(contact.TravelAgentName, input.UserName, contact.Email, contact.PhoneNumber, "ee694491-5166-441b-8262-9745bf866aa9", password, "",true, false)
 	if err != nil {
 		uc.TX.Rollback()
 
