@@ -20,6 +20,7 @@ import (
 	"log"
 	"os"
 	"qibla-backend/db"
+	"qibla-backend/helpers/amqp"
 	awsHelper "qibla-backend/helpers/aws"
 	"qibla-backend/helpers/fcm"
 	"qibla-backend/helpers/google"
@@ -149,6 +150,17 @@ func main() {
 		APIKey: os.Getenv("FMC_KEY"),
 	}
 
+	// Mqueue connection
+	amqpInfo := amqp.Connection{
+		URL: os.Getenv("AMQP_URL"),
+	}
+	amqpConn, amqpChannel, err := amqpInfo.Connect()
+	if err != nil {
+		panic(err)
+	}
+	usecase.AmqpConnection = amqpConn
+	usecase.AmqpChannel = amqpChannel
+
 	//init validator
 	validatorInit()
 
@@ -170,6 +182,8 @@ func main() {
 		GoMailConfig:   goMailConfig,
 		YoutubeService: youtubeService,
 		Fcm:            fcmConnection,
+		AmqpConn:       amqpConn,
+		AmqpChannel:    amqpChannel,
 	}
 
 	bootApp := bootstrap.Bootstrap{

@@ -70,6 +70,8 @@ type UcContract struct {
 	E              *echo.Echo
 	DB             *sql.DB
 	TX             *sql.Tx
+	AmqpConn       *amqp.Connection
+	AmqpChannel    *amqp.Channel
 	RedisClient    redis.RedisClient
 	Jwe            jwe.Credential
 	Validate       *validator.Validate
