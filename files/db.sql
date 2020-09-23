@@ -143,7 +143,8 @@ CREATE TABLE "users" (
   "name" varchar(50),
   "profile_picture" char(36),
   "mobile_phone" varchar(20),
-  "pin" varchar(128)
+  "pin" varchar(128),
+  "fcm_device_token" varchar(255)
 );
 
 CREATE TABLE "roles" (

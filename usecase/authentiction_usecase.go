@@ -43,7 +43,7 @@ func (uc AuthenticationUseCase) GenerateJwtToken(jwePayload, email, session stri
 	return token, refreshToken, expTokenAt, expRefreshTokenAt, err
 }
 
-func (uc AuthenticationUseCase) Login(username, password,fcmDeviceToken string) (res viewmodel.UserJwtTokenVm, err error) {
+func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string) (res viewmodel.UserJwtTokenVm, err error) {
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	isPinSet := false
 
@@ -63,20 +63,20 @@ func (uc AuthenticationUseCase) Login(username, password,fcmDeviceToken string) 
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
-	isPasswordValid,err := userUc.IsPasswordValid(user.ID, password)
+	isPasswordValid, err := userUc.IsPasswordValid(user.ID, password)
 	if err != nil {
 		fmt.Println(4)
 		return res, err
 	}
 	if !isPasswordValid {
 		fmt.Println(5)
-		return res,errors.New(messages.CredentialDoNotMatch)
+		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
-	err = userUc.EditFcmDeviceToken(user.ID,fcmDeviceToken)
+	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
 		fmt.Println(6)
-		return res,err
+		return res, err
 	}
 
 	jwePayload, _ := uc.Jwe.GenerateJwePayload(user.ID)
@@ -160,7 +160,7 @@ func (uc AuthenticationUseCase) ForgotPassword(email string) (err error) {
 
 func (uc AuthenticationUseCase) RegisterByOauth(input *requests.RegisterByOauthRequest) (res viewmodel.UserJwtTokenVm, err error) {
 	var profile map[string]interface{}
-	var email,name string
+	var email, name string
 
 	if input.Type == "gmail" {
 		profile, err = google.GetGoogleProfile(input.Token)
@@ -169,20 +169,20 @@ func (uc AuthenticationUseCase) RegisterByOauth(input *requests.RegisterByOauthR
 		}
 		email = profile["email"].(string)
 		name = profile["name"].(string)
-	}else{
-		profile,err = facebook.GetFacebookProfile(input.Token)
+	} else {
+		profile, err = facebook.GetFacebookProfile(input.Token)
 		if err != nil {
-			return res,err
+			return res, err
 		}
 		fmt.Println(profile)
 		email = profile["email"].(string)
 		name = profile["name"].(string)
 	}
 
-	return uc.registerUserByOauth(email,name,input.FcmDeviceToken)
+	return uc.registerUserByOauth(email, name, input.FcmDeviceToken)
 }
 
-func (uc AuthenticationUseCase) registerUserByOauth(email,name,fcmDeviceToken string) (res viewmodel.UserJwtTokenVm, err error) {
+func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken string) (res viewmodel.UserJwtTokenVm, err error) {
 	var user viewmodel.UserVm
 	var userID string
 	userUc := UserUseCase{UcContract: uc.UcContract}
@@ -222,9 +222,9 @@ func (uc AuthenticationUseCase) registerUserByOauth(email,name,fcmDeviceToken st
 		uc.TX.Commit()
 	}
 
-	err = userUc.EditFcmDeviceToken(user.ID,fcmDeviceToken)
+	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
 	jwePayload, _ := uc.Jwe.GenerateJwePayload(userID)
@@ -244,4 +244,3 @@ func (uc AuthenticationUseCase) registerUserByOauth(email,name,fcmDeviceToken st
 
 	return res, nil
 }
-

@@ -11,6 +11,7 @@ type UserVm struct {
 	IsAdminPanel    bool                   `json:"is_admin_panel"`
 	IsPINSet        bool                   `json:"is_pin_set"`
 	OdooUserID      int32                  `json:"odo_user_id"`
+	FcmDeviceToken  string                 `json:"fcm_device_token"`
 	CreatedAt       string                 `json:"created_at"`
 	UpdatedAt       string                 `json:"updated_at"`
 	Role            RoleVm                 `json:"role"`

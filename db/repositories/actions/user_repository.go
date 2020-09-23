@@ -213,11 +213,11 @@ func (UserRepository) EditUserName(ID, userName, updatedAt string, tx *sql.Tx) (
 	return err
 }
 
-func (repository UserRepository) EditFcmDeviceToken(ID, deviceToken, updatedAt string) (res string,err error) {
+func (repository UserRepository) EditFcmDeviceToken(ID, deviceToken, updatedAt string) (res string, err error) {
 	statement := `update "users" set "fcm_device_token"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
 	err = repository.DB.QueryRow(statement, deviceToken, datetime.StrParseToTime(updatedAt, time.RFC3339), ID).Scan(&res)
 
-	return res,err
+	return res, err
 }
 
 func (repository UserRepository) Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error) {
