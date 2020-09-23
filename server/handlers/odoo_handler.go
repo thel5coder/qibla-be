@@ -19,7 +19,7 @@ func (handler OdooHandler) GetField(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
-func (handler OdooHandler) Browse(ctx echo.Context) error {
+func (handler OdooHandler) BrowseTravelPackage(ctx echo.Context) error {
 	objectName := ctx.Param("objectName")
 	uc := usecase.OdooUseCase{UcContract: handler.UseCaseContract}
 	var res []viewmodel.TravelPackageOdooVm

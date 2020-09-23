@@ -9,5 +9,11 @@ type TourPackageVm struct {
 }
 
 type TourDetailOdooVm struct {
+	ID          int64         `xmlrpc:"id,omptempty"`
+	ArrivalDate string        `xmlrpc:"arrival_date,omptempty"`
+	CreateDate  string        `xmlrpc:"create_date,omptempty"`
+	DisplayName string        `xmlrpc:"display_name,omptempty"`
+	Name        string        `xmlrpc:"name,omptempty"`
+	JamaahList  []interface{} `xmlrpc:"jamaah_list,omptempty"`
 
 }
