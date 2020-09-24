@@ -142,7 +142,7 @@ func (uc AuthenticationUseCase) ForgotPassword(email string) (err error) {
 	}
 
 	if count > 0 {
-		user, err := userUc.ReadBy("email", email)
+		user, err := userUc.ReadBy("u.email", email)
 		if err != nil {
 			return err
 		}
@@ -195,7 +195,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 		return res, err
 	}
 	if count > 0 {
-		user, err = userUc.ReadBy("email", email)
+		user, err = userUc.ReadBy("u.email", email)
 		if err != nil {
 			fmt.Println(2)
 			return res, err

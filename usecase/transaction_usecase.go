@@ -202,7 +202,7 @@ func (uc TransactionUseCase) Delete(ID string) (err error) {
 }
 func (uc TransactionUseCase) AddTransactionZakat(input *requests.UserZakatRequest) (res viewmodel.TransactionVm, err error) {
 	userUseCase := UserUseCase{UcContract: uc.UcContract}
-	user, err := userUseCase.ReadBy("id", uc.UserID)
+	user, err := userUseCase.ReadBy("u.id", uc.UserID)
 	if err != nil {
 		return res, err
 	}
