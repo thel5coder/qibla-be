@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
@@ -24,6 +25,7 @@ func (handler JamaahHandler) ReadProfile(ctx echo.Context) error {
 func (handler JamaahHandler) EditProfile(ctx echo.Context) error {
 	user := ctx.Get("user").(*jwt.CustomClaims)
 	input := new(requests.EditProfileRequest)
+	fmt.Println(user.Id)
 
 	if err := ctx.Bind(input); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())

@@ -252,13 +252,18 @@ func (repository UserRepository) Delete(ID, updatedAt, deletedAt string, tx *sql
 }
 
 func (repository UserRepository) CountBy(ID, column, value string) (res int, err error) {
+	fmt.Println(ID)
 	if ID == "" {
 		statement := `select count("id") from "users" where ` + column + `=$1 and "deleted_at" is null`
 		err = repository.DB.QueryRow(statement, value).Scan(&res)
 	} else {
 		statement := `select count("id") from "users" where (` + column + `=$1 and "deleted_at" is null) and "id"<>$2`
 		err = repository.DB.QueryRow(statement, value, ID).Scan(&res)
+		fmt.Println(value)
+		fmt.Println(statement)
+		fmt.Println(res)
 	}
+
 
 	return res, err
 }
