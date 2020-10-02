@@ -70,7 +70,7 @@ finish:one:
   stage: finish
   needs: ["deploy:one"]
   script:
-    - ssh -tq ${SERVER_DEV} "cd ${SRC}/${SRC_SERVER} && docker-compose up -d"
+    - ssh -tq ${SERVER_DEV} "cd ${SRC_DEV}/${SRC_SERVER} && docker-compose up -d"
   only:
     - dev
 
@@ -78,7 +78,7 @@ finish:two:
   stage: finish
   needs: ["deploy:two"]
   script:
-    - ssh -tq ${SERVER_DEV} "cd ${SRC}/${SRC_SEND_NOTIFICATION} && docker-compose up -d"
+    - ssh -tq ${SERVER_DEV} "cd ${SRC_DEV}/${SRC_SEND_NOTIFICATION} && docker-compose up -d"
   only: 
     - dev
 
