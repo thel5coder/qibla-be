@@ -49,11 +49,9 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 
 	isExist, err := userUc.IsUserNameExist("", username)
 	if err != nil {
-		fmt.Println(1)
 		return res, err
 	}
 	if !isExist {
-		fmt.Println(2)
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
@@ -65,17 +63,14 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 
 	isPasswordValid, err := userUc.IsPasswordValid(user.ID, password)
 	if err != nil {
-		fmt.Println(4)
 		return res, err
 	}
 	if !isPasswordValid {
-		fmt.Println(5)
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
 	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
-		fmt.Println(6)
 		return res, err
 	}
 
@@ -83,7 +78,6 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 	session, _ := uc.UpdateSessionLogin(user.ID)
 	token, refreshToken, tokenExpiredAt, refreshTokenExpiredAt, err := uc.GenerateJwtToken(jwePayload, username, session)
 	if err != nil {
-		fmt.Println(7)
 		return res, err
 	}
 	if user.PIN != "" {

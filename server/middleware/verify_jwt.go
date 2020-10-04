@@ -7,6 +7,7 @@ import (
 	"qibla-backend/helpers/messages"
 	"qibla-backend/server/handlers"
 	"qibla-backend/usecase"
+	"qibla-backend/usecase/viewmodel"
 	"strings"
 	"time"
 
@@ -55,11 +56,11 @@ func (jwtVerify JwtVerify) JWTWithConfig(next echo.HandlerFunc) echo.HandlerFunc
 		claims.Id = fmt.Sprintf("%v", jweRes["id"])
 		jwtVerify.UcContract.UserID = claims.Id
 
-		//sessionData := viewmodel.UserSessionVm{}
-		//jwtVerify.UcContract.GetFromRedis("session-"+claims.Id, &sessionData)
-		//if sessionData.Session != claims.Session {
-		//	return apiHandler.SendResponseUnauthorized(ctx, errors.New(messages.InvalidSession))
-		//}
+		sessionData := viewmodel.UserSessionVm{}
+		jwtVerify.UcContract.RedisClient.GetFromRedis("session-"+claims.Id, &sessionData)
+		if sessionData.Session != claims.Session {
+			return apiHandler.SendResponseUnauthorized(ctx, errors.New(messages.InvalidSession))
+		}
 		ctx.Set("user", claims)
 
 		return next(ctx)
