@@ -159,6 +159,7 @@ func (uc AuthenticationUseCase) RegisterByOauth(input *requests.RegisterByOauthR
 	if input.Type == "gmail" {
 		profile, err = google.GetGoogleProfile(input.Token)
 		if err != nil {
+			fmt.Println(err.Error())
 			return res, errors.New(messages.CredentialDoNotMatch)
 		}
 		email = profile["email"].(string)
@@ -166,6 +167,7 @@ func (uc AuthenticationUseCase) RegisterByOauth(input *requests.RegisterByOauthR
 	} else {
 		profile, err = facebook.GetFacebookProfile(input.Token)
 		if err != nil {
+			fmt.Println(err.Error())
 			return res, err
 		}
 		fmt.Println(profile)

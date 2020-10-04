@@ -25,6 +25,7 @@ func GetFacebookProfile(token string) (res map[string]interface{}, err error) {
 	defer response.Body.Close()
 	responseBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
+		fmt.Println(err.Error())
 		return res, errors.New("error_read_body")
 	}
 	err = json.Unmarshal(responseBody, &res)
