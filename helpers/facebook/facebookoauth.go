@@ -15,6 +15,7 @@ const OauthFacebookURLAPI = "https://graph.facebook.com/me?fields=id,name,email&
 func GetFacebookProfile(token string) (res map[string]interface{}, err error) {
 	response, err := http.Get(OauthFacebookURLAPI + token)
 	if err != nil {
+		fmt.Println(err)
 		return res, err
 	}
 	if response.StatusCode >= 400 {
