@@ -60,6 +60,8 @@ func (jwtVerify JwtVerify) JWTWithConfig(next echo.HandlerFunc) echo.HandlerFunc
 		//if sessionData.Session != claims.Session {
 		//	return apiHandler.SendResponseUnauthorized(ctx, errors.New(messages.InvalidSession))
 		//}
+
+		//set context
 		ctx.Set("user", claims)
 
 		return next(ctx)
