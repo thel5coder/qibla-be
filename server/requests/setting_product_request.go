@@ -1,8 +1,8 @@
 package requests
 
 type SettingProductRequest struct {
-	ProductID           string   `json:"product_id"`
-	Price               int      `json:"price"`
+	ProductID           string   `json:"product_id" validate:"required"`
+	Price               int      `json:"price" validate:"required"`
 	PriceUnit           string   `json:"price_unit"`
 	MaintenancePrice    int32    `json:"maintenance_price"`
 	Discount            int32    `json:"discount"`
