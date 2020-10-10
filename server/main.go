@@ -85,11 +85,11 @@ func main() {
 		Port:     os.Getenv("DB_PORT"),
 		SslMode:  os.Getenv("DB_SSL_MODE"),
 	}
-
 	database, err := dbInfo.DbConnect()
 	if err != nil {
 		panic(err)
 	}
+	defer database.Close()
 
 	pong, err := redisClient.Client.Ping().Result()
 	fmt.Println("Redis ping status: "+pong, err)

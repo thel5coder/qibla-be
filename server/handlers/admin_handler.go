@@ -28,10 +28,10 @@ func (handler AdminHandler) Browse(ctx echo.Context) error {
 }
 
 func (handler AdminHandler) Read(ctx echo.Context) error {
-	ID := ctx.Param("id")
+	ID := ctx.Param("u.id")
 
 	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.ReadBy("id",ID)
+	res, err := uc.ReadBy("u.id",ID)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }

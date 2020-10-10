@@ -17,8 +17,11 @@ func GetGoogleProfile(token string) (res map[string]interface{},err error) {
 	}
 
 	defer response.Body.Close()
+	if response.StatusCode != 200{
+		return res,err
+	}
 	responseBody, err := ioutil.ReadAll(response.Body)
-	fmt.Println(string(responseBody))
+
 	if err != nil {
 		fmt.Println("error read body")
 
@@ -28,7 +31,6 @@ func GetGoogleProfile(token string) (res map[string]interface{},err error) {
 	if err != nil {
 		return res,err
 	}
-	fmt.Print(res)
 
 	return res,err
 }

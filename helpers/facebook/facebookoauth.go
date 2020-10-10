@@ -19,11 +19,14 @@ func GetFacebookProfile(token string) (res map[string]interface{}, err error) {
 		return res, err
 	}
 	if response.StatusCode >= 400 {
-		fmt.Println(response)
 		return res, errors.New("invalid_facebook_access_token")
 	}
-
 	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return res,err
+	}
+
 	responseBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		fmt.Println(err.Error())

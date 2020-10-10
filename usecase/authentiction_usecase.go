@@ -49,6 +49,7 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 
 	isExist, err := userUc.IsUserNameExist("", username)
 	if err != nil {
+		fmt.Println(err.Error())
 		return res, err
 	}
 	if !isExist {
@@ -63,6 +64,7 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 
 	isPasswordValid, err := userUc.IsPasswordValid(user.ID, password)
 	if err != nil {
+		fmt.Println(err.Error())
 		return res, err
 	}
 	if !isPasswordValid {
@@ -71,6 +73,7 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 
 	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
+		fmt.Println(err.Error())
 		return res, err
 	}
 
@@ -220,6 +223,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 
 	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
+		fmt.Println(4)
 		return res, err
 	}
 
@@ -227,6 +231,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	session, _ := uc.UpdateSessionLogin(userID)
 	token, refreshToken, tokenExpiredAt, refreshTokenExpiredAt, err := uc.GenerateJwtToken(jwePayload, email, session)
 	if err != nil {
+		fmt.Println(5)
 		return res, err
 	}
 
