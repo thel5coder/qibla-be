@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/hashing"
@@ -50,6 +51,7 @@ func (uc UserUseCase) ReadBy(column, value string) (res viewmodel.UserVm, err er
 	repository := actions.NewUserRepository(uc.DB)
 	user, err := repository.ReadBy(column, value)
 	if err != nil {
+		fmt.Println(err.Error())
 		return res, err
 	}
 

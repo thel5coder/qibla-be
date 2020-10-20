@@ -130,6 +130,13 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	promotionRoutes.RegisterRoute()
 
+	//tour package
+	tourPackageRoutes := routes.TourPackageRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	tourPackageRoutes.RegisterRoute()
+
 	//master product
 	masterProductRoutes := routes.MasterProductRoutes{
 		RouteGroup: apiV1,

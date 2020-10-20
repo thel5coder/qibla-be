@@ -190,9 +190,9 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	//count email by email profile
 	count, err := userUc.CountBy("", "email", email)
 	if err != nil {
-		fmt.Print(1)
 		return res, err
 	}
+	fmt.Println(count)
 	if count > 0 {
 		user, err = userUc.ReadBy("u.email", email)
 		if err != nil {

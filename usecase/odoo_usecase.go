@@ -1,6 +1,8 @@
 package usecase
 
-import "github.com/skilld-labs/go-odoo"
+import (
+	"github.com/skilld-labs/go-odoo"
+)
 
 type OdooUseCase struct {
 	*UcContract

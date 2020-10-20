@@ -50,7 +50,7 @@ func Exist(val interface{}, array interface{}) (exists bool) {
 func InterfaceArrayToString(data []interface{}) (res string) {
 	for i, d := range data {
 		if i != 0 {
-			res = res + ", "
+			res = res + ","
 		}
 		res = res + fmt.Sprintf("%v", d)
 	}

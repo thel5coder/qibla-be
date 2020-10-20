@@ -126,7 +126,9 @@ func (repository UserRepository) BrowseUserAdminPanel(search, order, sort string
 }
 
 func (repository UserRepository) ReadBy(column, value string) (data models.User, err error) {
+	fmt.Println(column)
 	statement := selectUser + ` where ` + column + `=$1 and u."deleted_at" is null`
+	fmt.Println(statement)
 	err = repository.DB.QueryRow(statement, value).Scan(
 		&data.ID,
 		&data.UserName,
@@ -148,6 +150,9 @@ func (repository UserRepository) ReadBy(column, value string) (data models.User,
 		&data.FileModel.Path,
 		&data.FileModel.Name,
 	)
+	if err != nil {
+		return data,err
+	}
 
 	return data, err
 }
@@ -221,7 +226,6 @@ func (repository UserRepository) EditFcmDeviceToken(ID, deviceToken, updatedAt s
 }
 
 func (repository UserRepository) Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error) {
-	fmt.Print(input.OdooUserID)
 	statement := `insert into "users" 
                  ("username","name","profile_picture","email","mobile_phone","password","role_id","odo_user_id","is_active","is_admin_panel","created_at","updated_at") 
                  values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning "id"`
@@ -252,16 +256,12 @@ func (repository UserRepository) Delete(ID, updatedAt, deletedAt string, tx *sql
 }
 
 func (repository UserRepository) CountBy(ID, column, value string) (res int, err error) {
-	fmt.Println(ID)
 	if ID == "" {
 		statement := `select count("id") from "users" where ` + column + `=$1 and "deleted_at" is null`
 		err = repository.DB.QueryRow(statement, value).Scan(&res)
 	} else {
 		statement := `select count("id") from "users" where (` + column + `=$1 and "deleted_at" is null) and "id"<>$2`
 		err = repository.DB.QueryRow(statement, value, ID).Scan(&res)
-		fmt.Println(value)
-		fmt.Println(statement)
-		fmt.Println(res)
 	}
 
 

@@ -18,6 +18,9 @@ func (route OdooRoutes) RegisterRoute(){
 	odooRoute := route.RouteGroup.Group("/odoo")
 	odooRoute.Use(jwtMiddleware.JWTWithConfig)
 	odooRoute.GET("/get-field/:objectName",handler.GetField)
-	odooRoute.GET("/:objectName",handler.BrowseTravelPackage)
-	odooRoute.GET("/:objectName/:id",handler.Read)
+	odooRoute.GET("/travel-package",handler.BrowseTravelPackage)
+	odooRoute.GET("/equipment-package",handler.BrowseEquipmentPackage)
+	odooRoute.GET("/travel-package/:id",handler.ReadTravelPackage)
+	odooRoute.GET("/equipment-package/:id",handler.ReadEquipmentPackage)
+	odooRoute.GET("/product-template/:id",handler.ReadProductTemplate)
 }
