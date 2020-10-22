@@ -126,9 +126,7 @@ func (repository UserRepository) BrowseUserAdminPanel(search, order, sort string
 }
 
 func (repository UserRepository) ReadBy(column, value string) (data models.User, err error) {
-	fmt.Println(column)
 	statement := selectUser + ` where ` + column + `=$1 and u."deleted_at" is null`
-	fmt.Println(statement)
 	err = repository.DB.QueryRow(statement, value).Scan(
 		&data.ID,
 		&data.UserName,

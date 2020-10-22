@@ -23,9 +23,9 @@ type TourPackageAirlineVm struct {
 }
 
 type TourPackagePriceVm struct {
-	RoomType     string  `json:"room_type"`
-	RoomCapacity string  `json:"room_capacity"`
-	Price        float32 `json:"price"`
-	PromoPrice   float32 `json:"promo_price"`
-	IsDefault    bool    `json:"is_default"`
+	RoomType     string `json:"room_type"`
+	RoomCapacity int64  `json:"room_capacity"`
+	Price        int64  `json:"price"`
+	PricePromo   int64  `json:"promo_price"`
+	IsDefault    bool   `json:"is_default"`
 }

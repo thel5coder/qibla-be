@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"qibla-backend/helpers/hashing"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/server/requests"
@@ -17,9 +18,11 @@ func (uc AdminUseCase) isExist(input *requests.UserRequest) (err error) {
 	//check is email exist
 	isEmailExist, err := userUc.IsEmailExist("", input.Email)
 	if err != nil {
+		fmt.Println(4)
 		return err
 	}
 	if isEmailExist {
+		fmt.Println(5)
 		return errors.New(messages.EmailAlreadyExist)
 	}
 
@@ -29,6 +32,7 @@ func (uc AdminUseCase) isExist(input *requests.UserRequest) (err error) {
 		return err
 	}
 	if isUserNameExist {
+		fmt.Println(6)
 		return errors.New(messages.UserNameExist)
 	}
 
@@ -42,6 +46,7 @@ func (uc AdminUseCase) Edit(ID string, input *requests.UserRequest) (err error) 
 	//check is email or username exist
 	err = uc.isExist(input)
 	if err != nil {
+		fmt.Println(1)
 		return err
 	}
 
@@ -60,6 +65,7 @@ func (uc AdminUseCase) Edit(ID string, input *requests.UserRequest) (err error) 
 	}
 	err = userUc.Edit(ID, input.UserName, input.UserName, input.Email, "", input.RoleID, password, "", input.IsActive, true)
 	if err != nil {
+		fmt.Println(2)
 		uc.TX.Rollback()
 
 		return err
@@ -69,6 +75,7 @@ func (uc AdminUseCase) Edit(ID string, input *requests.UserRequest) (err error) 
 	menuPermissionUserUc := MenuPermissionUserUseCase{UcContract: uc.UcContract}
 	err = menuPermissionUserUc.Store(ID, input.MenuPermissions, input.DeletedMenuPermissions, uc.TX)
 	if err != nil {
+		fmt.Println(3)
 		uc.TX.Rollback()
 
 		return err

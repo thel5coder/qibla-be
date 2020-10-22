@@ -103,20 +103,67 @@ func (uc TourPackageUseCase) getProduct(productIDs []int64) (res []viewmodel.Odo
 	return res, nil
 }
 
-func (uc TourPackageUseCase) GetRoomRate(roomRateIDs []interface{}) (res []viewmodel.OdooRoomRateVm, err error) {
-	odooUc := OdooUseCase{UcContract: uc.UcContract}
-	var temp []viewmodel.OdooRoomRateVm
+func (uc TourPackageUseCase) getTourPackagePriceRates(roomRateIDs []interface{}) (res []viewmodel.TourPackagePriceVm, err error) {
+	var temps []viewmodel.TourPackagePriceVm
 
+	//get data from object room.rates
 	roomRateIDstr := interfacepkg.InterfaceArrayToString(roomRateIDs)
 	roomRateIDarr := strings.Split(roomRateIDstr, ",")
+	roomRates, err := uc.getRoomRates(roomRateIDarr)
+	if err != nil {
+		return res, err
+	}
 
-	for _, roomRateID := range roomRateIDarr {
-		err = odooUc.Read("room.rate", int64(str.StringToInt(roomRateID)), &temp)
+	for _, roomRate := range roomRates {
+		//get data from object room.room
+		roomID := uc.getRoomID(roomRate)
+		rooms, err := uc.getRooms(roomID)
 		if err != nil {
 			return res, err
 		}
 
-		fmt.Println(temp[0].PricePromo)
+		temps = append(temps,viewmodel.TourPackagePriceVm{
+			RoomType:     rooms[0].DisplayName,
+			RoomCapacity: rooms[0].NumberOfPerson,
+			Price:        int64(roomRate.PriceUnit),
+			PricePromo:   int64(roomRate.PricePromo),
+			IsDefault:    false,
+		})
+	}
+
+
+	return res, nil
+}
+
+func (uc TourPackageUseCase) getRoomRates(roomRateIDs []string) (res []viewmodel.OdooRoomRateVm, err error) {
+	odooUc := OdooUseCase{UcContract: uc.UcContract}
+	var temp []viewmodel.OdooRoomRateVm
+
+	for _, roomRateID := range roomRateIDs {
+		err = odooUc.Read("room.rate", int64(str.StringToInt(roomRateID)), &temp)
+		if err != nil {
+			return res, err
+		}
+		res = append(res, temp[0])
+	}
+
+	return res, err
+}
+
+func (uc TourPackageUseCase) getRoomID(odooRoomRate viewmodel.OdooRoomRateVm) (res int64) {
+	odooRoomIDStr := interfacepkg.InterfaceArrayToString(odooRoomRate.RoomID)
+	odooRoomIDArr := strings.Split(odooRoomIDStr, ",")
+	res = int64(str.StringToInt(odooRoomIDArr[0]))
+
+	return res
+}
+
+func (uc TourPackageUseCase) getRooms(roomID int64) (res []viewmodel.OdooRoomVm, err error) {
+	odooUc := OdooUseCase{UcContract: uc.UcContract}
+
+	err = odooUc.Read("room.room", roomID, &res)
+	if err != nil {
+		return res, err
 	}
 
 	return res, nil
@@ -146,9 +193,9 @@ func (uc TourPackageUseCase) buildBody(model viewmodel.TravelPackageOdooVm) (res
 		return res, err
 	}
 
-	_,err = uc.GetRoomRate(model.RoomRateIDS)
+	_, err = uc.getTourPackagePriceRates(model.RoomRateIDS)
 	if err != nil {
-		return res,err
+		return res, err
 	}
 
 	res = viewmodel.TourPackageVm{
