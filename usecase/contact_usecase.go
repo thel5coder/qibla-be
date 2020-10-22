@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/helpers/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"
@@ -293,6 +294,15 @@ func (uc ContactUseCase) duplicateCheck(ID string, input *requests.ContactReques
 	}
 	if accreditationCount > 0 {
 		return errors.New("akreditasi sudah ada")
+	}
+
+	//check email
+	emailCount,err := uc.countBy(ID,"email",input.Email)
+	if err != nil {
+		return err
+	}
+	if emailCount > 0 {
+		return errors.New(messages.EmailAlreadyExist)
 	}
 
 	return nil
