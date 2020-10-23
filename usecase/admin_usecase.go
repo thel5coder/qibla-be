@@ -162,7 +162,7 @@ func (uc AdminUseCase) Delete(ID string) (err error) {
 			return err
 		}
 	}
-	uc.TX.Rollback()
+	uc.TX.Commit()
 
 	return nil
 }
