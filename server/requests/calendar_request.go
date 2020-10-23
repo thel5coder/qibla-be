@@ -6,5 +6,5 @@ type CalendarRequest struct {
 	End          string   `json:"end"`
 	Description  string   `json:"description"`
 	Remember     int      `json:"remember"`
-	Participants []string `json:"participants"`
+	Participants []string `json:"participants" validate:"email"`
 }

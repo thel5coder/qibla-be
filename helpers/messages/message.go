@@ -35,4 +35,5 @@ var (
 	OtpNotMatch            = "otp not match"
 	PaymentFailed          = "pembayaran gagal"
 	SameMethod             = "same method"
+	ParticipantRequired    = "partisipan harus ada"
 )

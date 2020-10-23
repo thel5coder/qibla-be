@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
+	"qibla-backend/helpers/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 )
@@ -55,6 +57,16 @@ func (handler CalendarHandler) Add(ctx echo.Context) error{
 	}
 	if err := handler.Validate.Struct(input); err != nil {
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
+	}
+
+	if len(input.Participants) == 0 {
+		return handler.SendResponseBadRequest(ctx,http.StatusBadRequest,errors.New(messages.ParticipantRequired))
+	}
+
+	for _,participant := range input.Participants{
+		if err := handler.Validate.Struct(participant); err != nil {
+			return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
+		}
 	}
 
 	uc := usecase.CalendarUseCase{UcContract: handler.UseCaseContract}
