@@ -64,7 +64,7 @@ func (repository MenuRepository) Browse(parentID,search, order, sort string, lim
 		err = repository.DB.QueryRow(statement,"%"+strings.ToLower(search)+"%",parentID).Scan(&count)
 	}else{
 		statement = `select count("id") from "menus" 
-                     where ("menu_id" like $1 or lower("name") like $1 or lower("url") like $1) and "deleted_at" is null`
+                     where ("menu_id" like $1 or lower("name") like $1 or lower("url") like $1) and "deleted_at" is null and "parent_id" is null`
 		err = repository.DB.QueryRow(statement,"%"+strings.ToLower(search)+"%").Scan(&count)
 	}
 
