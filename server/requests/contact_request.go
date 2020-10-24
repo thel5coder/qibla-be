@@ -7,7 +7,7 @@ type ContactRequest struct {
 	Longitude            string `json:"longitude"`
 	Latitude             string `json:"latitude"`
 	AreaCode             string `json:"area_code"`
-	PhoneNumber          string    `json:"phone_number"`
+	PhoneNumber          string `json:"phone_number"`
 	SKNumber             string `json:"sk_number"`
 	SKDate               string `json:"sk_date"`
 	Accreditation        string `json:"accreditation"`

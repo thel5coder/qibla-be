@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -23,6 +24,7 @@ func (repository SatisfactionCategoryRepository) BrowseAllBy(column, value strin
 	if value == "" && column == "parent_id" {
 		statement := `select * from "satisfaction_categories" where "parent_id" is null and "deleted_at" is null`
 		rows, err = repository.DB.Query(statement)
+		fmt.Println(rows)
 	} else {
 		statement := `select * from "satisfaction_categories" where ` + column + `=$1 and "deleted_at" is null`
 		rows, err = repository.DB.Query(statement, value)

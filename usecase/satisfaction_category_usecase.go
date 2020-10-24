@@ -164,6 +164,7 @@ func (uc SatisfactionCategoryUseCase) Add(parentID, name, description string, is
 		Name:        name,
 		Description: description,
 		IsActive:    true,
+		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
 	err = repository.Add(body, uc.TX)
@@ -219,12 +220,6 @@ func (uc SatisfactionCategoryUseCase) DeleteByPk(ID string) (err error) {
 		return err
 	}
 	if count > 0 {
-		err = uc.DeleteBy("id", ID)
-		if err != nil {
-			uc.TX.Rollback()
-
-			return err
-		}
 		err = uc.DeleteBy("parent_id", ID)
 		if err != nil {
 			uc.TX.Rollback()
