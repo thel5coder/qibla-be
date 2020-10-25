@@ -51,6 +51,7 @@ func (handler CalendarHandler) Edit(ctx echo.Context) error{
 
 func (handler CalendarHandler) Add(ctx echo.Context) error{
 	input := new(requests.CalendarRequest)
+	var participantEmail requests.EmailParticipant
 
 	if err := ctx.Bind(input); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
@@ -59,12 +60,13 @@ func (handler CalendarHandler) Add(ctx echo.Context) error{
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 	}
 
+	//validate participant email
 	if len(input.Participants) == 0 {
 		return handler.SendResponseBadRequest(ctx,http.StatusBadRequest,errors.New(messages.ParticipantRequired))
 	}
-
 	for _,participant := range input.Participants{
-		if err := handler.Validate.Struct(participant); err != nil {
+		participantEmail = requests.EmailParticipant{Email: participant}
+		if err := handler.Validate.Struct(participantEmail); err != nil {
 			return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 		}
 	}
