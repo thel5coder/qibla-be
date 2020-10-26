@@ -9,9 +9,9 @@ type ContactRequest struct {
 	AreaCode             string `json:"area_code"`
 	PhoneNumber          string `json:"phone_number"`
 	SKNumber             string `json:"sk_number"`
-	SKDate               string `json:"sk_date"`
+	SKDate               string `json:"sk_date" validate:"date"`
 	Accreditation        string `json:"accreditation"`
-	AccreditationDate    string `json:"accreditation_date"`
+	AccreditationDate    string `json:"accreditation_date" validate:"date"`
 	DirectorName         string `json:"director_name"`
 	DirectorContact      string `json:"director_contact"`
 	PicName              string `json:"pic_name"`
