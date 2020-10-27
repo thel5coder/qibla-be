@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"fmt"
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/helpers/datetime"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"
@@ -91,11 +91,15 @@ func (uc CalendarUseCase) Edit(ID string, input *requests.CalendarRequest) (err 
 
 		return err
 	}
+
+	startDate := datetime.StrParseToTime(input.Start, "2006-01-02 15:04:05")
+	endDate := datetime.StrParseToTime(input.End, "2006-01-02 15:04:05")
+	loc, _ := time.LoadLocation("UTC")
 	body := viewmodel.CalendarVm{
 		ID:          ID,
 		Title:       input.Title,
-		Start:       input.Start,
-		End:         input.End,
+		Start:       startDate.In(loc).Format(time.RFC3339),
+		End:         endDate.In(loc).Format(time.RFC3339),
 		Description: input.Description,
 		Remember:    input.Remember,
 		UpdatedAt:   now,
@@ -129,11 +133,14 @@ func (uc CalendarUseCase) Add(input *requests.CalendarRequest) (err error) {
 
 		return err
 	}
-	fmt.Println(input.Start)
+
+	startDate := datetime.StrParseToTime(input.Start, "2006-01-02 15:04:05")
+	endDate := datetime.StrParseToTime(input.End, "2006-01-02 15:04:05")
+	loc, _ := time.LoadLocation("UTC")
 	body := viewmodel.CalendarVm{
 		Title:       input.Title,
-		Start:       input.Start,
-		End:         input.End,
+		Start:       startDate.In(loc).Format(time.RFC3339),
+		End:         endDate.In(loc).Format(time.RFC3339),
 		Description: input.Description,
 		Remember:    input.Remember,
 		CreatedAt:   now,
