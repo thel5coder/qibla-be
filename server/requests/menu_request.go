@@ -1,7 +1,6 @@
 package requests
 
 type addMenuRequest struct {
-	MenuID   string `json:"menu_id" validate:"required"`
 	Name     string `json:"name" validate:"required"`
 	Url      string `json:"url" validate:"required"`
 	ParentID string `json:"parent_id"`

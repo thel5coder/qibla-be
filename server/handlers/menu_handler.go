@@ -27,11 +27,18 @@ func (handler MenuHandler) Browse(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, pagination, err)
 }
 
+func (handler MenuHandler) BrowseAllTree(ctx echo.Context) error {
+	uc := usecase.MenuUseCase{UcContract: handler.UseCaseContract}
+	res, err := uc.BrowseAllBy("m.parent_id", "", "=")
+
+	return handler.SendResponse(ctx, res, nil, err)
+}
+
 func (handler MenuHandler) Read(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
 	uc := usecase.MenuUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.ReadByPk(ID)
+	res, err := uc.ReadBy("m.id", ID, "=")
 
 	return handler.SendResponse(ctx, res, nil, err)
 }
@@ -42,7 +49,7 @@ func (handler MenuHandler) Edit(ctx echo.Context) error {
 	if err := ctx.Bind(inputs); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
 	}
-	for _,input := range inputs.Menus{
+	for _, input := range inputs.Menus {
 		if err := handler.Validate.Struct(input); err != nil {
 			return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 		}
@@ -60,7 +67,7 @@ func (handler MenuHandler) Add(ctx echo.Context) error {
 	if err := ctx.Bind(inputs); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
 	}
-	for _,input := range inputs.Menus{
+	for _, input := range inputs.Menus {
 		if err := handler.Validate.Struct(input); err != nil {
 			return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 		}
