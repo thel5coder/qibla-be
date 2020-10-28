@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -11,97 +12,128 @@ import (
 	"time"
 )
 
-type MenuRepository struct{
+type MenuRepository struct {
 	DB *sql.DB
 }
 
-func NewMenuRepository(DB *sql.DB) contracts.IMenuRepository{
+func NewMenuRepository(DB *sql.DB) contracts.IMenuRepository {
+	menuSelectStatementParams = []interface{}{}
+
 	return &MenuRepository{DB: DB}
 }
 
-func (repository MenuRepository) Browse(parentID,search, order, sort string, limit, offset int) (data []models.Menu, count int, err error) {
-	statement := ``
-	var rows *sql.Rows
-	if parentID != ""{
-		statement = `select * from "menus" 
-                     where "deleted_at" is null and "parent_id"=$1`
-		rows,err = repository.DB.Query(statement,parentID)
-	}else{
-		statement = `select * from "menus" 
-                     where ("menu_id" like $1 or lower("name") like $1 or lower("url") like $1) and "deleted_at" is null and "parent_id" is null
-                     order by `+order+` `+sort+` limit $2 offset $3`
-		rows,err = repository.DB.Query(statement,"%"+strings.ToLower(search)+"%",limit,offset)
+const (
+	menuSelect  = `select m."id",m."menu_id",m."name",m."url",m."parent_id",m."is_active",m."created_at",m."updated_at",array_to_string(array_agg(mp."id" || ':' || mp."permission"),',')`
+	menuJoin    = `left join "menu_permissions" mp on mp."menu_id"=m."id"`
+	menuGroupBy = `group by m."id"`
+)
+
+var (
+	menuSelectStatementParams = []interface{}{}
+	menuWhereStatement        = `where (m."menu_id" like $1 or lower(m."name") like $1 or lower(m."url") like $1 or cast(m."updated_at" as varchar) like $1) and m."deleted_at" is null`
+)
+
+func (repository MenuRepository) scanRow(row *sql.Row) (res models.Menu, err error) {
+	err = row.Scan(&res.ID, &res.MenuID, &res.Name, &res.Url, &res.ParentID, &res.IsActive, &res.CreatedAt, &res.UpdatedAt, &res.Permissions)
+	if err != nil {
+		return res, err
 	}
 
+	return res, nil
+}
+
+func (repository MenuRepository) scanRows(rows *sql.Rows) (res models.Menu, err error) {
+	err = rows.Scan(&res.ID, &res.MenuID, &res.Name, &res.Url, &res.ParentID, &res.IsActive, &res.CreatedAt, &res.UpdatedAt, &res.Permissions)
 	if err != nil {
-		return data,count,err
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (repository MenuRepository) Browse(parentID, search, order, sort string, limit, offset int) (data []models.Menu, count int, err error) {
+	fmt.Println(menuWhereStatement)
+	menuSelectStatementParams = append(menuSelectStatementParams, []interface{}{"%" + strings.ToLower(search) + "%", limit, offset}...)
+	if parentID != "" {
+		menuSelectStatementParams = append(menuSelectStatementParams, parentID)
+		menuWhereStatement += ` and m."parent_id"=$4`
+	} else {
+		menuWhereStatement += ` and m."parent_id" is null`
+	}
+	statement := menuSelect + ` from "menus" m ` + menuJoin + ` ` + menuWhereStatement + ` ` + menuGroupBy + ` order by m.` + order + ` ` + sort + ` limit $2 offset $3`
+	rows, err := repository.DB.Query(statement, menuSelectStatementParams...)
+	if err != nil {
+		return data, count, err
 	}
 
 	for rows.Next() {
-		dataTemp := models.Menu{}
-
-		err = rows.Scan(
-			&dataTemp.ID,
-			&dataTemp.MenuID,
-			&dataTemp.Name,
-			&dataTemp.Url,
-			&dataTemp.ParentID,
-			&dataTemp.IsActive,
-			&dataTemp.CreatedAt,
-			&dataTemp.UpdatedAt,
-			&dataTemp.DeletedAt,
-			)
+		temp, err := repository.scanRows(rows)
 		if err != nil {
-			return data,count,err
+			return data, count, err
 		}
-
-		data = append(data,dataTemp)
+		data = append(data, temp)
 	}
 
-	if parentID != ""{
-		statement = `select count("id") from "menus" 
-                     where ("menu_id" like $1 or lower("name") like $1 or lower("url") like $1) and "deleted_at" is null and "parent_id"=$2`
-		err = repository.DB.QueryRow(statement,"%"+strings.ToLower(search)+"%",parentID).Scan(&count)
-	}else{
-		statement = `select count("id") from "menus" 
-                     where ("menu_id" like $1 or lower("name") like $1 or lower("url") like $1) and "deleted_at" is null and "parent_id" is null`
-		err = repository.DB.QueryRow(statement,"%"+strings.ToLower(search)+"%").Scan(&count)
-	}
-
+	statement = `select distinct count(m."id") from "menus" m ` + menuJoin + ` ` + menuWhereStatement + ` ` + menuGroupBy
+	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
 	if err != nil {
-		return data,count,err
+		return data, count, err
 	}
 
-	return data,count,err
+	return data, count, err
 }
 
-func (repository MenuRepository) ReadBy(column, value string) (data models.Menu, err error) {
-	statement := `select * from "menus" where `+column+`=$1 and "deleted_at" is null`
-	err = repository.DB.QueryRow(statement,value).Scan(
-		&data.ID,
-		&data.MenuID,
-		&data.Name,
-		&data.Url,
-		&data.ParentID,
-		&data.IsActive,
-		&data.CreatedAt,
-		&data.UpdatedAt,
-		&data.DeletedAt,
-		)
+func (repository MenuRepository) BrowseAllBy(column, value, operator string) (data []models.Menu, err error) {
+	menuSelectStatementParams = []interface{}{}
+	whereStatement := `where ` + column + ` is null and m."deleted_at" is null and m."is_active"=true`
+	if value != "" {
+		menuSelectStatementParams = []interface{}{value}
+		whereStatement = `where ` + column + `` + operator + `$1 and m."deleted_at" is null and m."is_active"=true`
+	}
+	statement := menuSelect + ` from "menus" m ` + menuJoin + ` ` + whereStatement + ` ` + menuGroupBy
+	rows, err := repository.DB.Query(statement, menuSelectStatementParams...)
+	if err != nil {
+		return data, err
+	}
 
-	return data,err
+	for rows.Next() {
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
+
+	return data, err
+}
+
+func (repository MenuRepository) ReadBy(column, value, operator string) (data models.Menu, err error) {
+	menuSelectStatementParams = []interface{}{}
+	whereStatement := `where ` + column + ` is null and m."deleted_at" is null and m."is_active"=true`
+	if value != "" {
+		menuSelectStatementParams = []interface{}{value}
+		whereStatement = `where ` + column + `` + operator + `$1 and m."deleted_at" is null and m."is_active"=true`
+	}
+	statement := menuSelect + ` from "menus" m ` + menuJoin + ` ` + whereStatement + ` ` + menuGroupBy
+	row := repository.DB.QueryRow(statement, menuSelectStatementParams...)
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
 func (repository MenuRepository) Edit(input viewmodel.MenuVm, tx *sql.Tx) (err error) {
 	statement := `update "menus" set "name"=$1, "url"=$2, "is_active"=$3, "updated_at"=$4 where "id"=$5 and "deleted_at" is null returning "id"`
-	_,err = tx.Exec(
+	_, err = tx.Exec(
 		statement,
 		input.Name,
 		input.Url,
 		input.IsActive,
-		datetime.StrParseToTime(input.UpdatedAt,time.RFC3339),
+		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
 		input.ID,
-		)
+	)
 
 	return err
 }
@@ -115,48 +147,47 @@ func (repository MenuRepository) Add(input viewmodel.MenuVm, tx *sql.Tx) (res st
 		input.Url,
 		str.EmptyString(input.ParentID),
 		input.IsActive,
-		datetime.StrParseToTime(input.CreatedAt,time.RFC3339),
-		datetime.StrParseToTime(input.UpdatedAt,time.RFC3339),
-		).Scan(&res)
+		datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
+		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
+	).Scan(&res)
 
-	return res,err
+	return res, err
 }
 
 func (repository MenuRepository) Delete(ID, updatedAt, deletedAt string, tx *sql.Tx) (err error) {
 	statement := `update "menus" set "updated_at"=$1, "deleted_at"=$2 where "id"=$3`
-	_, err = tx.Exec(statement,datetime.StrParseToTime(updatedAt,time.RFC3339),datetime.StrParseToTime(deletedAt,time.RFC3339),ID)
+	_, err = tx.Exec(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), ID)
 
 	return err
 }
 
 func (repository MenuRepository) DeleteChild(parentID, updatedAt, deletedAt string, tx *sql.Tx) (err error) {
 	statement := `update "menus" set "updated_at"=$1, "deleted_at"=$2 where "parent_id"=$3`
-	_, err = tx.Exec(statement,datetime.StrParseToTime(updatedAt,time.RFC3339),datetime.StrParseToTime(deletedAt,time.RFC3339),parentID)
+	_, err = tx.Exec(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), parentID)
 
 	return err
 }
 
 func (repository MenuRepository) CountBy(ID, column, value string) (res int, err error) {
-	if ID != ""{
-		statement := `select count("id") from "menus" where `+column+`=$1 and "deleted_at" is null and "id"<>$2`
-		err = repository.DB.QueryRow(statement,value,ID).Scan(&res)
-	}else{
+	if ID != "" {
+		statement := `select count("id") from "menus" where ` + column + `=$1 and "deleted_at" is null and "id"<>$2`
+		err = repository.DB.QueryRow(statement, value, ID).Scan(&res)
+	} else {
 		if value == "" {
-			statement := `select count("id") from "menus" where `+column+` is null and "deleted_at" is null`
+			statement := `select count("id") from "menus" where ` + column + ` is null and "deleted_at" is null`
 			err = repository.DB.QueryRow(statement).Scan(&res)
-		}else{
-			statement := `select count("id") from "menus" where `+column+`=$1 and "deleted_at" is null`
-			err = repository.DB.QueryRow(statement,value).Scan(&res)
+		} else {
+			statement := `select count("id") from "menus" where ` + column + `=$1 and "deleted_at" is null`
+			err = repository.DB.QueryRow(statement, value).Scan(&res)
 		}
 	}
 
-	return res,err
+	return res, err
 }
 
 func (repository MenuRepository) CountByPk(ID string) (res int, err error) {
 	statement := `select count("id") from "menus" where "id"=$1 and "deleted_at" is null`
-	err = repository.DB.QueryRow(statement,ID).Scan(&res)
+	err = repository.DB.QueryRow(statement, ID).Scan(&res)
 
-	return res,err
+	return res, err
 }
-

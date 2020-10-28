@@ -3,11 +3,12 @@ package usecase
 import (
 	"errors"
 	"fmt"
+	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
-	"strconv"
+	"strings"
 	"time"
 )
 
@@ -25,83 +26,48 @@ func (uc MenuUseCase) Browse(parentID, search, order, sort string, page, limit i
 	}
 
 	for _, menu := range menus {
-		res = append(res, viewmodel.MenuVm{
-			ID:        menu.ID,
-			MenuID:    menu.MenuID,
-			Name:      menu.Name,
-			Url:       menu.Url,
-			ParentID:  menu.ParentID.String,
-			IsActive:  menu.IsActive,
-			CreatedAt: menu.CreatedAt,
-			UpdatedAt: menu.UpdatedAt,
-			DeletedAt: menu.DeletedAt.String,
-		})
+		res = append(res, uc.buildBody(menu))
 	}
 	pagination = uc.setPaginationResponse(page, limit, count)
 
 	return res, pagination, err
 }
 
-func (uc MenuUseCase) ReadBy(column, value string) (res viewmodel.MenuVm, err error) {
+func (uc MenuUseCase) BrowseAllBy(column, value, operator string) (res []viewmodel.MenuVm, err error) {
 	repository := actions.NewMenuRepository(uc.DB)
-	menuPermissionUc := MenuPermissionUseCase{UcContract: uc.UcContract}
-	var permissions []viewmodel.SelectedMenuPermissionVm
-
-	menu, err := repository.ReadBy(column, value)
+	menus, err := repository.BrowseAllBy(column, value, operator)
 	if err != nil {
 		return res, err
 	}
 
-	rootMenuPermissions, err := menuPermissionUc.Browse(menu.ID)
-	if err != nil {
-		return res, err
-	}
-	for _, menuPermission := range rootMenuPermissions {
-		permissions = append(permissions, viewmodel.SelectedMenuPermissionVm{
-			ID:         menuPermission.ID,
-			Permission: menuPermission.Permission,
-		})
+	for _, menu := range menus {
+		res = append(res, uc.buildBody(menu))
 	}
 
-	childMenus, _, err := uc.Browse(menu.ID, "", "", "", 0, 0)
-	if err != nil {
-		return res, err
-	}
-	for i:=0;i<len(childMenus);i++{
-		childMenuPermissions,err := menuPermissionUc.Browse(childMenus[i].ID)
-		if err != nil {
-			return res,err
-		}
-		for _,childMenuPermission := range childMenuPermissions{
-			childMenus[i].MenuPermissions = append(childMenus[i].MenuPermissions,viewmodel.SelectedMenuPermissionVm{
-				ID:         childMenuPermission.ID,
-				Permission: childMenuPermission.Permission,
-			})
-		}
-	}
-
-	res = viewmodel.MenuVm{
-		ID:              menu.ID,
-		MenuID:          menu.MenuID,
-		Name:            menu.Name,
-		Url:             menu.Url,
-		ParentID:        menu.ParentID.String,
-		IsActive:        menu.IsActive,
-		CreatedAt:       menu.CreatedAt,
-		UpdatedAt:       menu.UpdatedAt,
-		DeletedAt:       menu.DeletedAt.String,
-		MenuPermissions: permissions,
-		ChildMenus:      childMenus,
-	}
-
-	return res, err
+	return res, nil
 }
 
-func (uc MenuUseCase) ReadByPk(ID string) (res viewmodel.MenuVm, err error) {
-	res, err = uc.ReadBy("id", ID)
+func (uc MenuUseCase) browseChild(parentID string) (res []viewmodel.MenuVm) {
+	menus, err := uc.BrowseAllBy("m.parent_id", parentID, "=")
+	if err != nil {
+		return res
+	}
+
+	for _,menu := range menus {
+		menu.ChildMenus = uc.browseChild(menu.ID)
+	}
+
+	return res
+}
+
+func (uc MenuUseCase) ReadBy(column, value, operator string) (res viewmodel.MenuVm, err error) {
+	repository := actions.NewMenuRepository(uc.DB)
+
+	menu, err := repository.ReadBy(column, value, operator)
 	if err != nil {
 		return res, err
 	}
+	res = uc.buildBody(menu)
 
 	return res, err
 }
@@ -181,20 +147,23 @@ func (uc MenuUseCase) Add(inputs *requests.AddMenuRequest) (err error) {
 	for _, input := range inputs.Menus {
 		isExist, err := uc.isMenuExist("", "name", input.Name)
 		if err != nil {
-			fmt.Println("isexist")
 			transaction.Rollback()
 
 			return err
 		}
 		if isExist {
-			fmt.Println("already exist")
 			transaction.Rollback()
 
 			return errors.New(messages.DataAlreadyExist)
 		}
 
+		menuID, err := uc.GetMenuID(input.ParentID)
+		if err != nil {
+			return err
+		}
+		fmt.Println(menuID)
 		body := viewmodel.MenuVm{
-			MenuID:    input.MenuID,
+			MenuID:    menuID,
 			Name:      input.Name,
 			Url:       input.Url,
 			ParentID:  input.ParentID,
@@ -204,7 +173,6 @@ func (uc MenuUseCase) Add(inputs *requests.AddMenuRequest) (err error) {
 		}
 		_, err = repository.Add(body, transaction)
 		if err != nil {
-			fmt.Print("add")
 			transaction.Rollback()
 
 			return err
@@ -260,13 +228,7 @@ func (uc MenuUseCase) GetMenuID(parentID string) (res string, err error) {
 		return res, err
 	}
 
-	if count > 9 {
-		res = `0` + strconv.Itoa(count+1)
-	} else if count > 99 {
-		res = string(count)
-	} else {
-		res = `00` + strconv.Itoa(count+1)
-	}
+	res = fmt.Sprintf("%03d", count+1)
 
 	return res, err
 }
@@ -298,4 +260,32 @@ func (uc MenuUseCase) isMenuExist(ID, column, value string) (res bool, err error
 	}
 
 	return count > 0, err
+}
+
+func (uc MenuUseCase) buildBody(model models.Menu) viewmodel.MenuVm {
+	var menuPermissions []viewmodel.SelectedMenuPermissionVm
+
+	if model.Permissions.String != "" {
+		menuPermissionArr := strings.Split(model.Permissions.String, ",")
+		for _, permission := range menuPermissionArr {
+			permissionArr := strings.Split(permission, ":")
+			menuPermissions = append(menuPermissions, viewmodel.SelectedMenuPermissionVm{
+				ID:         permissionArr[0],
+				Permission: permissionArr[1],
+			})
+		}
+	}
+
+	return viewmodel.MenuVm{
+		ID:              model.ID,
+		MenuID:          model.MenuID,
+		Name:            model.Name,
+		Url:             model.Url,
+		ParentID:        model.ParentID.String,
+		IsActive:        model.IsActive,
+		CreatedAt:       model.CreatedAt,
+		UpdatedAt:       model.UpdatedAt,
+		MenuPermissions: menuPermissions,
+		ChildMenus:      uc.browseChild(model.ID),
+	}
 }

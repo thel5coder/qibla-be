@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/usecase/viewmodel"
 	"time"
@@ -57,7 +56,6 @@ func (uc MenuPermissionUseCase) Store(selectedPermissions []viewmodel.MenuPermis
 	}
 
 	if len(deletedPermissions)> 0{
-		fmt.Println(deletedPermissions)
 		for _,menuPermission := range deletedPermissions {
 			err = uc.Delete(menuPermission,tx)
 			if err != nil {

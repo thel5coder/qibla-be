@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -82,7 +81,6 @@ func (repository CalendarRepository) Edit(input viewmodel.CalendarVm, tx *sql.Tx
 }
 
 func (repository CalendarRepository) Add(input viewmodel.CalendarVm, tx *sql.Tx) (res string, err error) {
-	fmt.Println(input.Remember)
 	statement := `insert into "calendars" ("title","start","end","description","remember","created_at","updated_at") values($1,$2,$3,$4,$5,$6,$7) returning "id"`
 	err = tx.QueryRow(
 		statement,

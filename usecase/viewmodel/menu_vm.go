@@ -9,7 +9,6 @@ type MenuVm struct {
 	IsActive        bool                       `json:"is_active"`
 	CreatedAt       string                     `json:"created_at"`
 	UpdatedAt       string                     `json:"updated_at"`
-	DeletedAt       string                     `json:"deleted_at"`
 	MenuPermissions []SelectedMenuPermissionVm `json:"menu_permissions"`
 	ChildMenus      []MenuVm                   `json:"child_menus"`
 }
