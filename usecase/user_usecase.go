@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/hashing"
@@ -13,28 +12,11 @@ type UserUseCase struct {
 	*UcContract
 }
 
-func (uc UserUseCase) BrowseUserNonAdmin(search, order, sort string, page, limit int) (res []viewmodel.UserVm, pagination viewmodel.PaginationVm, err error) {
+func (uc UserUseCase) Browse(isAdminPanel bool,search, order, sort string, page, limit int) (res []viewmodel.UserVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewUserRepository(uc.DB)
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
-	users, count, err := repository.BrowseNonUserAdminPanel(search, order, sort, limit, offset)
-	if err != nil {
-		return res, pagination, err
-	}
-
-	for _, user := range users {
-		res = append(res, uc.buildBody(user))
-	}
-	pagination = uc.setPaginationResponse(page, limit, count)
-
-	return res, pagination, err
-}
-
-func (uc UserUseCase) BrowseUserAdmin(search, order, sort string, page, limit int) (res []viewmodel.UserVm, pagination viewmodel.PaginationVm, err error) {
-	repository := actions.NewUserRepository(uc.DB)
-	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
-
-	users, count, err := repository.BrowseUserAdminPanel(search, order, sort, limit, offset)
+	users, count, err := repository.Browse(isAdminPanel,search, order, sort, limit, offset)
 	if err != nil {
 		return res, pagination, err
 	}
@@ -51,10 +33,8 @@ func (uc UserUseCase) ReadBy(column, value string) (res viewmodel.UserVm, err er
 	repository := actions.NewUserRepository(uc.DB)
 	user, err := repository.ReadBy(column, value)
 	if err != nil {
-		fmt.Println(err.Error())
 		return res, err
 	}
-
 	res = uc.buildBody(user)
 
 	return res, err
@@ -212,8 +192,8 @@ func (uc UserUseCase) IsPasswordValid(ID, password string) (res bool, err error)
 
 func (uc UserUseCase) buildBody(model models.User) (res viewmodel.UserVm) {
 	var isPINSet = false
-	menuPermissionUserUc := MenuPermissionUserUseCase{UcContract: uc.UcContract}
-	var permissions []viewmodel.MenuPermissionUserVm
+	menuPermissionUserUc := MenuUserPermissionUseCase{UcContract: uc.UcContract}
+	var permissions []viewmodel.MenuUserPermissionVm
 
 	menuPermissionsUsers, _ := menuPermissionUserUc.Browse(model.ID)
 	for _, menuPermissionsUser := range menuPermissionsUsers {
@@ -246,7 +226,6 @@ func (uc UserUseCase) buildBody(model models.User) (res viewmodel.UserVm) {
 			Slug: model.RoleModel.Slug,
 		},
 		File:            file,
-		MenuPermissions: permissions,
 	}
 
 	return res

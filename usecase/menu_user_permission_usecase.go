@@ -1,68 +1,65 @@
 package usecase
 
 import (
-	"database/sql"
+	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/usecase/viewmodel"
-	"time"
 )
 
-type MenuPermissionUserUseCase struct {
+type MenuUserPermissionUseCase struct {
 	*UcContract
 }
 
-func (uc MenuPermissionUserUseCase) Browse(userID string) (res []viewmodel.MenuPermissionUserVm, err error) {
+func (uc MenuUserPermissionUseCase) Browse(menuID string) (res []viewmodel.MenuUserPermissionVm, err error) {
 	repository := actions.NewMenuUserPermissionRepository(uc.DB)
-	menuPermissionUsers, err := repository.Browse(userID)
+	menuPermissionUsers, err := repository.Browse(menuID)
 	if err != nil {
 		return res, err
 	}
 
 	for _, menuPermissionUser := range menuPermissionUsers {
-		res = append(res, viewmodel.MenuPermissionUserVm{
-			MenuID:           menuPermissionUser.MenuID,
-			MenuName:         menuPermissionUser.MenuName,
-			MenuPermissionID: menuPermissionUser.MenuPermissionID,
-			Permission:       menuPermissionUser.Permission,
-		})
+		res = append(res, uc.buildBody(menuPermissionUser))
 	}
 
 	return res, err
 }
 
-func (uc MenuPermissionUserUseCase) Add(userID string, menuPermissionUsers []string, tx *sql.Tx) (err error) {
+func (uc MenuUserPermissionUseCase) Add(menuID,permissionID string) (err error) {
 	repository := actions.NewMenuUserPermissionRepository(uc.DB)
-	now := time.Now().UTC().Format(time.RFC3339)
-
-	for _, menuPermissionUser := range menuPermissionUsers {
-		err = repository.Add(userID, menuPermissionUser, now, now, tx)
+	err = repository.Add(menuID,permissionID,uc.TX)
+	if err != nil {
+		return err
 	}
 
-	return err
+	return nil
 }
 
-func (uc MenuPermissionUserUseCase) Delete(userID string, menuPermissionUsers []string, tx *sql.Tx) (err error) {
+func (uc MenuUserPermissionUseCase) Delete(menuID string) (err error) {
 	repository := actions.NewMenuUserPermissionRepository(uc.DB)
-	now := time.Now().UTC().Format(time.RFC3339)
-
-	for _, menuPermissionUser := range menuPermissionUsers {
-		err = repository.Delete(userID, menuPermissionUser, now, now, tx)
+	err = repository.Delete(menuID,uc.TX)
+	if err != nil {
+		return err
 	}
 
-	return err
+	return nil
 }
 
-func (uc MenuPermissionUserUseCase) Store(userID string, menuPermissionUsers []string, deletedMenuPermissions []string, tx *sql.Tx) (err error) {
-	if len(menuPermissionUsers) > 0 {
-		err = uc.Add(userID,menuPermissionUsers,tx)
+func (uc MenuUserPermissionUseCase) Store(menuID string, menuPermissions []string) (err error) {
+	rows,err := uc.Browse(menuID)
+	if err != nil {
+		return err
+	}
+
+	if len(rows) > 0 {
+		err = uc.Delete(menuID)
 		if err != nil {
 			return err
 		}
 	}
 
-	if len(deletedMenuPermissions)>0 {
-		err = uc.Delete(userID, deletedMenuPermissions,tx)
-		if err !=nil {
+	for _, menuPermission := range menuPermissions{
+		err = uc.Add(menuID,menuPermission)
+		if err != nil {
 			return err
 		}
 	}
@@ -70,10 +67,9 @@ func (uc MenuPermissionUserUseCase) Store(userID string, menuPermissionUsers []s
 	return nil
 }
 
-func (uc MenuPermissionUserUseCase) DeleteByUser(userID string, tx *sql.Tx) (err error) {
-	repository := actions.NewMenuUserPermissionRepository(uc.DB)
-	now := time.Now().UTC().Format(time.RFC3339)
-	err = repository.DeleteByUser(userID, now, now, tx)
-
-	return err
+func (uc MenuUserPermissionUseCase) buildBody(model models.MenuUserPermission) viewmodel.MenuUserPermissionVm{
+	return viewmodel.MenuUserPermissionVm{
+		MenuID:           model.MenuID,
+		MenuPermissionID: model.MenuPermissionID,
+	}
 }

@@ -16,5 +16,4 @@ type UserVm struct {
 	UpdatedAt       string                 `json:"updated_at"`
 	Role            RoleVm                 `json:"role"`
 	File            FileVm                 `json:"file"`
-	MenuPermissions []MenuPermissionUserVm `json:"menu_permissions"`
 }
