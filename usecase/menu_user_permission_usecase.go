@@ -12,7 +12,7 @@ type MenuPermissionUserUseCase struct {
 }
 
 func (uc MenuPermissionUserUseCase) Browse(userID string) (res []viewmodel.MenuPermissionUserVm, err error) {
-	repository := actions.NewMenuPermissionUserRepository(uc.DB)
+	repository := actions.NewMenuUserPermissionRepository(uc.DB)
 	menuPermissionUsers, err := repository.Browse(userID)
 	if err != nil {
 		return res, err
@@ -31,7 +31,7 @@ func (uc MenuPermissionUserUseCase) Browse(userID string) (res []viewmodel.MenuP
 }
 
 func (uc MenuPermissionUserUseCase) Add(userID string, menuPermissionUsers []string, tx *sql.Tx) (err error) {
-	repository := actions.NewMenuPermissionUserRepository(uc.DB)
+	repository := actions.NewMenuUserPermissionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
 	for _, menuPermissionUser := range menuPermissionUsers {
@@ -42,7 +42,7 @@ func (uc MenuPermissionUserUseCase) Add(userID string, menuPermissionUsers []str
 }
 
 func (uc MenuPermissionUserUseCase) Delete(userID string, menuPermissionUsers []string, tx *sql.Tx) (err error) {
-	repository := actions.NewMenuPermissionUserRepository(uc.DB)
+	repository := actions.NewMenuUserPermissionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
 	for _, menuPermissionUser := range menuPermissionUsers {
@@ -71,7 +71,7 @@ func (uc MenuPermissionUserUseCase) Store(userID string, menuPermissionUsers []s
 }
 
 func (uc MenuPermissionUserUseCase) DeleteByUser(userID string, tx *sql.Tx) (err error) {
-	repository := actions.NewMenuPermissionUserRepository(uc.DB)
+	repository := actions.NewMenuUserPermissionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 	err = repository.DeleteByUser(userID, now, now, tx)
 
