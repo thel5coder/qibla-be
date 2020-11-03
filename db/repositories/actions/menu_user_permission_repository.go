@@ -4,68 +4,63 @@ import (
 	"database/sql"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
-	"qibla-backend/helpers/datetime"
-	"time"
 )
 
-type MenuPermissionUserRepository struct {
+type MenuUserPermissionRepository struct {
 	DB *sql.DB
 }
 
-func NewMenuPermissionUserRepository(DB *sql.DB) contracts.IMenuPermissionUserRepository {
-	return &MenuPermissionUserRepository{DB: DB}
+func NewMenuUserPermissionRepository(DB *sql.DB) contracts.IMenuUserPermissionRepository {
+	return &MenuUserPermissionRepository{DB: DB}
 }
 
-func (repository MenuPermissionUserRepository) Browse(userID string) (data []models.MenuPermissionUser, err error) {
-	statement := `select mpu.*, mp."permission",m."id",m."name" from menu_user_permissions mpu 
-                  inner join "menu_permissions" mp on mp."id"=mpu."menu_permission_id" and mp."deleted_at" is null
-                  inner join "menus" m on m."id"=mp."menu_id" and m."deleted_at" is null
-                  where mpu.menu_user_id=$1 and mpu."deleted_at" is null`
-	rows, err := repository.DB.Query(statement, userID)
+const (
+	menuUserPermissionSelect = `select "id","menu_id","menu_permission_id"`
+)
+
+func (repository MenuUserPermissionRepository) scanRows(rows *sql.Rows) (res models.MenuUserPermission, err error) {
+	err = rows.Scan(&res.MenuID, &res.MenuPermissionID)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (repository MenuUserPermissionRepository) Browse(menuID string) (data []models.MenuUserPermission, err error) {
+	statement := menuUserPermissionSelect + ` from "menu_user_permissions" where "menu_id"=$1`
+	rows, err := repository.DB.Query(statement, menuID)
 	if err != nil {
 		return data, err
 	}
 
 	for rows.Next() {
-		dataTemp := models.MenuPermissionUser{}
-		err = rows.Scan(
-			&dataTemp.ID,
-			&dataTemp.UserID,
-			&dataTemp.MenuPermissionID,
-			&dataTemp.CreatedAt,
-			&dataTemp.UpdatedAt,
-			&dataTemp.DeletedAt,
-			&dataTemp.Permission,
-			&dataTemp.MenuID,
-			&dataTemp.MenuName,
-		)
+		temp,err := repository.scanRows(rows)
 		if err != nil {
-			return data, err
+			return data,err
 		}
-
-		data = append(data, dataTemp)
+		data = append(data, temp)
 	}
 
 	return data, err
 }
 
-func (MenuPermissionUserRepository) Add(userID, menuPermissionID, createdAt, updatedAt string, tx *sql.Tx) (err error) {
-	statement := `insert into menu_user_permissions (menu_user_id,"menu_permission_id","created_at","updated_at") values($1,$2,$3,$4)`
-	_, err = tx.Exec(statement, userID, menuPermissionID, datetime.StrParseToTime(createdAt, time.RFC3339), datetime.StrParseToTime(updatedAt, time.RFC3339))
+func (MenuUserPermissionRepository) Add(menuID, menuPermissionID string, tx *sql.Tx) (err error) {
+	statement := `insert into "menu_user_permissions" ("menu_id","menu_permission_id") values($1,$2)`
+	_, err = tx.Exec(statement, menuID, menuPermissionID)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return nil
 }
 
-func (MenuPermissionUserRepository) Delete(userID, menuPermissionID, updatedAt, deletedAt string, tx *sql.Tx) (err error) {
-	statement := `update menu_user_permissions set "updated_at"=$1,"deleted_at"=$2 where menu_user_id=$3 and "menu_permission_id"=$4`
-	_, err = tx.Exec(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), userID, menuPermissionID)
+func (MenuUserPermissionRepository) Delete(menuID string, tx *sql.Tx) (err error) {
+	statement := `delete from "menu_user_permissions" where "menu_id"=$1`
+	_, err = tx.Exec(statement, menuID)
+	if err != nil {
+		return err
+	}
 
-	return err
-}
-
-func (MenuPermissionUserRepository) DeleteByUser(userID, updatedAt, deletedAt string, tx *sql.Tx) (err error) {
-	statement := `update menu_user_permissions set "updated_at"=$1,"deleted_at"=$2 where menu_user_id=$3 `
-	_, err = tx.Exec(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), userID)
-
-	return err
+	return nil
 }

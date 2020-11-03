@@ -5,12 +5,10 @@ import (
 	"qibla-backend/db/models"
 )
 
-type IMenuPermissionUserRepository interface {
-	Browse(userID string) (data []models.MenuPermissionUser, err error)
+type IMenuUserPermissionRepository interface {
+	Browse(menuID string) (data []models.MenuUserPermission, err error)
 
-	Add(userID, menuPermissionID, createdAt, updatedAt string, tx *sql.Tx) (err error)
+	Add(menuID, menuPermissionID string, tx *sql.Tx) (err error)
 
-	Delete(userID, menuPermissionID, updatedAt, deletedAt string, tx *sql.Tx) (err error)
-
-	DeleteByUser(userID, updatedAt, deletedAt string, tx *sql.Tx) (err error)
+	Delete(menuID string, tx *sql.Tx) (err error)
 }
