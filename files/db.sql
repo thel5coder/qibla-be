@@ -687,9 +687,9 @@ ALTER TABLE "users" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
 
 ALTER TABLE "menu_permissions" ADD FOREIGN KEY ("menu_id") REFERENCES "menus" ("id");
 
-ALTER TABLE "menu_permission_users" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE menu_user_permissions ADD FOREIGN KEY (menu_id) REFERENCES "users" ("id");
 
-ALTER TABLE "menu_permission_users" ADD FOREIGN KEY ("menu_permission_id") REFERENCES "menu_permissions" ("id");
+ALTER TABLE menu_user_permissions ADD FOREIGN KEY ("menu_permission_id") REFERENCES "menu_permissions" ("id");
 
 ALTER TABLE "global_info_category_settings" ADD FOREIGN KEY ("global_info_category_id") REFERENCES "global_info_categories" ("id");
 

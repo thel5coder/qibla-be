@@ -71,15 +71,15 @@ func (uc AdminUseCase) Edit(ID string, input *requests.UserRequest) (err error) 
 		return err
 	}
 
-	//edit menu permission user
-	menuPermissionUserUc := MenuPermissionUserUseCase{UcContract: uc.UcContract}
-	err = menuPermissionUserUc.Store(ID, input.MenuPermissions, input.DeletedMenuPermissions, uc.TX)
-	if err != nil {
-		fmt.Println(3)
-		uc.TX.Rollback()
-
-		return err
-	}
+	////edit menu permission user
+	//menuPermissionUserUc := MenuUserPermissionUseCase{UcContract: uc.UcContract}
+	//err = menuPermissionUserUc.Store(ID, input.MenuPermissions, input.DeletedMenuPermissions, uc.TX)
+	//if err != nil {
+	//	fmt.Println(3)
+	//	uc.TX.Rollback()
+	//
+	//	return err
+	//}
 	uc.TX.Commit()
 
 	return nil
@@ -105,7 +105,7 @@ func (uc AdminUseCase) Add(input *requests.UserRequest) (err error) {
 
 	//add user admin
 	password, _ := hashing.HashAndSalt(input.Password)
-	userID, err := userUc.Add(input.UserName, input.UserName, input.Email, "", input.RoleID, password, input.ProfilePictureID,true, true)
+	_, err = userUc.Add(input.UserName, input.UserName, input.Email, "", input.RoleID, password, input.ProfilePictureID,true, true)
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -113,13 +113,13 @@ func (uc AdminUseCase) Add(input *requests.UserRequest) (err error) {
 	}
 
 	//add menu permissions
-	menuPermissionUserUc := MenuPermissionUserUseCase{UcContract: uc.UcContract}
-	err = menuPermissionUserUc.Store(userID, input.MenuPermissions, input.DeletedMenuPermissions, uc.TX)
-	if err != nil {
-		uc.TX.Rollback()
-
-		return err
-	}
+	//menuPermissionUserUc := MenuUserPermissionUseCase{UcContract: uc.UcContract}
+	//err = menuPermissionUserUc.Store(userID, input.MenuPermissions, input.DeletedMenuPermissions, uc.TX)
+	//if err != nil {
+	//	uc.TX.Rollback()
+	//
+	//	return err
+	//}
 	uc.TX.Commit()
 
 	return nil
@@ -134,7 +134,7 @@ func (uc AdminUseCase) Delete(ID string) (err error) {
 		return err
 	}
 	userUc := UserUseCase{UcContract: uc.UcContract}
-	menuPermissionUserUc := MenuPermissionUserUseCase{UcContract: uc.UcContract}
+	//menuPermissionUserUc := MenuUserPermissionUseCase{UcContract: uc.UcContract}
 
 	//validate is data exist
 	count, err := userUc.CountByPk(ID)
@@ -154,13 +154,13 @@ func (uc AdminUseCase) Delete(ID string) (err error) {
 			return err
 		}
 
-		//delete user menu permission
-		err = menuPermissionUserUc.DeleteByUser(ID, uc.TX)
-		if err != nil {
-			uc.TX.Rollback()
-
-			return err
-		}
+		////delete user menu permission
+		//err = menuPermissionUserUc.DeleteByUser(ID, uc.TX)
+		//if err != nil {
+		//	uc.TX.Rollback()
+		//
+		//	return err
+		//}
 	}
 	uc.TX.Commit()
 

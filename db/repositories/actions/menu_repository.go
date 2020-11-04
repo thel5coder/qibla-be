@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -52,7 +51,6 @@ func (repository MenuRepository) scanRows(rows *sql.Rows) (res models.Menu, err 
 }
 
 func (repository MenuRepository) Browse(parentID, search, order, sort string, limit, offset int) (data []models.Menu, count int, err error) {
-	fmt.Println(menuWhereStatement)
 	menuSelectStatementParams = append(menuSelectStatementParams, []interface{}{"%" + strings.ToLower(search) + "%", limit, offset}...)
 	if parentID != "" {
 		menuSelectStatementParams = append(menuSelectStatementParams, parentID)

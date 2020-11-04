@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS "menu_permission_users" (
                                          "deleted_at" timestamp
 );
 -- +migrate Down
-DROP TABLE IF EXISTS "menu_permission_users";
+DROP TABLE IF EXISTS menu_user_permissions;

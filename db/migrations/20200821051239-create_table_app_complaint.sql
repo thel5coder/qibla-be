@@ -1,5 +1,5 @@
 -- +migrate Up
-CREATE TABLE "app_complaints"
+CREATE TABLE IF NOT EXISTS "app_complaints"
 (
     "id"             char(36) PRIMARY KEY NOT NULL DEFAULT (uuid_generate_v4()),
     "FullName"       varchar(50)          NOT NULL,

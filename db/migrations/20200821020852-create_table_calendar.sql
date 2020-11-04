@@ -1,5 +1,5 @@
 -- +migrate Up
-CREATE TABLE "calendars"
+CREATE TABLE IF NOT EXISTS "calendars"
 (
     "id"          char(36) PRIMARY KEY NOT NULL DEFAULT (uuid_generate_v4()),
     "title"       varchar(50)          NOT NULL,

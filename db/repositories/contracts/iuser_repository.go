@@ -7,9 +7,7 @@ import (
 )
 
 type IUserRepository interface {
-	BrowseNonUserAdminPanel(search, order, sort string, limit, offset int) (data []models.User, count int, err error)
-
-	BrowseUserAdminPanel(search, order, sort string, limit, offset int) (data []models.User, count int, err error)
+	Browse(isAdminPanel bool, search, order, sort string, limit, offset int) (data []models.User, count int, err error)
 
 	ReadBy(column, value string) (data models.User, err error)
 

@@ -22,7 +22,7 @@ func (handler AdminHandler) Browse(ctx echo.Context) error {
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
 
 	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
-	res, pagination, err := uc.BrowseUserAdmin(search, order, sort, page, limit)
+	res, pagination, err := uc.Browse(true,search, order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
 }

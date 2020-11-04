@@ -16,107 +16,71 @@ type UserRepository struct {
 }
 
 func NewUserRepository(DB *sql.DB) contracts.IUserRepository {
+	userSelectParams = []interface{}{}
+	userUpdateStatement = ``
+	userUpdateParams = []interface{}{}
+
 	return &UserRepository{DB: DB}
 }
 
-const selectUser = `select u."id",u."username",u."email",u."password",u."is_active",u."created_at",u."updated_at",u."odo_user_id",u."name",
-                   u."mobile_phone",u."pin",u."is_admin_panel",u."fcm_device_token",r."id",r."slug",r."name",f."id",f."path",f."name" from "users" u 
-                   inner join "roles" r on r."id"=u."role_id" and r."deleted_at" is null
-                   left join "files" f on f."id"=u."profile_picture"`
+const (
+	selectUser = `select u."id",u."username",u."email",u."password",u."is_active",u."created_at",u."updated_at",u."odo_user_id",u."name",
+                  u."mobile_phone",u."pin",u."is_admin_panel",u."fcm_device_token",r."id",r."slug",r."name",f."id",f."path",f."name",
+                  array_to_string(array_agg(mu."id" || ':' || mu."menu_id"),','),array_to_string(array_agg(mup."menu_id" || ':' || mup."menu_permission_id"),',')`
+	joinUser = `inner join "roles" r on r."id"=u."role_id" and r."deleted_at" is null
+                left join "files" f on f."id"=u."profile_picture" and f."deleted_at" is null
+                left join "menu_users" mu on mu."user_id"=u."id"
+                left join "menu_user_permissions" mup on mup."menu_id"=mu."menu_id"`
+	groupByUser = `group by u."id",r."id",f."id"`
+)
 
-func (repository UserRepository) BrowseNonUserAdminPanel(search, order, sort string, limit, offset int) (data []models.User, count int, err error) {
-	statement := selectUser + ` where (lower(u."username") like $1 or lower(u."email") like $1) and u."deleted_at" is null and u."is_admin_panel" = false 
-                 order by u.` + order + ` ` + sort + ` limit $2 offset $3`
-	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
+var (
+	whereStatementUser  = `where (lower(u."username") like $1 or lower(u."email") like $1) and u."deleted_at" is null`
+	userSelectParams    = []interface{}{}
+	userUpdateStatement = ``
+	userUpdateParams    = []interface{}{}
+)
+
+func (repository UserRepository) scanRow(row *sql.Row) (res models.User, err error) {
+	err = row.Scan(&res.ID, &res.UserName, &res.Email, &res.Password, &res.IsActive, &res.CreatedAt, &res.UpdatedAt, &res.OdooUserID, &res.Name, &res.MobilePhone, &res.PIN,
+		&res.IsAdminPanel, &res.FcmDeviceToken, &res.RoleModel.ID, &res.RoleModel.Slug, &res.RoleModel.Name, &res.ProfilePictureID, &res.FileModel.Path, &res.FileModel.Name,
+		&res.MenuUser, &res.MenuPermissionUser)
 	if err != nil {
-		fmt.Print(err)
-		return data, count, err
+		return res, err
 	}
 
-	for rows.Next() {
-		dataTemp := models.User{}
-
-		err = rows.Scan(
-			&dataTemp.ID,
-			&dataTemp.UserName,
-			&dataTemp.Email,
-			&dataTemp.Password,
-			&dataTemp.IsActive,
-			&dataTemp.CreatedAt,
-			&dataTemp.UpdatedAt,
-			&dataTemp.OdooUserID,
-			&dataTemp.Name,
-			&dataTemp.MobilePhone,
-			&dataTemp.PIN,
-			&dataTemp.IsAdminPanel,
-			&dataTemp.FcmDeviceToken,
-			&dataTemp.RoleModel.ID,
-			&dataTemp.RoleModel.Slug,
-			&dataTemp.RoleModel.Name,
-			&dataTemp.ProfilePictureID,
-			&dataTemp.FileModel.Path,
-			&dataTemp.FileModel.Name,
-		)
-		if err != nil {
-			return data, count, err
-		}
-
-		data = append(data, dataTemp)
-	}
-
-	statement = `select count("id") from "users"
-                 where (lower("username") like $1 or lower("email") like $1) and "deleted_at" is null and "is_admin_panel" = false`
-	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
-	if err != nil {
-		return data, count, err
-	}
-
-	return data, count, err
+	return res, nil
 }
 
-func (repository UserRepository) BrowseUserAdminPanel(search, order, sort string, limit, offset int) (data []models.User, count int, err error) {
-	statement := selectUser + ` where (lower(u."username") like $1 or lower(u."email") like $1 or lower(r."name") like $1) and u."deleted_at" is null and u."is_admin_panel" = true 
-                order by u.` + order + ` ` + sort + ` limit $2 offset $3`
-	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
+func (repository UserRepository) scanRows(rows *sql.Rows) (res models.User, err error) {
+	err = rows.Scan(&res.ID, &res.UserName, &res.Email, &res.Password, &res.IsActive, &res.CreatedAt, &res.UpdatedAt, &res.OdooUserID, &res.Name, &res.MobilePhone, &res.PIN,
+		&res.IsAdminPanel, &res.FcmDeviceToken, &res.RoleModel.ID, &res.RoleModel.Slug, &res.RoleModel.Name, &res.ProfilePictureID, &res.FileModel.Path, &res.FileModel.Name,
+		&res.MenuUser, &res.MenuPermissionUser)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (repository UserRepository) Browse(isAdminPanel bool, search, order, sort string, limit, offset int) (data []models.User, count int, err error) {
+	userSelectParams = append(userSelectParams, []interface{}{"%" + strings.ToLower(search) + "%", limit, offset, isAdminPanel})
+	statement := selectUser + ` from "users" u ` + joinUser + ` ` + whereStatementUser + ` ` + groupByUser + ` order by u.` + order + ` ` + sort + ` limit $2 offset $3`
+	rows, err := repository.DB.Query(statement, userSelectParams...)
 	if err != nil {
 		fmt.Print(err)
 		return data, count, err
 	}
 
 	for rows.Next() {
-		dataTemp := models.User{}
-
-		err = rows.Scan(
-			&dataTemp.ID,
-			&dataTemp.UserName,
-			&dataTemp.Email,
-			&dataTemp.Password,
-			&dataTemp.IsActive,
-			&dataTemp.CreatedAt,
-			&dataTemp.UpdatedAt,
-			&dataTemp.OdooUserID,
-			&dataTemp.Name,
-			&dataTemp.MobilePhone,
-			&dataTemp.PIN,
-			&dataTemp.IsAdminPanel,
-			&dataTemp.FcmDeviceToken,
-			&dataTemp.RoleModel.ID,
-			&dataTemp.RoleModel.Slug,
-			&dataTemp.RoleModel.Name,
-			&dataTemp.ProfilePictureID,
-			&dataTemp.FileModel.Path,
-			&dataTemp.FileModel.Name,
-		)
+		temp, err := repository.scanRows(rows)
 		if err != nil {
 			return data, count, err
 		}
-
-		data = append(data, dataTemp)
+		data = append(data, temp)
 	}
 
-	statement = `select count("users"."id") from "users"
-                 inner join "roles" r on r."id"=users."role_id"
-                 where (lower(users."username") like $1 or lower(users."email") like $1 or lower(r."name") like $1) and "users"."deleted_at" is null and "users"."is_admin_panel"=true`
+	statement = `select distinct count(u."id") from "users" u ` + joinUser + ` ` + whereStatementUser + ` ` + groupByUser
 	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
 	if err != nil {
 		return data, count, err
@@ -126,73 +90,32 @@ func (repository UserRepository) BrowseUserAdminPanel(search, order, sort string
 }
 
 func (repository UserRepository) ReadBy(column, value string) (data models.User, err error) {
-	statement := selectUser + ` where ` + column + `=$1 and u."deleted_at" is null`
-	err = repository.DB.QueryRow(statement, value).Scan(
-		&data.ID,
-		&data.UserName,
-		&data.Email,
-		&data.Password,
-		&data.IsActive,
-		&data.CreatedAt,
-		&data.UpdatedAt,
-		&data.OdooUserID,
-		&data.Name,
-		&data.MobilePhone,
-		&data.PIN,
-		&data.IsAdminPanel,
-		&data.FcmDeviceToken,
-		&data.RoleModel.ID,
-		&data.RoleModel.Slug,
-		&data.RoleModel.Name,
-		&data.ProfilePictureID,
-		&data.FileModel.Path,
-		&data.FileModel.Name,
-	)
+	statement := selectUser + ` from "users" u ` + joinUser + ` where  ` + column + `=$1 ` + groupByUser
+	row := repository.DB.QueryRow(statement, value)
+	data, err = repository.scanRow(row)
 	if err != nil {
-		return data,err
+		return data, err
 	}
 
-	return data, err
+	return data, nil
 }
 
 func (repository UserRepository) Edit(input viewmodel.UserVm, password string, tx *sql.Tx) (err error) {
+	userUpdateParams = append(userUpdateParams, []interface{}{input.UserName, input.Email, input.IsActive, input.Role.ID, datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
+		input.Name, input.File.ID, input.MobilePhone, input.IsAdminPanel, input.ID}...)
+	userUpdateStatement = `set "username"=$1, "email"=$2, "is_active"=$3, "role_id"=$4, "updated_at"=$5, "name"=$6, "profile_picture"=$7, "mobile_phone"=$8, "is_admin_panel"=$9 where "id"=$10`
 	if password != "" {
-		statement := `update "users" 
-                     set "username"=$1, "email"=$2, "password"=$3, "is_active"=$4, "role_id"=$5, "updated_at"=$6, "name"=$7, "profile_picture"=$8, "mobile_phone"=$9,"is_admin_panel"=$10
-                     where "id"=$11`
-		_, err = tx.Exec(
-			statement,
-			input.UserName,
-			input.Email,
-			password,
-			input.IsActive,
-			input.Role.ID,
-			datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
-			input.Name,
-			input.File.ID,
-			input.MobilePhone,
-			input.IsAdminPanel,
-			input.ID,
-		)
-	} else {
-		statement := `update "users" 
-                      set "username"=$1, "email"=$2, "is_active"=$3, "role_id"=$4, "updated_at"=$5, "name"=$6, "profile_picture"=$7, "mobile_phone"=$8, "is_admin_panel"=$9 where "id"=$10`
-		_, err = tx.Exec(
-			statement,
-			input.UserName,
-			input.Email,
-			input.IsActive,
-			input.Role.ID,
-			datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
-			input.Name,
-			input.File.ID,
-			input.MobilePhone,
-			input.IsAdminPanel,
-			input.ID,
-		)
+		userUpdateParams = append(userUpdateParams, []interface{}{password}...)
+		userUpdateStatement = `set "username"=$1, "email"=$2, "is_active"=$3, "role_id"=$4, "updated_at"=$5, "name"=$6, "profile_picture"=$7, "mobile_phone"=$8, "is_admin_panel"=$9, 
+                              "password"=$11 where "id"=$10`
+	}
+	statement := `update "users" ` + userUpdateStatement
+	_, err = tx.Exec(statement, userUpdateParams...)
+	if err != nil {
+		return err
 	}
 
-	return err
+	return nil
 }
 
 func (repository UserRepository) EditPIN(ID, pin, updatedAt string) (res string, err error) {
@@ -261,7 +184,6 @@ func (repository UserRepository) CountBy(ID, column, value string) (res int, err
 		statement := `select count("id") from "users" where (` + column + `=$1 and "deleted_at" is null) and "id"<>$2`
 		err = repository.DB.QueryRow(statement, value, ID).Scan(&res)
 	}
-
 
 	return res, err
 }
