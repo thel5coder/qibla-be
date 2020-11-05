@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -35,7 +34,7 @@ const (
 )
 
 var (
-	whereStatementUser  = `where (lower(u."username") like $1 or lower(u."email") like $1) and u."deleted_at" is null`
+	whereStatementUser  = `where (lower(u."username") like $1 or lower(u."email") like $1) and u."deleted_at" is null and u."is_admin_panel"=$2`
 	userSelectParams    = []interface{}{}
 	userUpdateStatement = ``
 	userUpdateParams    = []interface{}{}
@@ -64,11 +63,10 @@ func (repository UserRepository) scanRows(rows *sql.Rows) (res models.User, err 
 }
 
 func (repository UserRepository) Browse(isAdminPanel bool, search, order, sort string, limit, offset int) (data []models.User, count int, err error) {
-	userSelectParams = append(userSelectParams, []interface{}{"%" + strings.ToLower(search) + "%", limit, offset, isAdminPanel})
-	statement := selectUser + ` from "users" u ` + joinUser + ` ` + whereStatementUser + ` ` + groupByUser + ` order by u.` + order + ` ` + sort + ` limit $2 offset $3`
+	userSelectParams = append(userSelectParams, []interface{}{"%" + strings.ToLower(search) + "%", isAdminPanel, limit, offset}...)
+	statement := selectUser + ` from "users" u ` + joinUser + ` ` + whereStatementUser + ` ` + groupByUser + ` order by u.` + order + ` ` + sort + ` limit $3 offset $4`
 	rows, err := repository.DB.Query(statement, userSelectParams...)
 	if err != nil {
-		fmt.Print(err)
 		return data, count, err
 	}
 
@@ -81,7 +79,7 @@ func (repository UserRepository) Browse(isAdminPanel bool, search, order, sort s
 	}
 
 	statement = `select distinct count(u."id") from "users" u ` + joinUser + ` ` + whereStatementUser + ` ` + groupByUser
-	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
+	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%",isAdminPanel).Scan(&count)
 	if err != nil {
 		return data, count, err
 	}

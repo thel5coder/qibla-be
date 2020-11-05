@@ -21,8 +21,8 @@ func (handler AdminHandler) Browse(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
 
-	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
-	res, pagination, err := uc.Browse(true,search, order, sort, page, limit)
+	uc := usecase.AdminUseCase{UcContract: handler.UseCaseContract}
+	res, pagination, err := uc.Browse(search, order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
 }
@@ -30,8 +30,8 @@ func (handler AdminHandler) Browse(ctx echo.Context) error {
 func (handler AdminHandler) Read(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
-	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.ReadBy("u.id",ID)
+	uc := usecase.AdminUseCase{UcContract: handler.UseCaseContract}
+	res, err := uc.ReadBy("u.id",ID,"=")
 
 	return handler.SendResponse(ctx, res, nil, err)
 }

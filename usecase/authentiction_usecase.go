@@ -49,7 +49,6 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 
 	isExist, err := userUc.IsUserNameExist("", username)
 	if err != nil {
-		fmt.Println(err.Error())
 		return res, err
 	}
 	if !isExist {
@@ -58,13 +57,11 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 
 	user, err := userUc.ReadBy("u.username", username)
 	if err != nil {
-		fmt.Println(err.Error())
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
 	isPasswordValid, err := userUc.IsPasswordValid(user.ID, password)
 	if err != nil {
-		fmt.Println(err.Error())
 		return res, err
 	}
 	if !isPasswordValid {
@@ -162,7 +159,6 @@ func (uc AuthenticationUseCase) RegisterByOauth(input *requests.RegisterByOauthR
 	if input.Type == "gmail" {
 		profile, err = google.GetGoogleProfile(input.Token)
 		if err != nil {
-			fmt.Println(err.Error())
 			return res, errors.New(messages.CredentialDoNotMatch)
 		}
 		email = profile["email"].(string)
@@ -170,10 +166,8 @@ func (uc AuthenticationUseCase) RegisterByOauth(input *requests.RegisterByOauthR
 	} else {
 		profile, err = facebook.GetFacebookProfile(input.Token)
 		if err != nil {
-			fmt.Println(err.Error())
 			return res, err
 		}
-		fmt.Println(profile)
 		email = profile["email"].(string)
 		name = profile["name"].(string)
 	}
@@ -190,13 +184,13 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	//count email by email profile
 	count, err := userUc.CountBy("", "email", email)
 	if err != nil {
+		fmt.Println("count")
 		return res, err
 	}
-	fmt.Println(count)
 	if count > 0 {
+		fmt.Println(email)
 		user, err = userUc.ReadBy("u.email", email)
 		if err != nil {
-			fmt.Println(2)
 			return res, err
 		}
 		userID = user.ID
@@ -213,7 +207,6 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 		password := str.RandomString(6)
 		userID, err = jamaahUc.Add(name, "guest", email, password, "")
 		if err != nil {
-			fmt.Println(3)
 			uc.TX.Rollback()
 
 			return res, err
@@ -223,7 +216,6 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 
 	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
-		fmt.Println(4)
 		return res, err
 	}
 
@@ -231,7 +223,6 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	session, _ := uc.UpdateSessionLogin(userID)
 	token, refreshToken, tokenExpiredAt, refreshTokenExpiredAt, err := uc.GenerateJwtToken(jwePayload, email, session)
 	if err != nil {
-		fmt.Println(5)
 		return res, err
 	}
 

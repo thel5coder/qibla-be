@@ -19,7 +19,7 @@ const (
 )
 
 func (repository MenuUserPermissionRepository) scanRows(rows *sql.Rows) (res models.MenuUserPermission, err error) {
-	err = rows.Scan(&res.MenuID, &res.MenuPermissionID)
+	err = rows.Scan(&res.ID, &res.MenuID, &res.MenuPermissionID)
 	if err != nil {
 		return res, err
 	}
@@ -35,9 +35,9 @@ func (repository MenuUserPermissionRepository) Browse(menuID string) (data []mod
 	}
 
 	for rows.Next() {
-		temp,err := repository.scanRows(rows)
+		temp, err := repository.scanRows(rows)
 		if err != nil {
-			return data,err
+			return data, err
 		}
 		data = append(data, temp)
 	}

@@ -2,37 +2,68 @@ package usecase
 
 import (
 	"errors"
-	"fmt"
 	"qibla-backend/helpers/hashing"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/server/requests"
+	"qibla-backend/usecase/viewmodel"
 )
 
 type AdminUseCase struct {
 	*UcContract
 }
 
-func (uc AdminUseCase) isExist(input *requests.UserRequest) (err error) {
+func (uc AdminUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.AdminVm, pagination viewmodel.PaginationVm, err error) {
+	userUc := UserUseCase{UcContract: uc.UcContract}
+	users, pagination, err := userUc.Browse(true, search, order, sort, page, limit)
+	if err != nil {
+		return res, pagination, err
+	}
+
+	for _, user := range users {
+		temp, err := uc.buildBody(user)
+		if err != nil {
+			return res, pagination, err
+		}
+
+		res = append(res, temp)
+	}
+
+	return res, pagination, err
+}
+
+func (uc AdminUseCase) ReadBy(column, value, operator string) (res viewmodel.AdminVm, err error) {
+	userUc := UserUseCase{UcContract: uc.UcContract}
+	user, err := userUc.ReadBy(column, value)
+	if err != nil {
+		return res, err
+	}
+
+	res, err = uc.buildBody(user)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (uc AdminUseCase) isExist(ID string, input *requests.UserRequest) (err error) {
 	userUc := UserUseCase{UcContract: uc.UcContract}
 
 	//check is email exist
-	isEmailExist, err := userUc.IsEmailExist("", input.Email)
+	isEmailExist, err := userUc.IsEmailExist(ID, input.Email)
 	if err != nil {
-		fmt.Println(4)
 		return err
 	}
 	if isEmailExist {
-		fmt.Println(5)
 		return errors.New(messages.EmailAlreadyExist)
 	}
 
 	//check is username exist
-	isUserNameExist, err := userUc.IsUserNameExist("", input.UserName)
+	isUserNameExist, err := userUc.IsUserNameExist(ID, input.UserName)
 	if err != nil {
 		return err
 	}
 	if isUserNameExist {
-		fmt.Println(6)
 		return errors.New(messages.UserNameExist)
 	}
 
@@ -44,9 +75,8 @@ func (uc AdminUseCase) Edit(ID string, input *requests.UserRequest) (err error) 
 	password := ""
 
 	//check is email or username exist
-	err = uc.isExist(input)
+	err = uc.isExist(ID, input)
 	if err != nil {
-		fmt.Println(1)
 		return err
 	}
 
@@ -65,21 +95,17 @@ func (uc AdminUseCase) Edit(ID string, input *requests.UserRequest) (err error) 
 	}
 	err = userUc.Edit(ID, input.UserName, input.UserName, input.Email, "", input.RoleID, password, "", input.IsActive, true)
 	if err != nil {
-		fmt.Println(2)
 		uc.TX.Rollback()
 
 		return err
 	}
 
-	////edit menu permission user
-	//menuPermissionUserUc := MenuUserPermissionUseCase{UcContract: uc.UcContract}
-	//err = menuPermissionUserUc.Store(ID, input.MenuPermissions, input.DeletedMenuPermissions, uc.TX)
-	//if err != nil {
-	//	fmt.Println(3)
-	//	uc.TX.Rollback()
-	//
-	//	return err
-	//}
+	//add menu user permissions
+	menuUserUc := MenuUserUseCase{UcContract: uc.UcContract}
+	err = menuUserUc.Store(ID, input.MenuUsers)
+	if err != nil {
+		return err
+	}
 	uc.TX.Commit()
 
 	return nil
@@ -89,7 +115,7 @@ func (uc AdminUseCase) Add(input *requests.UserRequest) (err error) {
 	userUc := UserUseCase{UcContract: uc.UcContract}
 
 	//check is email or username exist
-	err = uc.isExist(input)
+	err = uc.isExist("", input)
 	if err != nil {
 		return err
 	}
@@ -105,21 +131,19 @@ func (uc AdminUseCase) Add(input *requests.UserRequest) (err error) {
 
 	//add user admin
 	password, _ := hashing.HashAndSalt(input.Password)
-	_, err = userUc.Add(input.UserName, input.UserName, input.Email, "", input.RoleID, password, input.ProfilePictureID,true, true)
+	userID, err := userUc.Add(input.UserName, input.UserName, input.Email, "", input.RoleID, password, input.ProfilePictureID, true, true)
 	if err != nil {
 		uc.TX.Rollback()
 
 		return err
 	}
 
-	//add menu permissions
-	//menuPermissionUserUc := MenuUserPermissionUseCase{UcContract: uc.UcContract}
-	//err = menuPermissionUserUc.Store(userID, input.MenuPermissions, input.DeletedMenuPermissions, uc.TX)
-	//if err != nil {
-	//	uc.TX.Rollback()
-	//
-	//	return err
-	//}
+	//add menu user permissions
+	menuUserUc := MenuUserUseCase{UcContract: uc.UcContract}
+	err = menuUserUc.Store(userID, input.MenuUsers)
+	if err != nil {
+		return err
+	}
 	uc.TX.Commit()
 
 	return nil
@@ -165,4 +189,27 @@ func (uc AdminUseCase) Delete(ID string) (err error) {
 	uc.TX.Commit()
 
 	return nil
+}
+
+func (uc AdminUseCase) buildBody(userVm viewmodel.UserVm) (res viewmodel.AdminVm, err error) {
+	menuUserUc := MenuUserUseCase{UcContract: uc.UcContract}
+	menuUsers, err := menuUserUc.BrowseBy("user_id", userVm.ID, "=")
+	if err != nil {
+		return res, err
+	}
+
+	var accessMenuTemp []viewmodel.AdminUserAccessMenuVm
+	for _, menuUser := range menuUsers {
+		accessMenuTemp = append(accessMenuTemp, viewmodel.AdminUserAccessMenuVm{
+			MenuID:     menuUser.MenuID,
+			Permission: menuUser.Permissions,
+		})
+	}
+
+	res = viewmodel.AdminVm{
+		User:       userVm,
+		MenuAccess: accessMenuTemp,
+	}
+
+	return res, nil
 }

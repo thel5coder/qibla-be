@@ -15,11 +15,13 @@ func NewMenuUserRepository(DB *sql.DB) contracts.IMenuUserRepository {
 }
 
 const (
-	selectMenuUser = `select "id","user_id","menu_id"`
+	selectMenuUser  = `select mu."id",mu."user_id",mu."menu_id",array_to_string(array_agg(mup."menu_permission_id"),',')`
+	joinMenuUser    = `left join "menu_user_permissions" mup on mup."menu_id"=mu."menu_id"`
+	groupByMenuUser = `group by mu."id",mu."user_id",mu."menu_id"`
 )
 
 func (repository MenuUserRepository) scanRows(rows *sql.Rows) (res models.MenuUser, err error) {
-	err = rows.Scan(&res.ID, &res.UserID, &res.MenuID)
+	err = rows.Scan(&res.ID, &res.UserID, &res.MenuID, &res.MenuPermissions)
 	if err != nil {
 		return res, err
 	}
@@ -28,7 +30,7 @@ func (repository MenuUserRepository) scanRows(rows *sql.Rows) (res models.MenuUs
 }
 
 func (repository MenuUserRepository) BrowseBy(column, value, operator string) (data []models.MenuUser, err error) {
-	statement := selectMenuUser + ` from "menu_users" where ` + column + `` + operator + `$1`
+	statement := selectMenuUser + ` from "menu_users" mu ` + joinMenuUser + ` where ` + column + `` + operator + `$1 ` + groupByMenuUser
 	rows, err := repository.DB.Query(statement, value)
 	if err != nil {
 		return data, err

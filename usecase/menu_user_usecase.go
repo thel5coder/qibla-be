@@ -5,6 +5,7 @@ import (
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
+	"strings"
 )
 
 type MenuUserUseCase struct {
@@ -18,16 +19,16 @@ func (uc MenuUserUseCase) BrowseBy(column, value, operator string) (res []viewmo
 		return res, err
 	}
 
-	for _,menuUser := range menuUsers{
-		res = append(res,uc.buildBody(menuUser))
+	for _, menuUser := range menuUsers {
+		res = append(res, uc.buildBody(menuUser))
 	}
 
-	return res,err
+	return res, err
 }
 
-func (uc MenuUserUseCase) Add(userID,menuID string) (err error){
+func (uc MenuUserUseCase) Add(userID, menuID string) (err error) {
 	repository := actions.NewMenuUserRepository(uc.DB)
-	err = repository.Add(userID,menuID,uc.TX)
+	err = repository.Add(userID, menuID, uc.TX)
 	if err != nil {
 		return err
 	}
@@ -35,9 +36,9 @@ func (uc MenuUserUseCase) Add(userID,menuID string) (err error){
 	return nil
 }
 
-func (uc MenuUserUseCase) Delete(userID string) (err error){
+func (uc MenuUserUseCase) Delete(userID string) (err error) {
 	repository := actions.NewMenuUserRepository(uc.DB)
-	err = repository.Delete(userID,uc.TX)
+	err = repository.Delete(userID, uc.TX)
 	if err != nil {
 		return err
 	}
@@ -45,24 +46,27 @@ func (uc MenuUserUseCase) Delete(userID string) (err error){
 	return nil
 }
 
-func (uc MenuUserUseCase) Store(userID string,inputs []requests.MenuUserRequest) (err error){
-	menuUserPermissionUc := MenuUserPermissionUseCase{UcContract:uc.UcContract}
-	rows,err := uc.BrowseBy("user_id",userID,"=")
+func (uc MenuUserUseCase) Store(userID string, inputs []requests.MenuUserRequest) (err error) {
+	menuUserPermissionUc := MenuUserPermissionUseCase{UcContract: uc.UcContract}
+	rows, err := uc.BrowseBy("mu.user_id", userID, "=")
 	if err != nil {
 		return err
 	}
 
 	if len(rows) > 0 {
-		uc.Delete(userID)
+		err = uc.Delete(userID)
+		if err != nil {
+			return err
+		}
 	}
 
-	for _,input := range inputs{
-		err = uc.Add(userID,input.MenuID)
+	for _, input := range inputs {
+		err = uc.Add(userID, input.MenuID)
 		if err != nil {
 			return err
 		}
 
-		err = menuUserPermissionUc.Store(input.MenuID,input.MenuPermissions)
+		err = menuUserPermissionUc.Store(input.MenuID, input.MenuPermissions)
 		if err != nil {
 			return err
 		}
@@ -72,9 +76,12 @@ func (uc MenuUserUseCase) Store(userID string,inputs []requests.MenuUserRequest)
 }
 
 func (uc MenuUserUseCase) buildBody(model models.MenuUser) viewmodel.MenuUserVm {
+	permissionStr := model.MenuPermissions
+	permissionArr := strings.Split(permissionStr, ",")
 	return viewmodel.MenuUserVm{
-		ID:     model.ID,
-		UserID: model.UserID,
-		MenuID: model.MenuID,
+		ID:          model.ID,
+		UserID:      model.UserID,
+		MenuID:      model.MenuID,
+		Permissions: permissionArr,
 	}
 }
