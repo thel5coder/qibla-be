@@ -24,7 +24,7 @@ type Connection struct {
 
 func (c Connection) DbConnect() (*sql.DB, error) {
 	connStr := fmt.Sprintf(
-		"postgres://%s:%s@%s:5432/%s?sslmode=%s&TimeZone=UTC", c.User, c.Password, c.Host, c.DbName, c.SslMode,
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s&TimeZone=UTC", c.User, c.Password, c.Host, c.Port, c.DbName, c.SslMode,
 	)
 
 	if c.SslMode == "require" {

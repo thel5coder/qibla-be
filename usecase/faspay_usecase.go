@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"qibla-backend/helpers/enums"
+	"qibla-backend/helpers/interfacepkg"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/helpers/str"
 	"qibla-backend/server/requests"
@@ -63,6 +64,29 @@ func (uc FaspayUseCase) GetLisPaymentMethods() (res map[string]interface{}, err 
 	err = json.Unmarshal(body, &res)
 
 	return res, err
+}
+
+func (uc FaspayUseCase) GetLisPaymentMethodsByCode(code string) (res string, err error) {
+	paymentMethod, err := uc.GetLisPaymentMethods()
+	if err != nil {
+		return res, err
+	}
+
+	var data viewmodel.FaspayPaymentMethodVM
+	interfacepkg.Convert(paymentMethod, &data)
+
+	for _, d := range data.PaymentChannel {
+		if d.PgCode == code {
+			res = d.PgName
+		}
+	}
+
+	if res == "" {
+		return res, errors.New("Empty Data")
+	}
+
+	return res, err
+
 }
 
 func (uc FaspayUseCase) PostData(input requests.FaspayPostRequest) (res map[string]interface{}, err error) {
