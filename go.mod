@@ -21,6 +21,8 @@ require (
 	github.com/lib/pq v1.7.0
 	github.com/maddevsio/fcm v1.0.5
 	github.com/pusher/pusher-http-go v4.0.1+incompatible
+	github.com/robfig/cron v1.2.0 // indirect
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/xid v1.2.1
 	github.com/rubenv/sql-migrate v0.0.0-20200616145509-8d140a17f351
 	github.com/satori/go.uuid v1.2.0

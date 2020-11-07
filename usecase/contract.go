@@ -50,6 +50,9 @@ const (
 	defaultFaspayPaymentPlan    = "01"
 	defaultFaspayCurrency       = "IDR"
 	defaultInvoiceDueDate       = 7
+
+	// DefaultLocation ...
+	DefaultLocation = "Asia/Jakarta"
 )
 
 // GlobalSmsCounter ...
