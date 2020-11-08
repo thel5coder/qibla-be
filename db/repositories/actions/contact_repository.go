@@ -5,6 +5,7 @@ import (
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
+	"qibla-backend/helpers/enums"
 	"qibla-backend/helpers/str"
 	"qibla-backend/usecase/viewmodel"
 	"strings"
@@ -75,15 +76,69 @@ func (repository ContactRepository) Browse(search, order, sort string, limit, of
 	return data, count, err
 }
 
-func (repository ContactRepository) BrowseAll(search string,isZakatPartner bool) (data []models.Contact, err error) {
+func (repository ContactRepository) BrowseAll(search string, isZakatPartner bool) (data []models.Contact, err error) {
 	var rows *sql.Rows
 	if search == "" {
 		statement := `select * from "contacts" where "is_zakat_partner"=$1 and "deleted_at" is null`
-		rows, err = repository.DB.Query(statement,isZakatPartner)
+		rows, err = repository.DB.Query(statement, isZakatPartner)
 	} else {
 		statement := `select * from "contacts" where (lower("travel_agent_name") like $1 or lower("branch_name") like $1) and "is_zakat_partner"=$2 and "deleted_at" is null`
-		rows, err = repository.DB.Query(statement, "%"+strings.ToLower(search)+"%",isZakatPartner)
+		rows, err = repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", isZakatPartner)
 	}
+	if err != nil {
+		return data, err
+	}
+
+	for rows.Next() {
+		dataTemp := models.Contact{}
+		err = rows.Scan(
+			&dataTemp.ID,
+			&dataTemp.BranchName,
+			&dataTemp.TravelAgentName,
+			&dataTemp.Address,
+			&dataTemp.Longitude,
+			&dataTemp.Latitude,
+			&dataTemp.AreaCode,
+			&dataTemp.PhoneNumber,
+			&dataTemp.SKNumber,
+			&dataTemp.SKDate,
+			&dataTemp.Accreditation,
+			&dataTemp.AccreditationDate,
+			&dataTemp.DirectorName,
+			&dataTemp.DirectorContact,
+			&dataTemp.PicName,
+			&dataTemp.PicContact,
+			&dataTemp.Logo,
+			&dataTemp.VirtualAccountNumber,
+			&dataTemp.AccountName,
+			&dataTemp.AccountNumber,
+			&dataTemp.AccountBankName,
+			&dataTemp.AccountBankCode,
+			&dataTemp.CreatedAt,
+			&dataTemp.UpdatedAt,
+			&dataTemp.DeletedAt,
+			&dataTemp.Email,
+			&dataTemp.IsZakatPartner,
+		)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, dataTemp)
+	}
+
+	return data, err
+}
+
+func (repository ContactRepository) BrowseAllZakatDisbursement() (data []models.Contact, err error) {
+	statement := `SELECT def.* FROM "contacts" def
+	JOIN "user_zakats" uz ON uz."contact_id" = def."id"
+	JOIN "transactions" t ON t."id" = uz."transaction_id"
+	WHERE def."deleted_at" IS NULL AND t."transaction_type" = $1 AND t."payment_status" = $2
+	AND t."is_disburse_allowed" = $3 AND t."is_disburse" = $4
+	GROUP BY def."id"`
+	rows, err := repository.DB.Query(statement,
+		enums.KeyTransactionType1, enums.KeyPaymentStatus3, true, false,
+	)
 	if err != nil {
 		return data, err
 	}

@@ -4,6 +4,8 @@ import (
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/enums"
+	"qibla-backend/helpers/interfacepkg"
+	"qibla-backend/helpers/logruslogger"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"
@@ -135,6 +137,23 @@ func (uc DisbursementUseCase) Add(input *requests.DisbursementRequest) (res view
 	}
 
 	return res, err
+}
+
+// AddZakatByContact ...
+func (uc DisbursementUseCase) AddZakatByContact(contact *viewmodel.ContactVm) (err error) {
+	ctx := "DisbursementUseCase.AddZakatByContact"
+
+	// Get all transaction
+	transactionUc := TransactionUseCase{UcContract: uc.UcContract}
+	transaction, err := transactionUc.BrowseAllZakatDisbursement(contact.ID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "transaction", uc.ReqID)
+		return err
+	}
+
+	logruslogger.Log(logruslogger.InfoLevel, interfacepkg.Marshall(transaction), ctx, "transaction", uc.ReqID)
+
+	return err
 }
 
 // Delete ...

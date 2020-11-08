@@ -20,7 +20,7 @@ type Transaction struct {
 	TransactionDate   string         `db:"transaction_date"`
 	UpdatedAt         string         `db:"updated_at"`
 	Total             float32        `db:"total"`
-	Fee               float32        `db:"fee"`
+	FeeQibla          float32        `db:"fee_qibla"`
 	IsDisburse        bool           `db:"is_disburse"`
 	IsDisburseAllowed bool           `db:"is_disburse_allowed"`
 	Details           sql.NullString `json:"details"`
