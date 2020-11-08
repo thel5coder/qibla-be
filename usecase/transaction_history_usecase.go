@@ -19,24 +19,24 @@ func (uc TransactionHistoryUseCase) ReadBy(column, value string) (res viewmodel.
 	}
 
 	res = viewmodel.TransactionHistoryVm{
-		ID:        transactionHistory.ID,
-		TrxID:     transactionHistory.TrxID,
-		Status:    transactionHistory.Status,
-		Response:  transactionHistory.Response,
-		CreatedAt: transactionHistory.CreatedAt,
-		UpdatedAt: transactionHistory.UpdatedAt,
+		ID:            transactionHistory.ID,
+		TransactionID: transactionHistory.TransactionID,
+		Status:        transactionHistory.Status,
+		Response:      transactionHistory.Response,
+		CreatedAt:     transactionHistory.CreatedAt,
+		UpdatedAt:     transactionHistory.UpdatedAt,
 	}
 
 	return res, err
 }
 
-func (uc TransactionHistoryUseCase) Edit(trxID, status string, response map[string]interface{}) (err error) {
+func (uc TransactionHistoryUseCase) Edit(transactionID, status string, response map[string]interface{}) (err error) {
 	repository := actions.NewTransactionHistoryRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
 	responseByte, err := json.Marshal(response)
 
-	_, err = repository.EditByTrxID(trxID, status, string(responseByte), now)
+	_, err = repository.EditByTrxID(transactionID, status, string(responseByte), now)
 	if err != nil {
 		return err
 	}
@@ -44,12 +44,12 @@ func (uc TransactionHistoryUseCase) Edit(trxID, status string, response map[stri
 	return nil
 }
 
-func (uc TransactionHistoryUseCase) Add(trxID, status string, response map[string]interface{}) (err error) {
+func (uc TransactionHistoryUseCase) Add(transactionID, status string, response map[string]interface{}) (err error) {
 	repository := actions.NewTransactionHistoryRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
 	responseByte, err := json.Marshal(response)
-	err = repository.Add(trxID, status, string(responseByte), now, now,uc.TX)
+	err = repository.Add(transactionID, status, string(responseByte), now, now, uc.TX)
 	if err != nil {
 		return err
 	}

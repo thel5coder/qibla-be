@@ -50,6 +50,7 @@ const (
 	defaultFaspayPaymentPlan    = "01"
 	defaultFaspayCurrency       = "IDR"
 	defaultInvoiceDueDate       = 7
+	defaultFeeZakat             = 5000
 )
 
 // GlobalSmsCounter ...

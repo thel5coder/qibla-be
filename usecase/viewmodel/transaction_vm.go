@@ -17,6 +17,9 @@ type TransactionVm struct {
 	TransactionDate   string                 `json:"transaction_date"`
 	UpdatedAt         string                 `json:"updated_at"`
 	Total             float32                `json:"total"`
+	FeeQibla          float32                `json:"fee_qibla"`
+	IsDisburse        bool                   `json:"is_disburse"`
+	IsDisburseAllowed bool                   `json:"is_disburse_allowed"`
 	Details           []TransactionDetailVm  `json:"details"`
 	FaspayResponse    map[string]interface{} `json:"faspay_response"`
 }

@@ -16,7 +16,7 @@ func(route FaspayRoutes) RegisterRoute(){
 	jwtMiddleware := middleware.JwtVerify{UcContract:route.Handler.UseCaseContract}
 
 
-	faspayRoute := route.RouteGroup.Group("/faspay")
+	faspayRoute := route.RouteGroup.Group("/faspay_api")
 	faspayRoute.Use(jwtMiddleware.JWTWithConfig)
 	faspayRoute.GET("/get-payment-method",handler.GetLisPaymentMethods)
 	faspayRoute.GET("/invoice/:invoiceId",handler.CheckPaymentNotification)

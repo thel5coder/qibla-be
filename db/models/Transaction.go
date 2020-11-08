@@ -19,4 +19,6 @@ type Transaction struct {
 	TransactionDate   string         `json:"transaction_date"`
 	UpdatedAt         string         `json:"updated_at"`
 	Total             float32        `json:"total"`
+	IsDisburse        bool           `json:"is_disburse"`
+	IsDisburseAllowed bool           `json:"is_disburse_allowed"`
 }

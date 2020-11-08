@@ -81,6 +81,9 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 		UpdatedAt:         now,
 		Details:           transactionDetails,
 		Total:             input.FaspayBody.Total,
+		FeeQibla:          input.FeeQibla,
+		IsDisburse:        input.IsDisburse,
+		IsDisburseAllowed: input.IsDisburseAllowed,
 	}
 	res.ID, err = repository.Add(res, uc.TX)
 	if err != nil {
@@ -93,7 +96,7 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 		return res, err
 	}
 
-	//post data to faspay
+	//post data to faspay_api
 	faspayUc := FaspayUseCase{UcContract: uc.UcContract}
 	input.FaspayBody.InvoiceNumber = invoiceNumber
 	faspayRes, err := faspayUc.PostData(input.FaspayBody)
@@ -173,6 +176,7 @@ func (uc TransactionUseCase) AddTransactionRegisterPartner(userID, bankName stri
 		TransactionDirection: enums.KeyTransactionDirection1,
 		TransactionDetail:    details,
 		FaspayBody:           faspayRequest,
+		IsDisburseAllowed:    false,
 	}
 	res, err = uc.Add(transactionInput)
 	if err != nil {
@@ -217,6 +221,9 @@ func (uc TransactionUseCase) AddTransactionZakat(input *requests.UserZakatReques
 		TransactionType:      enums.KeyTransactionType1,
 		TransactionDirection: enums.KeyTransactionDirection1,
 		TransactionDetail:    []requests.TransactionDetailRequest{},
+		FeeQibla:             defaultFeeZakat,
+		IsDisburseAllowed:    true,
+		IsDisburse:           false,
 		FaspayBody: requests.FaspayPostRequest{
 			RequestTransaction:  enums.KeyTransactionType1,
 			TransactionDate:     now.Format("2006-01-02 15:04:05"),

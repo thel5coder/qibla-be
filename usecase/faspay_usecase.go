@@ -44,20 +44,17 @@ func (uc FaspayUseCase) GetLisPaymentMethods() (res map[string]interface{}, err 
 
 	request, err := http.NewRequest("POST", os.Getenv("FASPAY_BASE_URL")+"/100001/10", bytes.NewBuffer(bodyPost))
 	if err != nil {
-		fmt.Print(err.Error())
 		return res, err
 	}
 
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Print(err.Error())
 		return res, err
 	}
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		fmt.Print(err.Error())
 		return res, err
 	}
 	err = json.Unmarshal(body, &res)
@@ -170,109 +167,111 @@ func (uc FaspayUseCase) CheckPaymentStatus(invoiceID string) (res map[string]int
 
 func (uc FaspayUseCase) PaymentNotification(input *requests.PaymentNotificationRequest) (res viewmodel.PaymentNotificationVm, err error, code int) {
 	now := time.Now().UTC().Format("2006-01-02 15:04:05")
+
+	//check is transaction exist by trx_id
 	transactionUc := TransactionUseCase{UcContract: uc.UcContract}
 	transaction, err := transactionUc.ReadBy("t.trx_id", input.TrxID, "=")
 	if err != nil {
-		fmt.Println("check error")
-		fmt.Println(err.Error())
-		fmt.Println(1)
-
 		res = viewmodel.PaymentNotificationVm{
-			Response:     "Payment Notification",
-			TrxID:        input.TrxID,
-			MerchantID:   input.MerchantID,
-			Merchant:     input.Merchant,
-			BillNo:       input.BillNo,
-			ResponseCode: "05",
-			ResponseDesc: "Tagihan tidak ditemukan",
-			ResponseDate: now,
+			Response:      "Payment Notification",
+			TransactionID: transaction.ID,
+			TrxID:         input.TrxID,
+			MerchantID:    input.MerchantID,
+			Merchant:      input.Merchant,
+			BillNo:        input.BillNo,
+			ResponseCode:  "05",
+			ResponseDesc:  "Tagihan tidak ditemukan",
+			ResponseDate:  now,
 		}
 		return res, err, http.StatusUnprocessableEntity
 	}
+
+	//check is signature valid
 	signature := uc.getSignature(os.Getenv("FASPAY_USER_ID") + `` + os.Getenv("FASPAY_PASSWORD") + `` + transaction.InvoiceNumber + `2`)
 	if signature != input.Signature {
-		fmt.Println(2)
-
 		res = viewmodel.PaymentNotificationVm{
-			Response:     "Payment Notification",
-			TrxID:        input.TrxID,
-			MerchantID:   input.MerchantID,
-			Merchant:     input.Merchant,
-			BillNo:       input.BillNo,
-			ResponseCode: "09",
-			ResponseDesc: "Unknown",
-			ResponseDate: now,
+			Response:      "Payment Notification",
+			TransactionID: transaction.ID,
+			TrxID:         input.TrxID,
+			MerchantID:    input.MerchantID,
+			Merchant:      input.Merchant,
+			BillNo:        input.BillNo,
+			ResponseCode:  "09",
+			ResponseDesc:  "Unknown",
+			ResponseDate:  now,
 		}
 		return res, err, http.StatusUnauthorized
 	}
 
+	//init transaction
 	uc.TX, err = uc.DB.Begin()
 	if err != nil {
-		fmt.Println(3)
-
 		uc.TX.Rollback()
 		res = viewmodel.PaymentNotificationVm{
-			Response:     "Payment Notification",
-			TrxID:        input.TrxID,
-			MerchantID:   input.MerchantID,
-			Merchant:     input.Merchant,
-			BillNo:       input.BillNo,
-			ResponseCode: "09",
-			ResponseDesc: "Unknown",
-			ResponseDate: now,
+			Response:      "Payment Notification",
+			TransactionID: transaction.ID,
+			TrxID:         input.TrxID,
+			MerchantID:    input.MerchantID,
+			Merchant:      input.Merchant,
+			BillNo:        input.BillNo,
+			ResponseCode:  "09",
+			ResponseDesc:  "Unknown",
+			ResponseDate:  now,
 		}
 
 		return res, err, http.StatusUnprocessableEntity
 	}
 
+	//edit payment status in transaction
 	transactionUc.TX = uc.TX
 	err = transactionUc.EditStatus(transaction.ID, enums.KeyPaymentStatus3, input.PaymentDate)
 	if err != nil {
-		fmt.Println(err.Error())
 		uc.TX.Rollback()
 		res = viewmodel.PaymentNotificationVm{
-			Response:     "Payment Notification",
-			TrxID:        input.TrxID,
-			MerchantID:   input.MerchantID,
-			Merchant:     input.Merchant,
-			BillNo:       input.BillNo,
-			ResponseCode: "00",
-			ResponseDesc: "Sukses",
-			ResponseDate: now,
+			Response:      "Payment Notification",
+			TransactionID: transaction.ID,
+			TrxID:         input.TrxID,
+			MerchantID:    input.MerchantID,
+			Merchant:      input.Merchant,
+			BillNo:        input.BillNo,
+			ResponseCode:  "00",
+			ResponseDesc:  "Sukses",
+			ResponseDate:  now,
 		}
 
 		return res, err, http.StatusOK
 	}
 
+	//add transaction history
 	transactionHistoryUc := TransactionHistoryUseCase{UcContract: uc.UcContract}
 	err = transactionHistoryUc.Add(input.TrxID, enums.KeyPaymentStatus3, map[string]interface{}{})
 	if err != nil {
-		fmt.Println(5)
-
 		uc.TX.Rollback()
 		res = viewmodel.PaymentNotificationVm{
-			Response:     "Payment Notification",
-			TrxID:        input.TrxID,
-			MerchantID:   input.MerchantID,
-			Merchant:     input.Merchant,
-			BillNo:       input.BillNo,
-			ResponseCode: "00",
-			ResponseDesc: "Sukses",
-			ResponseDate: now,
+			Response:      "Payment Notification",
+			TransactionID: transaction.ID,
+			TrxID:         input.TrxID,
+			MerchantID:    input.MerchantID,
+			Merchant:      input.Merchant,
+			BillNo:        input.BillNo,
+			ResponseCode:  "00",
+			ResponseDesc:  "Sukses",
+			ResponseDate:  now,
 		}
 
 		return res, err, http.StatusOK
 	}
 
 	res = viewmodel.PaymentNotificationVm{
-		Response:     "Payment Notification",
-		TrxID:        input.TrxID,
-		MerchantID:   input.MerchantID,
-		Merchant:     input.Merchant,
-		BillNo:       input.BillNo,
-		ResponseCode: "00",
-		ResponseDesc: "Sukses",
-		ResponseDate: now,
+		Response:      "Payment Notification",
+		TransactionID: transaction.ID,
+		TrxID:         input.TrxID,
+		MerchantID:    input.MerchantID,
+		Merchant:      input.Merchant,
+		BillNo:        input.BillNo,
+		ResponseCode:  "00",
+		ResponseDesc:  "Sukses",
+		ResponseDate:  now,
 	}
 	uc.TX.Commit()
 

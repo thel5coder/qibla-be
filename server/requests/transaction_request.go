@@ -10,4 +10,7 @@ type TransactionRequest struct {
 	PaymentMethodeCode   int32                      `json:"payment_methode_code"`
 	TransactionDetail    []TransactionDetailRequest `json:"transaction_detail"`
 	FaspayBody           FaspayPostRequest          `json:"faspay_body"`
+	IsDisburse           bool                       `json:"is_disrburse"`
+	IsDisburseAllowed    bool                       `json:"is_disburse_allowed"`
+	FeeQibla             float32                    `json:"fee_qibla"`
 }

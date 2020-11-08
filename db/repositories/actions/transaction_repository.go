@@ -53,8 +53,8 @@ func (repository TransactionRepository) ReadBy(column, value, operator string) (
 
 func (TransactionRepository) Add(input viewmodel.TransactionVm, tx *sql.Tx) (res string, err error) {
 	statement := `insert into "transactions" ("user_id","invoice_number","trx_id","due_date","due_date_period","payment_status","payment_method_code","va_number",
-                  "bank_name","direction","transaction_type","transaction_date","updated_at")
-                  values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) returning "id"`
+                  "bank_name","direction","transaction_type","transaction_date","updated_at","total","fee_qibla","is_disburse","is_disburse_allowed")
+                  values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) returning "id"`
 	err = tx.QueryRow(
 		statement,
 		input.UserID,
@@ -70,6 +70,10 @@ func (TransactionRepository) Add(input viewmodel.TransactionVm, tx *sql.Tx) (res
 		input.TransactionType,
 		datetime.StrParseToTime(input.TransactionDate, time.RFC3339),
 		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
+		input.Total,
+		input.FeeQibla,
+		input.IsDisburse,
+		input.IsDisburseAllowed,
 	).Scan(&res)
 
 	return res, err
