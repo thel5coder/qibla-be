@@ -211,12 +211,19 @@ func (uc TransactionUseCase) AddTransactionZakat(input *requests.UserZakatReques
 		return res, err
 	}
 
+	// Get bank name
+	faspayUc := FaspayUseCase{UcContract: uc.UcContract}
+	bankName, err := faspayUc.GetLisPaymentMethodsByCode(strconv.Itoa(int(input.PaymentMethodCode)))
+	if err != nil {
+		return res, err
+	}
+
 	now := time.Now().UTC()
 	transactionInput := requests.TransactionRequest{
 		UserID:               uc.UserID,
 		DueDate:              now.AddDate(0, 0, int(defaultInvoiceDueDate)).Format("2006-01-02"),
 		DueDateAging:         defaultInvoiceDueDate,
-		BankName:             input.BankName,
+		BankName:             bankName,
 		PaymentMethodeCode:   input.PaymentMethodCode,
 		TransactionType:      enums.KeyTransactionType1,
 		TransactionDirection: enums.KeyTransactionDirection1,

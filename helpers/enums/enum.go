@@ -73,7 +73,7 @@ const KeyRememberCalender4 = 30
 const ValueRememberCalender4 = "30 minutes before"
 const KeyRememberCalender5 = 60
 const ValueRememberCalender5 = "1 hour before"
-const KeyRememberCalender6 =  120
+const KeyRememberCalender6 = 120
 const ValueRememberCalender6 = "2 hours before"
 const KeyRememberCalender7 = 1440
 const ValueRememberCalender7 = "1 day before"
@@ -100,3 +100,4 @@ const KeyTransactionType3 = "product_subscription"
 const KeyTransactionType4 = "tour_promotion"
 const KeyTransactionType5 = "extra_product_subscription"
 const KeyTransactionType6 = "pengecekan_status_pembayaran"
+

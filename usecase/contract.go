@@ -51,6 +51,8 @@ const (
 	defaultFaspayCurrency       = "IDR"
 	defaultInvoiceDueDate       = 7
 	defaultFeeZakat             = 5000
+	// DefaultLocation ...
+	DefaultLocation = "Asia/Jakarta"
 )
 
 // GlobalSmsCounter ...
