@@ -18,12 +18,16 @@ func NewTransactionRepository(DB *sql.DB) contracts.ITransactionRepository {
 }
 
 const transactionSelect = `select t."id",t."user_id",t."invoice_number",t."trx_id",t."due_date",t."due_date_period",t."payment_status",
-                         t."payment_method_code",t."va_number",t."bank_name",t."direction",t."transaction_type",t."paid_date",
-                         t."transaction_date",t."updated_at",t."total",t."qibla_fee",t."is_disburse",t."is_disburse_allowed"`
+                         t."payment_method_code",t."va_number",t."bank_name",t."direction",t."transaction_type",t."paid_date",t."invoice_status",
+                         t."transaction_date",t."updated_at",t."total",t."fee_qibla",t."is_disburse",t."is_disburse_allowed",
+                         array_to_string(array_agg(td."name" || ':' td."price" || ':' || tx."quantity"),',')`
 const joinQuery = `left join "transaction_details" td on td."transaction_id"=t."id"`
 const groupBy = `group by t."id"`
 
 
+func (repository TransactionRepository) scanRow(row *sql.Row) (res models.Transaction,err error){
+	err = row.Scan(&res.ID,&res.UserID,&res.InvoiceNumber,&res.TrxID,&res.DueDate,&res.DueDatePeriod,&res.PaymentStatus,&res.)
+}
 
 func (TransactionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Transaction, count int, err error) {
 	panic("implement me")

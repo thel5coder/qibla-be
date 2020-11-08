@@ -23,4 +23,5 @@ type Transaction struct {
 	Fee               float32        `db:"fee"`
 	IsDisburse        bool           `db:"is_disburse"`
 	IsDisburseAllowed bool           `db:"is_disburse_allowed"`
+	Details           sql.NullString `json:"details"`
 }
