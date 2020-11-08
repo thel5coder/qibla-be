@@ -22,11 +22,12 @@ func NewDisbursementRepository(DB *sql.DB) contracts.IDisbursementRepository {
 
 func (repository DisbursementRepository) scanRows(rows *sql.Rows) (d models.Disbursement, err error) {
 	err = rows.Scan(
-		&d.ID, &d.TransactionID, &d.Total, &d.Status, &d.DisbursementType,
-		&d.StartPeriod, &d.EndPeriod, &d.DisburseAt, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
+		&d.ID, &d.ContactID, &d.TransactionID, &d.Total, &d.Status, &d.DisbursementType,
+		&d.StartPeriod, &d.EndPeriod, &d.DisburseAt, &d.AccountNumber, &d.AccountName,
+		&d.AccountBankName, &d.AccountBankCode, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
 		&d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
 		&d.Transaction.PaymentStatus, &d.Transaction.DueDate, &d.Transaction.VaNumber,
-		&d.Transaction.BankName,
+		&d.Transaction.BankName, &d.Contact.BranchName, &d.Contact.TravelAgentName,
 	)
 
 	return d, err
@@ -34,11 +35,12 @@ func (repository DisbursementRepository) scanRows(rows *sql.Rows) (d models.Disb
 
 func (repository DisbursementRepository) scanRow(row *sql.Row) (d models.Disbursement, err error) {
 	err = row.Scan(
-		&d.ID, &d.TransactionID, &d.Total, &d.Status, &d.DisbursementType,
-		&d.StartPeriod, &d.EndPeriod, &d.DisburseAt, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
+		&d.ID, &d.ContactID, &d.TransactionID, &d.Total, &d.Status, &d.DisbursementType,
+		&d.StartPeriod, &d.EndPeriod, &d.DisburseAt, &d.AccountNumber, &d.AccountName,
+		&d.AccountBankName, &d.AccountBankCode, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
 		&d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
 		&d.Transaction.PaymentStatus, &d.Transaction.DueDate, &d.Transaction.VaNumber,
-		&d.Transaction.BankName,
+		&d.Transaction.BankName, &d.Contact.BranchName, &d.Contact.TravelAgentName,
 	)
 
 	return d, err
@@ -125,13 +127,16 @@ func (repository DisbursementRepository) ReadBy(column, value string) (data mode
 // Add ...
 func (DisbursementRepository) Add(input viewmodel.DisbursementVm, tx *sql.Tx) (res string, err error) {
 	statement := `INSERT INTO "disbursements" (
-		"transaction_id", "total", "status", "disbursement_type", "start_period",
-		"end_period", "disburse_at", "created_at","updated_at"
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8) returning "id"`
+		"contact_id", "transaction_id", "total", "status", "disbursement_type", "start_period",
+		"end_period", "disburse_at", "account_number", "account_name", "account_bank_name",
+		"account_bank_code", "created_at","updated_at"
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $13) returning "id"`
 	err = tx.QueryRow(statement,
-		str.EmptyString(input.TransactionID), input.Total, input.Status, input.DisbursementType,
+		str.EmptyString(input.ContactID), str.EmptyString(input.TransactionID), input.Total, input.Status, input.DisbursementType,
 		str.EmptyString(input.StartPeriod), str.EmptyString(input.EndPeriod),
-		str.EmptyString(input.DisburseAt), datetime.StrParseToTime(input.CreatedAt, time.RFC3339), datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
+		str.EmptyString(input.DisburseAt), input.AccountNumber, input.AccountName,
+		input.AccountBankName, input.AccountBankCode, datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
+		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
 	).Scan(&res)
 
 	return res, err
@@ -139,13 +144,15 @@ func (DisbursementRepository) Add(input viewmodel.DisbursementVm, tx *sql.Tx) (r
 
 // Edit ...
 func (DisbursementRepository) Edit(input viewmodel.DisbursementVm, tx *sql.Tx) (err error) {
-	statement := `UPDATE "disbursements" set "transaction_id" = $1, "total" = $2,
-	"status" = $3, "disbursement_type" = $4, "start_period" = $5, "end_period" = $6,
-	"disburse_at = $7, "updated_at"=$8 WHERE "id"=$9 AND "deleted_at" IS NULL`
+	statement := `UPDATE "disbursements" set "contact_id" = $1, "transaction_id" = $2, "total" = $3,
+	"status" = $4, "disbursement_type" = $5, "start_period" = $6, "end_period" = $7,
+	"disburse_at = $8, "account_number" = $9, "account_name" = $10, "account_bank_name" = $11,
+	"account_bank_code" = $12, "updated_at" = $13 WHERE "id" = $14 AND "deleted_at" IS NULL`
 	_, err = tx.Exec(statement,
-		str.EmptyString(input.TransactionID), input.Total, input.Status, input.DisbursementType,
+		str.EmptyString(input.ContactID), str.EmptyString(input.TransactionID), input.Total, input.Status, input.DisbursementType,
 		str.EmptyString(input.StartPeriod), str.EmptyString(input.EndPeriod),
-		str.EmptyString(input.DisburseAt), datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
+		str.EmptyString(input.DisburseAt), input.AccountNumber, input.AccountName,
+		input.AccountBankName, input.AccountBankCode, datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
 		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID,
 	)
 
