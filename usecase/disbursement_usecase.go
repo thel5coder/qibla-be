@@ -107,6 +107,7 @@ func (uc DisbursementUseCase) Add(input *requests.DisbursementRequest) (res view
 
 	now := time.Now().UTC()
 	res = viewmodel.DisbursementVm{
+		ContactID: input.ContactID,
 		// TransactionID:    transaction.ID,
 		Total:            input.Total,
 		Status:           enums.KeyPaymentStatus1,
@@ -114,6 +115,10 @@ func (uc DisbursementUseCase) Add(input *requests.DisbursementRequest) (res view
 		StartPeriod:      input.StartPeriod,
 		EndPeriod:        input.EndPeriod,
 		DisburseAt:       input.DisburseAt,
+		AccountNumber:    input.AccountNumber,
+		AccountName:      input.AccountName,
+		AccountBankName:  input.AccountBankName,
+		AccountBankCode:  input.AccountBankCode,
 		CreatedAt:        now.Format(time.RFC3339),
 		UpdatedAt:        now.Format(time.RFC3339),
 	}
@@ -167,6 +172,10 @@ func (uc DisbursementUseCase) buildBody(data *models.Disbursement) (res viewmode
 		StartPeriod:                  data.StartPeriod.String,
 		EndPeriod:                    data.EndPeriod.String,
 		DisburseAt:                   data.DisburseAt.String,
+		AccountNumber:                data.AccountNumber.String,
+		AccountName:                  data.AccountName.String,
+		AccountBankName:              data.AccountBankName.String,
+		AccountBankCode:              data.AccountBankCode.String,
 		CreatedAt:                    data.CreatedAt,
 		UpdatedAt:                    data.UpdatedAt,
 		DeletedAt:                    data.DeletedAt.String,

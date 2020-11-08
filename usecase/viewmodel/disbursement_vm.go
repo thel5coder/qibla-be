@@ -3,6 +3,7 @@ package viewmodel
 // DisbursementVm ...
 type DisbursementVm struct {
 	ID                           string  `json:"id"`
+	ContactID                    string  `json:"contact_id"`
 	TransactionID                string  `json:"transaction_id"`
 	TransactionInvoiceNumber     string  `json:"transaction_invoice_number"`
 	TransactionPaymentMethodCode int32   `json:"transaction_payment_method_code"`
@@ -16,6 +17,10 @@ type DisbursementVm struct {
 	StartPeriod                  string  `json:"start_period"`
 	EndPeriod                    string  `json:"end_period"`
 	DisburseAt                   string  `json:"disburse_at"`
+	AccountNumber                string  `json:"account_number"`
+	AccountName                  string  `json:"account_name"`
+	AccountBankName              string  `json:"account_bank_name"`
+	AccountBankCode              string  `json:"account_bank_code"`
 	CreatedAt                    string  `json:"created_at"`
 	UpdatedAt                    string  `json:"updated_at"`
 	DeletedAt                    string  `json:"deleted_at"`

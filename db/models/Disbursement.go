@@ -5,6 +5,8 @@ import "database/sql"
 // Disbursement ...
 type Disbursement struct {
 	ID               string          `db:"id"`
+	ContactID        string          `db:"contact_id"`
+	Contact          Contact         `db:"contact"`
 	TransactionID    string          `db:"transaction_id"`
 	Transaction      Transaction     `db:"transaction"`
 	Total            sql.NullFloat64 `db:"total"`
@@ -13,6 +15,10 @@ type Disbursement struct {
 	StartPeriod      sql.NullString  `db:"start_period"`
 	EndPeriod        sql.NullString  `db:"end_period"`
 	DisburseAt       sql.NullString  `db:"disburse_at"`
+	AccountNumber    sql.NullString  `db:"account_number"`
+	AccountName      sql.NullString  `db:"account_name"`
+	AccountBankName  sql.NullString  `db:"account_bank_name"`
+	AccountBankCode  sql.NullString  `db:"account_bank_code"`
 	CreatedAt        string          `db:"created_at"`
 	UpdatedAt        string          `db:"updated_at"`
 	DeletedAt        sql.NullString  `db:"deleted_at"`
@@ -20,11 +26,14 @@ type Disbursement struct {
 
 var (
 	// DisbursementSelect ...
-	DisbursementSelect = `SELECT def."id", def."transaction_id", def."total", def."status",
+	DisbursementSelect = `SELECT def."id", def."contact_id", def."transaction_id", def."total", def."status",
 	def."disbursement_type", def."start_period", def."end_period", def."disburse_at",
+	def."account_number", def."account_name", def."account_bank_name", def."account_bank_code",
 	def."created_at", def."updated_at", def."deleted_at",
 	t."invoice_number", t."payment_method_code", t."payment_status",
-	t."due_date", t."va_number", t."bank_name"
+	t."due_date", t."va_number", t."bank_name",
+	c."branch_name", c."travel_agent_name"
 	FROM "disbursements" def
-	LEFT JOIN "transactions" t ON t."id" = def."transaction_id"`
+	LEFT JOIN "transactions" t ON t."id" = def."transaction_id"
+	LEFT JOIN "contacts" c ON c."id" = def."contact_id"`
 )
