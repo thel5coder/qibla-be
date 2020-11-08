@@ -218,6 +218,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 		uc.TX.Commit()
 	}
 
+	//edit fcm token
 	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"edit-fcm")
