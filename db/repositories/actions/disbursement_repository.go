@@ -2,12 +2,15 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
+	"strings"
+	"time"
+
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
 	"qibla-backend/helpers/str"
 	"qibla-backend/usecase/viewmodel"
-	"time"
 )
 
 // DisbursementRepository ...
@@ -28,6 +31,7 @@ func (repository DisbursementRepository) scanRows(rows *sql.Rows) (d models.Disb
 		&d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
 		&d.Transaction.PaymentStatus, &d.Transaction.DueDate, &d.Transaction.VaNumber,
 		&d.Transaction.BankName, &d.Contact.BranchName, &d.Contact.TravelAgentName,
+		&d.Contact.AccountBankName,
 	)
 
 	return d, err
@@ -41,14 +45,41 @@ func (repository DisbursementRepository) scanRow(row *sql.Row) (d models.Disburs
 		&d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
 		&d.Transaction.PaymentStatus, &d.Transaction.DueDate, &d.Transaction.VaNumber,
 		&d.Transaction.BankName, &d.Contact.BranchName, &d.Contact.TravelAgentName,
+		&d.Contact.AccountBankName,
 	)
 
 	return d, err
 }
 
 // Browse ...
-func (repository DisbursementRepository) Browse(search, order, sort string, limit, offset int) (data []models.Disbursement, count int, err error) {
-	statement := models.DisbursementSelect + ` WHERE def."deleted_at" IS NULL
+func (repository DisbursementRepository) Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, order, sort string, limit, offset int) (data []models.Disbursement, count int, err error) {
+	var conditionString string
+	if contactTravelAgentName != "" {
+		conditionString += ` AND LOWER(c."travel_agent_name") LIKE '%` + strings.ToLower(contactTravelAgentName) + `%'`
+	}
+	if contactBranchName != "" {
+		conditionString += ` AND LOWER(c."branch_name") LIKE '%` + strings.ToLower(contactBranchName) + `%'`
+	}
+	if total != "" {
+		conditionString += ` AND def."total"::TEXT LIKE '%` + total + `%'`
+	}
+	if startPeriod != "" {
+		conditionString += ` AND def."start_period"::TEXT LIKE '%` + startPeriod + `%'`
+	}
+	if endPeriod != "" {
+		conditionString += ` AND def."end_period"::TEXT LIKE '%` + endPeriod + `%'`
+	}
+	if contactAccountBankName != "" {
+		conditionString += ` AND LOWER(c."account_bank_name") LIKE '%` + strings.ToLower(contactAccountBankName) + `%'`
+	}
+	if status != "" {
+		conditionString += ` AND def."status" = '` + status + `'`
+	}
+	if disburseAt != "" {
+		conditionString += ` AND def."disburse_at"::TEXT LIKE '%` + disburseAt + `%'`
+	}
+
+	statement := models.DisbursementSelect + ` WHERE def."deleted_at" IS NULL ` + conditionString + `
 		ORDER BY def.` + order + ` ` + sort + ` LIMIT $1 OFFSET $2`
 	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
@@ -63,7 +94,10 @@ func (repository DisbursementRepository) Browse(search, order, sort string, limi
 		data = append(data, d)
 	}
 
-	statement = `SELECT COUNT(def."id") FROM "disbursements" uz WHERE def."deleted_at" IS NULL`
+	statement = `SELECT COUNT(def."id") FROM "disbursements" def
+	LEFT JOIN "transactions" t ON t."id" = def."transaction_id"
+	LEFT JOIN "contacts" c ON c."id" = def."contact_id"
+	WHERE def."deleted_at" IS NULL ` + conditionString
 	err = repository.DB.QueryRow(statement).Scan(&count)
 	if err != nil {
 		return data, count, err
@@ -115,6 +149,7 @@ func (repository DisbursementRepository) BrowseAll() (data []models.Disbursement
 func (repository DisbursementRepository) ReadBy(column, value string) (data models.Disbursement, err error) {
 	statement := models.DisbursementSelect + ` WHERE ` + column + `=$1
 	AND def."deleted_at" IS NULL`
+	fmt.Println(statement)
 	row := repository.DB.QueryRow(statement, value)
 	data, err = repository.scanRow(row)
 	if err != nil {
@@ -130,7 +165,7 @@ func (DisbursementRepository) Add(input viewmodel.DisbursementVm, tx *sql.Tx) (r
 		"contact_id", "transaction_id", "total", "status", "disbursement_type", "start_period",
 		"end_period", "disburse_at", "account_number", "account_name", "account_bank_name",
 		"account_bank_code", "created_at","updated_at"
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $13) returning "id"`
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) returning "id"`
 	err = tx.QueryRow(statement,
 		str.EmptyString(input.ContactID), str.EmptyString(input.TransactionID), input.Total, input.Status, input.DisbursementType,
 		str.EmptyString(input.StartPeriod), str.EmptyString(input.EndPeriod),

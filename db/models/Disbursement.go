@@ -7,7 +7,7 @@ type Disbursement struct {
 	ID               string          `db:"id"`
 	ContactID        string          `db:"contact_id"`
 	Contact          Contact         `db:"contact"`
-	TransactionID    string          `db:"transaction_id"`
+	TransactionID    sql.NullString  `db:"transaction_id"`
 	Transaction      Transaction     `db:"transaction"`
 	Total            sql.NullFloat64 `db:"total"`
 	Status           sql.NullString  `db:"status"`
@@ -32,7 +32,7 @@ var (
 	def."created_at", def."updated_at", def."deleted_at",
 	t."invoice_number", t."payment_method_code", t."payment_status",
 	t."due_date", t."va_number", t."bank_name",
-	c."branch_name", c."travel_agent_name"
+	c."branch_name", c."travel_agent_name", c."account_bank_name"
 	FROM "disbursements" def
 	LEFT JOIN "transactions" t ON t."id" = def."transaction_id"
 	LEFT JOIN "contacts" c ON c."id" = def."contact_id"`

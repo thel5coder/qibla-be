@@ -240,6 +240,11 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	transactionRoutes.RegisterRoute()
 
+	disbursementRoutes := routes.DisbursementRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	disbursementRoutes.RegisterRoute()
 
 	//mobile
 	//video kajian routes

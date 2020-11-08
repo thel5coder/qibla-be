@@ -199,9 +199,16 @@ func handler(deliveries <-chan amqp.Delivery, uc *usecase.UcContract) {
 		var contact viewmodel.ContactVm
 		interfacepkg.UnmarshallCbInterface(formData["contact"].(interface{}), &contact)
 
+		uc.TX, err = uc.DB.Begin()
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "db", formData["qid"].(string))
+			d.Reject(false)
+		}
+
 		disbursementUc := usecase.DisbursementUseCase{UcContract: uc}
 		err = disbursementUc.AddZakatByContact(&contact)
 		if err != nil {
+			uc.TX.Rollback()
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "err", formData["qid"].(string))
 
 			// Get fail counter from redis
@@ -225,6 +232,7 @@ func handler(deliveries <-chan amqp.Delivery, uc *usecase.UcContract) {
 				d.Nack(false, true)
 			}
 		} else {
+			uc.TX.Commit()
 			logruslogger.Log(logruslogger.InfoLevel, interfacepkg.Marshall(contact), ctx, "success", formData["qid"].(string))
 			d.Ack(false)
 		}

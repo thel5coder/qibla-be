@@ -62,6 +62,14 @@ func (uc TransactionUseCase) EditTrxID(ID, trxID string) (err error) {
 	return err
 }
 
+func (uc TransactionUseCase) EditIsDisburse(ID string) (err error) {
+	repository := actions.NewTransactionRepository(uc.DB)
+	now := time.Now().UTC().Format(time.RFC3339)
+	err = repository.EditIsDisburse(ID, now, uc.TX)
+
+	return err
+}
+
 func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmodel.TransactionVm, err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
@@ -321,7 +329,10 @@ func (uc TransactionUseCase) buildBody(model models.Transaction) (res viewmodel.
 		PaidDate:          model.PaidDate.String,
 		TransactionDate:   model.TransactionDate,
 		UpdatedAt:         model.UpdatedAt,
-		Total:             model.Total,
+		Total:             float32(model.Total.Float64),
+		FeeQibla:          float32(model.FeeQibla.Float64),
+		IsDisburse:        model.IsDisburse.Bool,
+		IsDisburseAllowed: model.IsDisburseAllowed.Bool,
 		Details:           nil,
 		FaspayResponse:    nil,
 	}

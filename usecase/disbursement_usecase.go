@@ -1,11 +1,13 @@
 package usecase
 
 import (
+	"errors"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/enums"
-	"qibla-backend/helpers/interfacepkg"
 	"qibla-backend/helpers/logruslogger"
+	timepkg "qibla-backend/helpers/time"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"
@@ -17,11 +19,11 @@ type DisbursementUseCase struct {
 }
 
 // Browse ...
-func (uc DisbursementUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.DisbursementVm, pagination viewmodel.PaginationVm, err error) {
+func (uc DisbursementUseCase) Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, order, sort string, page, limit int) (res []viewmodel.DisbursementVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewDisbursementRepository(uc.DB)
 
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
-	disbursements, count, err := repository.Browse(search, order, sort, limit, offset)
+	disbursements, count, err := repository.Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, order, sort, limit, offset)
 	if err != nil {
 		return res, pagination, err
 	}
@@ -77,7 +79,8 @@ func (uc DisbursementUseCase) ReadBy(column, value string) (res viewmodel.Disbur
 
 // ReadByPk ...
 func (uc DisbursementUseCase) ReadByPk(ID string) (res viewmodel.DisbursementVm, err error) {
-	res, err = uc.ReadBy("uz.id", ID)
+	fmt.Println(ID)
+	res, err = uc.ReadBy("def.id", ID)
 	if err != nil {
 		return res, err
 	}
@@ -85,32 +88,14 @@ func (uc DisbursementUseCase) ReadByPk(ID string) (res viewmodel.DisbursementVm,
 	return res, err
 }
 
-func (uc DisbursementUseCase) checkInput(input *requests.DisbursementRequest) (err error) {
-	var details []string
-	for _, d := range input.Details {
-		details = append(details, d.TransactionID)
-	}
-
-	return err
-}
-
 // Add ...
 func (uc DisbursementUseCase) Add(input *requests.DisbursementRequest) (res viewmodel.DisbursementVm, err error) {
-	err = uc.checkInput(input)
-	if err != nil {
-		return res, err
-	}
-
-	// transactionUseCase := TransactionUseCase{UcContract: uc.UcContract}
-	// transaction, err := transactionUseCase.AddTransactionZakat(input)
-	// if err != nil {
-	// 	return res, err
-	// }
+	ctx := "DisbursementUseCase.Add"
 
 	now := time.Now().UTC()
 	res = viewmodel.DisbursementVm{
-		ContactID: input.ContactID,
-		// TransactionID:    transaction.ID,
+		ContactID:        input.ContactID,
+		TransactionID:    input.TransactionID,
 		Total:            input.Total,
 		Status:           enums.KeyPaymentStatus1,
 		DisbursementType: input.DisbursementType,
@@ -127,16 +112,60 @@ func (uc DisbursementUseCase) Add(input *requests.DisbursementRequest) (res view
 	repository := actions.NewDisbursementRepository(uc.DB)
 	res.ID, err = repository.Add(res, uc.TX)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "query", uc.ReqID)
 		return res, err
 	}
 
 	disbursementDetailUc := DisbursementDetailUseCase{UcContract: uc.UcContract}
 	err = disbursementDetailUc.AddBulk(res.ID, &input.Details)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "add_detail", uc.ReqID)
 		return res, err
 	}
 
 	return res, err
+}
+
+func (uc DisbursementUseCase) checkZakatInput(input *requests.DisbursementRequest, transaction *[]viewmodel.TransactionVm) (err error) {
+	ctx := "DisbursementUseCase.checkZakatInput"
+
+	for _, d := range *transaction {
+		input.Total += float64(d.Total) - float64(d.FeeQibla)
+
+		date, err := timepkg.Parse(d.TransactionDate, time.RFC3339, DefaultLocation)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "parse_transaction_date", uc.ReqID)
+			return err
+		}
+
+		if input.StartPeriod == "" {
+			input.StartPeriod = d.TransactionDate
+		} else {
+			startDate, err := timepkg.Parse(input.StartPeriod, time.RFC3339, DefaultLocation)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "parse_start_date", uc.ReqID)
+				return err
+			}
+			if startDate.After(date) {
+				input.StartPeriod = d.TransactionDate
+			}
+		}
+
+		if input.EndPeriod == "" {
+			input.EndPeriod = d.TransactionDate
+		} else {
+			endDate, err := timepkg.Parse(input.EndPeriod, time.RFC3339, DefaultLocation)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "parse_end_date", uc.ReqID)
+				return err
+			}
+			if endDate.Before(date) {
+				input.EndPeriod = d.TransactionDate
+			}
+		}
+	}
+
+	return err
 }
 
 // AddZakatByContact ...
@@ -150,8 +179,48 @@ func (uc DisbursementUseCase) AddZakatByContact(contact *viewmodel.ContactVm) (e
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "transaction", uc.ReqID)
 		return err
 	}
+	if len(transaction) == 0 {
+		logruslogger.Log(logruslogger.WarnLevel, "", ctx, "empty_transaction", uc.ReqID)
+		return errors.New("Empty")
+	}
 
-	logruslogger.Log(logruslogger.InfoLevel, interfacepkg.Marshall(transaction), ctx, "transaction", uc.ReqID)
+	var bodyDetails []requests.DisbursementDetailRequest
+	for _, t := range transaction {
+		bodyDetails = append(bodyDetails, requests.DisbursementDetailRequest{
+			TransactionID: t.ID,
+		})
+	}
+
+	body := requests.DisbursementRequest{
+		ContactID:        contact.ID,
+		DisbursementType: enums.KeyTransactionType1,
+		AccountNumber:    contact.AccountNumber,
+		AccountName:      contact.AccountName,
+		AccountBankName:  contact.AccountBankName,
+		AccountBankCode:  contact.AccountBankCode,
+		Details:          bodyDetails,
+	}
+	err = uc.checkZakatInput(&body, &transaction)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "check_input", uc.ReqID)
+		return err
+	}
+
+	// Add record to zakat
+	_, err = uc.Add(&body)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "add", uc.ReqID)
+		return err
+	}
+
+	// Change transaction is disburse
+	for _, t := range transaction {
+		err = transactionUc.EditIsDisburse(t.ID)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "edit_transaction", uc.ReqID)
+			return err
+		}
+	}
 
 	return err
 }
@@ -178,7 +247,10 @@ func (uc DisbursementUseCase) countBy(ID, column, value string) (res int, err er
 func (uc DisbursementUseCase) buildBody(data *models.Disbursement) (res viewmodel.DisbursementVm) {
 	return viewmodel.DisbursementVm{
 		ID:                           data.ID,
-		TransactionID:                data.TransactionID,
+		ContactID:                    data.ContactID,
+		ContactBranchName:            data.Contact.BranchName.String,
+		ContactTravelAgentName:       data.Contact.TravelAgentName.String,
+		TransactionID:                data.TransactionID.String,
 		TransactionInvoiceNumber:     data.Transaction.InvoiceNumber.String,
 		TransactionPaymentMethodCode: data.Transaction.PaymentMethodCode.Int32,
 		TransactionPaymentStatus:     data.Transaction.PaymentStatus.String,

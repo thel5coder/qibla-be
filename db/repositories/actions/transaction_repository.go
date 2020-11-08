@@ -155,6 +155,15 @@ func (repository TransactionRepository) EditTrxID(ID, trxID string, updatedAt st
 	return err
 }
 
+func (repository TransactionRepository) EditIsDisburse(ID, updatedAt string, tx *sql.Tx) (err error) {
+	statement := `update "transactions" set "is_disburse" = $1, "updated_at" = $2 where "id" = $3 returning "id"`
+	_, err = tx.Exec(statement,
+		true, datetime.StrParseToTime(updatedAt, time.RFC3339), ID,
+	)
+
+	return err
+}
+
 func (repository TransactionRepository) CountBy(ID, column, value string) (res int, err error) {
 	if ID == "" {
 		statement := `select count("id") from "transactions" where ` + column + `=$1`

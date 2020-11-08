@@ -4,6 +4,8 @@ package viewmodel
 type DisbursementVm struct {
 	ID                           string  `json:"id"`
 	ContactID                    string  `json:"contact_id"`
+	ContactBranchName            string  `json:"contact_branch_name"`
+	ContactTravelAgentName       string  `json:"contact_travel_agent_name"`
 	TransactionID                string  `json:"transaction_id"`
 	TransactionInvoiceNumber     string  `json:"transaction_invoice_number"`
 	TransactionPaymentMethodCode int32   `json:"transaction_payment_method_code"`

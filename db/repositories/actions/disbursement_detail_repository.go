@@ -62,7 +62,7 @@ func (repository DisbursementDetailRepository) BrowseAll(disbursementID string) 
 
 // Add ...
 func (DisbursementDetailRepository) Add(input viewmodel.DisbursementDetailVm, tx *sql.Tx) (res string, err error) {
-	statement := `INSERT INTO "disbursements" ("disbursement_id", "transaction_id")
+	statement := `INSERT INTO "disbursement_details" ("disbursement_id", "transaction_id")
 	VALUES ($1, $2) returning "id"`
 	err = tx.QueryRow(statement,
 		str.EmptyString(input.DisbursementID), str.EmptyString(input.TransactionID),
@@ -73,7 +73,7 @@ func (DisbursementDetailRepository) Add(input viewmodel.DisbursementDetailVm, tx
 
 // Delete ...
 func (DisbursementDetailRepository) Delete(disbursementID, updatedAt, deletedAt string, tx *sql.Tx) (err error) {
-	statement := `UPDATE "disbursements" SET "updated_at"=$1, "deleted_at"=$2
+	statement := `UPDATE "disbursement_details" SET "updated_at"=$1, "deleted_at"=$2
 	WHERE "disbursement_id"=$3 AND "deleted_at" IS NULL`
 	_, err = tx.Exec(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), disbursementID)
 
