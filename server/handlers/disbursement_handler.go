@@ -22,13 +22,14 @@ func (handler DisbursementHandler) Browse(ctx echo.Context) error {
 	contactAccountBankName := ctx.QueryParam("contact_account_bank_name")
 	status := ctx.QueryParam("status")
 	disburseAt := ctx.QueryParam("disburse_at")
+	originAccountBankName := ctx.QueryParam("origin_account_bank_name")
 	order := ctx.QueryParam("order")
 	sort := ctx.QueryParam("sort")
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
 
 	uc := usecase.DisbursementUseCase{UcContract: handler.UseCaseContract}
-	res, pagination, err := uc.Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, order, sort, page, limit)
+	res, pagination, err := uc.Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, originAccountBankName, order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
 }

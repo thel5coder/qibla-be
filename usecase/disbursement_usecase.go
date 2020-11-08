@@ -19,11 +19,11 @@ type DisbursementUseCase struct {
 }
 
 // Browse ...
-func (uc DisbursementUseCase) Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, order, sort string, page, limit int) (res []viewmodel.DisbursementVm, pagination viewmodel.PaginationVm, err error) {
+func (uc DisbursementUseCase) Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, originAccountBankName, order, sort string, page, limit int) (res []viewmodel.DisbursementVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewDisbursementRepository(uc.DB)
 
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
-	disbursements, count, err := repository.Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, order, sort, limit, offset)
+	disbursements, count, err := repository.Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, originAccountBankName, order, sort, limit, offset)
 	if err != nil {
 		return res, pagination, err
 	}
@@ -94,20 +94,24 @@ func (uc DisbursementUseCase) Add(input *requests.DisbursementRequest) (res view
 
 	now := time.Now().UTC()
 	res = viewmodel.DisbursementVm{
-		ContactID:        input.ContactID,
-		TransactionID:    input.TransactionID,
-		Total:            input.Total,
-		Status:           enums.KeyPaymentStatus1,
-		DisbursementType: input.DisbursementType,
-		StartPeriod:      input.StartPeriod,
-		EndPeriod:        input.EndPeriod,
-		DisburseAt:       input.DisburseAt,
-		AccountNumber:    input.AccountNumber,
-		AccountName:      input.AccountName,
-		AccountBankName:  input.AccountBankName,
-		AccountBankCode:  input.AccountBankCode,
-		CreatedAt:        now.Format(time.RFC3339),
-		UpdatedAt:        now.Format(time.RFC3339),
+		ContactID:             input.ContactID,
+		TransactionID:         input.TransactionID,
+		Total:                 input.Total,
+		Status:                enums.KeyPaymentStatus1,
+		DisbursementType:      input.DisbursementType,
+		StartPeriod:           input.StartPeriod,
+		EndPeriod:             input.EndPeriod,
+		DisburseAt:            input.DisburseAt,
+		AccountNumber:         input.AccountNumber,
+		AccountName:           input.AccountName,
+		AccountBankName:       input.AccountBankName,
+		AccountBankCode:       input.AccountBankCode,
+		OriginAccountNumber:   input.OriginAccountNumber,
+		OriginAccountName:     input.OriginAccountName,
+		OriginAccountBankName: input.OriginAccountBankName,
+		OriginAccountBankCode: input.OriginAccountBankCode,
+		CreatedAt:             now.Format(time.RFC3339),
+		UpdatedAt:             now.Format(time.RFC3339),
 	}
 	repository := actions.NewDisbursementRepository(uc.DB)
 	res.ID, err = repository.Add(res, uc.TX)
@@ -192,13 +196,17 @@ func (uc DisbursementUseCase) AddZakatByContact(contact *viewmodel.ContactVm) (e
 	}
 
 	body := requests.DisbursementRequest{
-		ContactID:        contact.ID,
-		DisbursementType: enums.KeyTransactionType1,
-		AccountNumber:    contact.AccountNumber,
-		AccountName:      contact.AccountName,
-		AccountBankName:  contact.AccountBankName,
-		AccountBankCode:  contact.AccountBankCode,
-		Details:          bodyDetails,
+		ContactID:             contact.ID,
+		DisbursementType:      enums.KeyTransactionType1,
+		AccountNumber:         contact.AccountNumber,
+		AccountName:           contact.AccountName,
+		AccountBankName:       contact.AccountBankName,
+		AccountBankCode:       contact.AccountBankCode,
+		OriginAccountNumber:   DefaultOriginAccountNumber,
+		OriginAccountName:     DefaultOriginAccountName,
+		OriginAccountBankName: DefaultOriginAccountBankName,
+		OriginAccountBankCode: DefaultOriginAccountBankCode,
+		Details:               bodyDetails,
 	}
 	err = uc.checkZakatInput(&body, &transaction)
 	if err != nil {
@@ -267,6 +275,10 @@ func (uc DisbursementUseCase) buildBody(data *models.Disbursement) (res viewmode
 		AccountName:                  data.AccountName.String,
 		AccountBankName:              data.AccountBankName.String,
 		AccountBankCode:              data.AccountBankCode.String,
+		OriginAccountNumber:          data.OriginAccountNumber.String,
+		OriginAccountName:            data.OriginAccountName.String,
+		OriginAccountBankName:        data.OriginAccountBankName.String,
+		OriginAccountBankCode:        data.OriginAccountBankCode.String,
 		CreatedAt:                    data.CreatedAt,
 		UpdatedAt:                    data.UpdatedAt,
 		DeletedAt:                    data.DeletedAt.String,

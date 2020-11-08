@@ -23,6 +23,10 @@ type DisbursementVm struct {
 	AccountName                  string  `json:"account_name"`
 	AccountBankName              string  `json:"account_bank_name"`
 	AccountBankCode              string  `json:"account_bank_code"`
+	OriginAccountNumber          string  `json:"origin_account_number"`
+	OriginAccountName            string  `json:"origin_account_name"`
+	OriginAccountBankName        string  `json:"origin_account_bank_name"`
+	OriginAccountBankCode        string  `json:"origin_account_bank_code"`
 	CreatedAt                    string  `json:"created_at"`
 	UpdatedAt                    string  `json:"updated_at"`
 	DeletedAt                    string  `json:"deleted_at"`

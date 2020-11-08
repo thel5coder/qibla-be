@@ -51,6 +51,16 @@ const (
 	defaultFaspayCurrency       = "IDR"
 	defaultInvoiceDueDate       = 7
 	defaultFeeZakat             = 5000
+
+	// DefaultOriginAccountNumber ...
+	DefaultOriginAccountNumber = "111"
+	// DefaultOriginAccountName ...
+	DefaultOriginAccountName = "111"
+	// DefaultOriginAccountBankName ...
+	DefaultOriginAccountBankName = "111"
+	// DefaultOriginAccountBankCode ...
+	DefaultOriginAccountBankCode = "111"
+
 	// DefaultLocation ...
 	DefaultLocation = "Asia/Jakarta"
 )

@@ -8,7 +8,7 @@ import (
 
 // IDisbursementRepository ...
 type IDisbursementRepository interface {
-	Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, order, sort string, limit, offset int) (data []models.Disbursement, count int, err error)
+	Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, originAccountBankName, order, sort string, limit, offset int) (data []models.Disbursement, count int, err error)
 
 	BrowseBy(column, value, operator string) (data []models.Disbursement, err error)
 
