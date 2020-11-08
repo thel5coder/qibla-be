@@ -3,9 +3,10 @@ CREATE TABLE IF NOT EXISTS "disbursements"
 (
     "id"                char(36) PRIMARY KEY NOT NULL DEFAULT (uuid_generate_v4()),
     "transaction_id"    char(36)             NOT NULL,
+    "contact_id"        char(36)             NOT NULL,
     "total"             float4,
     "status"            status_transaction_enum,
-    "disbursment_type"  disbursement_type_enum,
+    "disbursement_type" disbursement_type_enum,
     "start_period"      timestamp,
     "end_period"        timestamp,
     "account_number"    varchar(20)          NOT NULL,
