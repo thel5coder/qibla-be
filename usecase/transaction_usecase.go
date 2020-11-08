@@ -73,6 +73,7 @@ func (uc TransactionUseCase) Add(input requests.TransactionRequest) (res viewmod
 		DueDate:           input.DueDate,
 		DueDatePeriod:     input.DueDateAging,
 		PaymentStatus:     enums.KeyPaymentStatus1,
+		InvoiceStatus:     enums.InvoiceStatusEnum[0],
 		PaymentMethodCode: input.PaymentMethodeCode,
 		BankName:          input.BankName,
 		Direction:         input.TransactionDirection,
