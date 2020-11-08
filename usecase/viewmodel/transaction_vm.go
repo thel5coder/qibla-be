@@ -8,6 +8,7 @@ type TransactionVm struct {
 	DueDate           string                 `json:"due_date"`
 	DueDatePeriod     int32                  `json:"due_date_period"`
 	PaymentStatus     string                 `json:"payment_status"`
+	InvoiceStatus     string                 `json:"ivoice_status"`
 	PaymentMethodCode int32                  `json:"payment_method_code"`
 	VaNumber          string                 `json:"va_number"`
 	BankName          string                 `json:"bank_name"`

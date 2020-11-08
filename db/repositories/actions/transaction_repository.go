@@ -19,9 +19,11 @@ func NewTransactionRepository(DB *sql.DB) contracts.ITransactionRepository {
 
 const transactionSelect = `select t."id",t."user_id",t."invoice_number",t."trx_id",t."due_date",t."due_date_period",t."payment_status",
                          t."payment_method_code",t."va_number",t."bank_name",t."direction",t."transaction_type",t."paid_date",
-                         t."transaction_date",t."updated_at",sum(td."price")`
+                         t."transaction_date",t."updated_at",t."total",t."qibla_fee",t."is_disburse",t."is_disburse_allowed"`
 const joinQuery = `left join "transaction_details" td on td."transaction_id"=t."id"`
 const groupBy = `group by t."id"`
+
+
 
 func (TransactionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Transaction, count int, err error) {
 	panic("implement me")
@@ -53,8 +55,8 @@ func (repository TransactionRepository) ReadBy(column, value, operator string) (
 
 func (TransactionRepository) Add(input viewmodel.TransactionVm, tx *sql.Tx) (res string, err error) {
 	statement := `insert into "transactions" ("user_id","invoice_number","trx_id","due_date","due_date_period","payment_status","payment_method_code","va_number",
-                  "bank_name","direction","transaction_type","transaction_date","updated_at","total","fee_qibla","is_disburse","is_disburse_allowed")
-                  values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) returning "id"`
+                  "bank_name","direction","transaction_type","transaction_date","updated_at","total","fee_qibla","is_disburse","is_disburse_allowed","invoice_status")
+                  values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) returning "id"`
 	err = tx.QueryRow(
 		statement,
 		input.UserID,
@@ -74,6 +76,7 @@ func (TransactionRepository) Add(input viewmodel.TransactionVm, tx *sql.Tx) (res
 		input.FeeQibla,
 		input.IsDisburse,
 		input.IsDisburseAllowed,
+		input.InvoiceStatus,
 	).Scan(&res)
 
 	return res, err
@@ -129,11 +132,11 @@ func (repository TransactionRepository) CountBy(ID, column, value string) (res i
 	return res, err
 }
 
-func (repository TransactionRepository) Delete(ID,updatedAt,deletedAt string) (res string,err error){
+func (repository TransactionRepository) Delete(ID, updatedAt, deletedAt string) (res string, err error) {
 	statement := `update "transactions" set "updated_at"=$1, "deleted_at"=$2 where "id"=$1`
-	err = repository.DB.QueryRow(statement,datetime.StrParseToTime(updatedAt,time.RFC3339),datetime.StrParseToTime(deletedAt,time.RFC3339),ID).Scan(&res)
+	err = repository.DB.QueryRow(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), ID).Scan(&res)
 
-	return res,err
+	return res, err
 }
 
 func (repository TransactionRepository) GetInvoiceCount(month int) (res int, err error) {
@@ -142,4 +145,3 @@ func (repository TransactionRepository) GetInvoiceCount(month int) (res int, err
 
 	return res, err
 }
-

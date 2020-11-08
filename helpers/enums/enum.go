@@ -101,3 +101,5 @@ const KeyTransactionType4 = "tour_promotion"
 const KeyTransactionType5 = "extra_product_subscription"
 const KeyTransactionType6 = "pengecekan_status_pembayaran"
 
+var InvoiceStatusEnum = []string{"open","close","overdue"}
+

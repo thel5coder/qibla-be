@@ -3,22 +3,24 @@ package models
 import "database/sql"
 
 type Transaction struct {
-	ID                string         `json:"id"`
-	UserID            string         `json:"user_id"`
-	InvoiceNumber     sql.NullString `json:"invoice_number"`
-	TrxID             sql.NullString `json:"trx_id"`
-	DueDate           sql.NullString `json:"due_date"`
-	DueDatePeriod     sql.NullInt32  `json:"due_date_period"`
-	PaymentStatus     sql.NullString `json:"payment_status"`
-	PaymentMethodCode sql.NullInt32  `json:"payment_method_code"`
-	VaNumber          sql.NullString `json:"va_number"`
-	BankName          sql.NullString `json:"bank_name"`
-	Direction         string         `json:"direction"`
-	TransactionType   string         `json:"transaction_type"`
-	PaidDate          sql.NullString `json:"paid_date"`
-	TransactionDate   string         `json:"transaction_date"`
-	UpdatedAt         string         `json:"updated_at"`
-	Total             float32        `json:"total"`
-	IsDisburse        bool           `json:"is_disburse"`
-	IsDisburseAllowed bool           `json:"is_disburse_allowed"`
+	ID                string         `db:"id"`
+	UserID            string         `db:"user_id"`
+	InvoiceNumber     sql.NullString `db:"invoice_number"`
+	TrxID             sql.NullString `db:"trx_id"`
+	DueDate           sql.NullString `db:"due_date"`
+	DueDatePeriod     sql.NullInt32  `db:"due_date_period"`
+	PaymentStatus     sql.NullString `db:"payment_status"`
+	InvoiceStatus     sql.NullString `db:"invoice_status"`
+	PaymentMethodCode sql.NullInt32  `db:"payment_method_code"`
+	VaNumber          sql.NullString `db:"va_number"`
+	BankName          sql.NullString `db:"bank_name"`
+	Direction         string         `db:"direction"`
+	TransactionType   string         `db:"transaction_type"`
+	PaidDate          sql.NullString `db:"paid_date"`
+	TransactionDate   string         `db:"transaction_date"`
+	UpdatedAt         string         `db:"updated_at"`
+	Total             float32        `db:"total"`
+	Fee               float32        `db:"fee"`
+	IsDisburse        bool           `db:"is_disburse"`
+	IsDisburseAllowed bool           `db:"is_disburse_allowed"`
 }
