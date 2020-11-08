@@ -5,6 +5,7 @@ import (
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
+	"qibla-backend/helpers/enums"
 	"qibla-backend/usecase/viewmodel"
 	"time"
 )
@@ -19,14 +20,48 @@ func NewTransactionRepository(DB *sql.DB) contracts.ITransactionRepository {
 
 const transactionSelect = `select t."id",t."user_id",t."invoice_number",t."trx_id",t."due_date",t."due_date_period",t."payment_status",
                          t."payment_method_code",t."va_number",t."bank_name",t."direction",t."transaction_type",t."paid_date",
-                         t."transaction_date",t."updated_at",t."total",t."qibla_fee",t."is_disburse",t."is_disburse_allowed"`
+                         t."transaction_date",t."updated_at",t."total",t."fee_qibla",t."is_disburse",t."is_disburse_allowed"`
 const joinQuery = `left join "transaction_details" td on td."transaction_id"=t."id"`
 const groupBy = `group by t."id"`
 
-
-
 func (TransactionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Transaction, count int, err error) {
 	panic("implement me")
+}
+
+func (repository TransactionRepository) BrowseAllZakatDisbursement(contactID string) (data []models.Transaction, err error) {
+	statement := `SELECT def."id", def."user_id", def."invoice_number", def."trx_id",
+	def."due_date", def."due_date_period", def."payment_status", def."payment_method_code",
+	def."va_number", def."bank_name", def."direction", def."transaction_type", def."paid_date",
+	def."transaction_date", def."updated_at", def."total", def."fee_qibla", def."is_disburse",
+	def."is_disburse_allowed"
+	FROM "transactions" def
+	JOIN "user_zakats" uz ON uz."transaction_id" = def."id"
+	WHERE def."deleted_at" IS NULL AND def."transaction_type" = $1 AND def."payment_status" = $2
+	AND def."is_disburse_allowed" = $3 AND def."is_disburse" = $4 AND uz."contact_id" = $5
+	GROUP BY def."id"`
+	rows, err := repository.DB.Query(statement,
+		enums.KeyTransactionType1, enums.KeyPaymentStatus3, true, false, contactID,
+	)
+	if err != nil {
+		return data, err
+	}
+
+	for rows.Next() {
+		d := models.Transaction{}
+		err = rows.Scan(
+			&d.ID, &d.UserID, &d.InvoiceNumber, &d.TrxID, &d.DueDate,
+			&d.DueDatePeriod, &d.PaymentStatus, &d.PaymentMethodCode, &d.VaNumber,
+			&d.BankName, &d.Direction, &d.TransactionType, &d.PaidDate,
+			&d.TransactionDate, &d.UpdatedAt, &d.Total, &d.FeeQibla,
+			&d.IsDisburse, &d.IsDisburseAllowed,
+		)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, d)
+	}
+
+	return data, err
 }
 
 func (repository TransactionRepository) ReadBy(column, value, operator string) (data models.Transaction, err error) {

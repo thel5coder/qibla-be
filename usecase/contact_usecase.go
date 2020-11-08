@@ -106,6 +106,50 @@ func (uc ContactUseCase) BrowseAll(search string, isZakatPartner bool) (res []vi
 	return res, err
 }
 
+func (uc ContactUseCase) BrowseAllZakatDisbursement() (res []viewmodel.ContactVm, err error) {
+	repository := actions.NewContactRepository(uc.DB)
+	fileUc := FileUseCase{UcContract: uc.UcContract}
+	contacts, err := repository.BrowseAllZakatDisbursement()
+	if err != nil {
+		return res, err
+	}
+
+	for _, contact := range contacts {
+		file, _ := fileUc.ReadByPk(contact.Logo)
+		res = append(res, viewmodel.ContactVm{
+			ID:                   contact.ID,
+			BranchName:           contact.BranchName.String,
+			TravelAgentName:      contact.TravelAgentName.String,
+			Address:              contact.Address.String,
+			Longitude:            contact.Longitude.String,
+			Latitude:             contact.Latitude.String,
+			AreaCode:             contact.AreaCode,
+			PhoneNumber:          contact.PhoneNumber,
+			SKNumber:             contact.SKNumber.String,
+			SKDate:               contact.SKDate.String,
+			Accreditation:        contact.Accreditation.String,
+			AccreditationDate:    contact.AccreditationDate.String,
+			DirectorName:         contact.DirectorName.String,
+			DirectorContact:      contact.DirectorContact.String,
+			PicName:              contact.PicName,
+			PicContact:           contact.PicContact,
+			FileLogo:             file,
+			VirtualAccountNumber: contact.VirtualAccountNumber.String,
+			AccountNumber:        contact.AccountNumber,
+			AccountName:          contact.AccountName,
+			AccountBankName:      contact.AccountBankName,
+			AccountBankCode:      contact.AccountBankCode,
+			Email:                contact.Email,
+			IsZakatPartner:       contact.IsZakatPartner,
+			CreatedAt:            contact.CreatedAt,
+			UpdatedAt:            contact.UpdatedAt,
+			DeletedAt:            contact.DeletedAt.String,
+		})
+	}
+
+	return res, err
+}
+
 func (uc ContactUseCase) BrowseAllZakatPlace(search string) (res []viewmodel.ZakatPlaceVm, err error) {
 	contactZakats, err := uc.BrowseAll(search, true)
 	if err != nil {
@@ -297,7 +341,7 @@ func (uc ContactUseCase) duplicateCheck(ID string, input *requests.ContactReques
 	}
 
 	//check email
-	emailCount,err := uc.countBy(ID,"email",input.Email)
+	emailCount, err := uc.countBy(ID, "email", input.Email)
 	if err != nil {
 		return err
 	}

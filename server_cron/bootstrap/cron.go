@@ -18,8 +18,10 @@ func (boot *Bootstrap) RegisterCronjob() {
 
 	c := cron.New(cron.WithLocation(location))
 
-	// Blast message run every day
-	c.AddFunc("* * * * *", cronjobUc.Test)
+	// Test
+	// c.AddFunc("* * * * *", cronjobUc.Test)
+
+	c.AddFunc("* * * * *", cronjobUc.DisbursementMutation)
 
 	c.Run()
 }

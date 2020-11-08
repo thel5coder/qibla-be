@@ -18,6 +18,22 @@ type TransactionUseCase struct {
 	*UcContract
 }
 
+// BrowseAllZakatDisbursement ...
+func (uc TransactionUseCase) BrowseAllZakatDisbursement(contactID string) (res []viewmodel.TransactionVm, err error) {
+	repository := actions.NewTransactionRepository(uc.DB)
+
+	data, err := repository.BrowseAllZakatDisbursement(contactID)
+	if err != nil {
+		return res, err
+	}
+
+	for _, d := range data {
+		res = append(res, uc.buildBody(d))
+	}
+
+	return res, err
+}
+
 func (uc TransactionUseCase) ReadBy(column, value, operator string) (res viewmodel.TransactionVm, err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 	transaction, err := repository.ReadBy(column, value, operator)
