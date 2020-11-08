@@ -88,7 +88,7 @@ func (repository UserRepository) Browse(isAdminPanel bool, search, order, sort s
 }
 
 func (repository UserRepository) ReadBy(column, value string) (data models.User, err error) {
-	statement := selectUser + ` from "users" u ` + joinUser + ` where  ` + column + `=$1 and u."deleted_at" is null` + groupByUser
+	statement := selectUser + ` from "users" u ` + joinUser + ` where  ` + column + `=$1 and u."deleted_at" is null ` + groupByUser
 	row := repository.DB.QueryRow(statement, value)
 	data, err = repository.scanRow(row)
 	if err != nil {
