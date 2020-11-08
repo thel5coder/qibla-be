@@ -18,14 +18,28 @@ func NewTransactionRepository(DB *sql.DB) contracts.ITransactionRepository {
 	return &TransactionRepository{DB: DB}
 }
 
-const transactionSelect = `select t."id",t."user_id",t."invoice_number",t."trx_id",t."due_date",t."due_date_period",t."payment_status",
-                         t."payment_method_code",t."va_number",t."bank_name",t."direction",t."transaction_type",t."paid_date",
-                         t."transaction_date",t."updated_at",t."total",t."fee_qibla",t."is_disburse",t."is_disburse_allowed"`
-const joinQuery = `left join "transaction_details" td on td."transaction_id"=t."id"`
-const groupBy = `group by t."id"`
+const (
+	transactionSelect = `select t."id",t."user_id",t."invoice_number",t."trx_id",t."due_date",t."due_date_period",t."payment_status",
+                         t."payment_method_code",t."va_number",t."bank_name",t."direction",t."transaction_type",t."paid_date",t."invoice_status",
+                         t."transaction_date",t."updated_at",t."total",t."fee_qibla",t."is_disburse",t."is_disburse_allowed",
+                         array_to_string(array_agg(td."name" || ':' td."price" || ':' || tx."quantity"),',')`
+	jointTransaction   = `left join "transaction_details" td on td."transaction_id"=t."id"`
+	groupByTransaction = `group by t."id"`
+)
 
-func (TransactionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Transaction, count int, err error) {
-	panic("implement me")
+func (repository TransactionRepository) scanRow(row *sql.Row) (res models.Transaction, err error) {
+	err = row.Scan(&res.ID, &res.UserID, &res.InvoiceNumber, &res.TrxID, &res.DueDate, &res.DueDatePeriod, &res.PaymentStatus, &res.PaymentMethodCode, &res.VaNumber, &res.BankName,
+		&res.Direction, &res.TransactionType, &res.PaidDate, &res.InvoiceStatus, &res.TransactionDate, &res.UpdatedAt, &res.Total, &res.FeeQibla, &res.IsDisburse, &res.IsDisburseAllowed,
+		&res.Details)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (repository TransactionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Transaction, count int, err error) {
+	return data,count,err
 }
 
 func (repository TransactionRepository) BrowseAllZakatDisbursement(contactID string) (data []models.Transaction, err error) {
@@ -65,7 +79,7 @@ func (repository TransactionRepository) BrowseAllZakatDisbursement(contactID str
 }
 
 func (repository TransactionRepository) ReadBy(column, value, operator string) (data models.Transaction, err error) {
-	statement := transactionSelect + ` from "transactions" t ` + joinQuery + ` where ` + column + `` + operator + `$1 ` + groupBy
+	statement := transactionSelect + ` from "transactions" t ` + jointTransaction + ` where ` + column + `` + operator + `$1 ` + groupByTransaction
 	err = repository.DB.QueryRow(statement, value).Scan(
 		&data.ID,
 		&data.UserID,

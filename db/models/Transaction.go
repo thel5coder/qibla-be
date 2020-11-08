@@ -23,4 +23,5 @@ type Transaction struct {
 	FeeQibla          sql.NullFloat64 `db:"fee_qibla"`
 	IsDisburse        sql.NullBool    `db:"is_disburse"`
 	IsDisburseAllowed sql.NullBool    `db:"is_disburse_allowed"`
+	Details           sql.NullString  `json:"details"`
 }

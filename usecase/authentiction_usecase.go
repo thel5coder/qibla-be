@@ -7,10 +7,12 @@ import (
 	"os"
 	"qibla-backend/helpers/facebook"
 	"qibla-backend/helpers/google"
+	"qibla-backend/helpers/logruslogger"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/helpers/str"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
+	functionCaller "qibla-backend/helpers/functioncaller"
 )
 
 type AuthenticationUseCase struct {
@@ -184,19 +186,20 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	//count email by email profile
 	count, err := userUc.CountBy("", "email", email)
 	if err != nil {
-		fmt.Println("count")
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"count-user")
 		return res, err
 	}
 	if count > 0 {
-		fmt.Println(email)
 		user, err = userUc.ReadBy("u.email", email)
 		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"read-by-user")
 			return res, err
 		}
 		userID = user.ID
 	} else {
 		uc.TX, err = uc.DB.Begin()
 		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"init-transaction")
 			uc.TX.Rollback()
 
 			return res, err
@@ -207,6 +210,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 		password := str.RandomString(6)
 		userID, err = jamaahUc.Add(name, "guest", email, password, "")
 		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"add-jamaah")
 			uc.TX.Rollback()
 
 			return res, err
@@ -216,6 +220,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 
 	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"edit-fcm")
 		return res, err
 	}
 
