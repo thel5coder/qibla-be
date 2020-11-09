@@ -180,6 +180,7 @@ func (uc AuthenticationUseCase) RegisterByOauth(input *requests.RegisterByOauthR
 func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken string) (res viewmodel.UserJwtTokenVm, err error) {
 	var user viewmodel.UserVm
 	var userID string
+	var isPinSet bool
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	jamaahUc := JamaahUseCase{UcContract: uc.UcContract}
 
@@ -196,6 +197,9 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 			return res, err
 		}
 		userID = user.ID
+		if user.PIN != "" {
+			isPinSet = true
+		}
 	} else {
 		uc.TX, err = uc.DB.Begin()
 		if err != nil {
@@ -216,8 +220,10 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 			return res, err
 		}
 		uc.TX.Commit()
+		isPinSet = false
 	}
 
+	//edit fcm token
 	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"edit-fcm")
@@ -236,7 +242,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 		ExpTime:         tokenExpiredAt,
 		RefreshToken:    refreshToken,
 		ExpRefreshToken: refreshTokenExpiredAt,
-		IsPinSet:        user.IsPINSet,
+		IsPinSet:        isPinSet,
 	}
 
 	return res, nil
