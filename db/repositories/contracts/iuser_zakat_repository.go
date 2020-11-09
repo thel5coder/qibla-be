@@ -7,7 +7,7 @@ import (
 )
 
 type IUserZakatRepository interface {
-	Browse(search, order, sort string, limit, offset int) (data []models.UserZakat, count int, err error)
+	Browse(search, createdAt, bankName, typeZakat, invoiceNumber, total, travelAgentName, order, sort string, limit, offset int) (data []models.UserZakat, count int, err error)
 
 	BrowseBy(column, value, operator string) (data []models.UserZakat, err error)
 

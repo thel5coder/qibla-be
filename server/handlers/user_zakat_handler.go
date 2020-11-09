@@ -17,13 +17,19 @@ type UserZakatHandler struct {
 // Browse ..
 func (handler UserZakatHandler) Browse(ctx echo.Context) error {
 	search := ctx.QueryParam("search")
+	createdAt := ctx.QueryParam("created_at")
+	bankName := ctx.QueryParam("bank_name")
+	typeZakat := ctx.QueryParam("type_zakat")
+	invoiceNumber := ctx.QueryParam("invoice_number")
+	total := ctx.QueryParam("total")
+	travelAgentName := ctx.QueryParam("travel_agent_name")
 	order := ctx.QueryParam("order")
 	sort := ctx.QueryParam("sort")
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
 
 	uc := usecase.UserZakatUseCase{UcContract: handler.UseCaseContract}
-	res, pagination, err := uc.Browse(search, order, sort, page, limit)
+	res, pagination, err := uc.Browse(search, createdAt, bankName, typeZakat, invoiceNumber, total, travelAgentName, order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
 }

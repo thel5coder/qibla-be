@@ -7,6 +7,7 @@ import (
 	"qibla-backend/helpers/datetime"
 	"qibla-backend/helpers/str"
 	"qibla-backend/usecase/viewmodel"
+	"strings"
 	"time"
 )
 
@@ -45,8 +46,28 @@ func (repository UserZakatRepository) scanRow(row *sql.Row) (d models.UserZakat,
 }
 
 // Browse ...
-func (repository UserZakatRepository) Browse(search, order, sort string, limit, offset int) (data []models.UserZakat, count int, err error) {
-	statement := models.UserZakatSelect + ` WHERE uz."deleted_at" IS NULL
+func (repository UserZakatRepository) Browse(search, createdAt, bankName, typeZakat, invoiceNumber, total, travelAgentName, order, sort string, limit, offset int) (data []models.UserZakat, count int, err error) {
+	var conditionString string
+	if createdAt != "" {
+		conditionString += ` AND LOWER(uz."created_at"::TEXT) LIKE '%` + strings.ToLower(createdAt) + `%'`
+	}
+	if bankName != "" {
+		conditionString += ` AND LOWER(t."bank_name") LIKE '%` + strings.ToLower(bankName) + `%'`
+	}
+	if typeZakat != "" {
+		conditionString += ` AND uz."type_zakat" = '` + typeZakat + `'`
+	}
+	if invoiceNumber != "" {
+		conditionString += ` AND LOWER(t."invoice_number") LIKE '%` + strings.ToLower(invoiceNumber) + `%'`
+	}
+	if total != "" {
+		conditionString += ` AND LOWER(uz."total"::TEXT) LIKE '%` + strings.ToLower(total) + `%'`
+	}
+	if travelAgentName != "" {
+		conditionString += ` AND LOWER(c."travel_agent_name") LIKE '%` + strings.ToLower(travelAgentName) + `%'`
+	}
+
+	statement := models.UserZakatSelect + ` WHERE uz."deleted_at" IS NULL ` + conditionString + `
 		ORDER BY uz.` + order + ` ` + sort + ` LIMIT $1 OFFSET $2`
 	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
@@ -61,7 +82,11 @@ func (repository UserZakatRepository) Browse(search, order, sort string, limit, 
 		data = append(data, d)
 	}
 
-	statement = `SELECT COUNT(uz."id") FROM "user_zakats" uz WHERE uz."deleted_at" IS NULL`
+	statement = `SELECT COUNT(uz."id") FROM "user_zakats" uz
+	LEFT JOIN "users" u ON u."id" = uz."user_id"
+	LEFT JOIN "transactions" t ON t."id" = uz."transaction_id"
+	LEFT JOIN "contacts" c ON c."id" = uz."contact_id"
+	WHERE uz."deleted_at" IS NULL ` + conditionString
 	err = repository.DB.QueryRow(statement).Scan(&count)
 	if err != nil {
 		return data, count, err

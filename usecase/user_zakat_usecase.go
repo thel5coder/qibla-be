@@ -17,11 +17,11 @@ type UserZakatUseCase struct {
 }
 
 // Browse ...
-func (uc UserZakatUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.UserZakatVm, pagination viewmodel.PaginationVm, err error) {
+func (uc UserZakatUseCase) Browse(search, createdAt, bankName, typeZakat, invoiceNumber, total, travelAgentName, order, sort string, page, limit int) (res []viewmodel.UserZakatVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewUserZakatRepository(uc.DB)
 
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
-	userZakats, count, err := repository.Browse(search, order, sort, limit, offset)
+	userZakats, count, err := repository.Browse(search, createdAt, bankName, typeZakat, invoiceNumber, total, travelAgentName, order, sort, limit, offset)
 	if err != nil {
 		return res, pagination, err
 	}
