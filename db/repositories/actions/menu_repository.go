@@ -183,6 +183,7 @@ func (repository MenuRepository) CountBy(ID, column, value string) (res int, err
 	return res, err
 }
 
+//query count by pk
 func (repository MenuRepository) CountByPk(ID string) (res int, err error) {
 	statement := `select count("id") from "menus" where "id"=$1 and "deleted_at" is null`
 	err = repository.DB.QueryRow(statement, ID).Scan(&res)
