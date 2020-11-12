@@ -56,6 +56,7 @@ func (uc MenuUseCase) browseChild(parentID string) (res []viewmodel.MenuVm) {
 	for _,menu := range menus {
 		menu.ChildMenus = uc.browseChild(menu.ID)
 	}
+	res = menus
 
 	return res
 }
