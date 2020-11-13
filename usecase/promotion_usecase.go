@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
@@ -260,4 +261,8 @@ func (uc PromotionUseCase) CountBy(ID, promotionPackageID, column, value string)
 	}
 
 	return res, err
+}
+
+func (uc PromotionUseCase) buildBody(model models.Promotion) viewmodel.PromotionVm{
+	return viewmodel.PromotionVm{}
 }

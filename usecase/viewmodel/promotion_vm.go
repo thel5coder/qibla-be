@@ -15,3 +15,11 @@ type PromotionVm struct {
 	UpdatedAt            string                        `json:"updated_at"`
 	DeletedAt            string                        `json:"deleted_at"`
 }
+
+type PromotionPlatformVm struct {
+
+}
+
+type PlatformPositionVm struct {
+
+}

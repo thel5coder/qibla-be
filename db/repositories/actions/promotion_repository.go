@@ -7,6 +7,7 @@ import (
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
 	"qibla-backend/usecase/viewmodel"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -28,10 +29,28 @@ const (
 	promotionGroupByStatement = `group by p.id`
 )
 
+func (repository PromotionRepository) scanRows(rows *sql.Rows) (res models.Promotion,err error){
+	err = rows.Scan(&res.ID,&res.PromotionPackageID,&res.PackageName,&res.PackagePromotionSlug,&res.StartDate,&res.EndDate,&res.Price,&res.Description,&res.Platform,&res.Position)
+	if err != nil {
+		return res,err
+	}
+
+	return res,nil
+}
+
+func (repository PromotionRepository) scanRow(row *sql.Row) (res models.Promotion,err error){
+	err = row.Scan(&res.ID,&res.PromotionPackageID,&res.PackageName,&res.PackagePromotionSlug,&res.StartDate,&res.EndDate,&res.Price,&res.Description,&res.Platform,&res.Position)
+	if err != nil {
+		return res,err
+	}
+
+	return res,nil
+}
+
 func (repository PromotionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Promotion, count int, err error) {
 	statement := `select p.*, pp."package_name" from "promotions" p
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where (lower(pp."package_name") l ike $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
+                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
                  and p."deleted_at" is null 
                  order by ` + order + " " + sort + " limit $2 offset $3"
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
@@ -73,8 +92,42 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 	return data, count, err
 }
 
-func (repository PromotionRepository) BrowseAll(filters []map[string]interface{}) (data models.Promotion, err error) {
-	panic("implement me")
+func (repository PromotionRepository) BrowseAll(filters map[string]interface{}) (data []models.Promotion, err error) {
+	var filterStatement string
+	keys := reflect.ValueOf(filters).MapKeys()
+	for _,key := range keys {
+		if key.String() == "position" {
+			filterStatement += `and lower(pos.position) = '`+filters[key.String()].(string)+`' `
+		}
+
+		if key.String() == "platform" {
+			filterStatement += `and lower(plat.platform)='`+filters[key.String()].(string)+`' `
+		}
+
+		if key.String() == "startDate" {
+			filterStatement += `and p.start_date < '`+filters[key.String()].(string)+`' `
+		}
+
+		if key.String() == "endDate" {
+			filterStatement += `and p.end_date > '`+filters[key.String()].(string)+`' `
+		}
+	}
+
+	statement := promotionSelectStatement +` from "promotions" p `+promotionJoinStatement+` where p."deleted_at" is null `+filterStatement+` `+promotionGroupByStatement
+	rows,err := repository.DB.Query(statement)
+	if err != nil {
+		return data,err
+	}
+
+	for rows.Next(){
+		temp,err := repository.scanRows(rows)
+		if err != nil {
+			return data,err
+		}
+		data = append(data,temp)
+	}
+
+	return data,err
 }
 
 func (repository PromotionRepository) ReadBy(column, value string) (data models.Promotion, err error) {

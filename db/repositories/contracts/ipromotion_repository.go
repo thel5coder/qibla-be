@@ -9,7 +9,7 @@ import (
 type IPromotionRepository interface {
 	Browse(search, order, sort string, limit, offset int) (data []models.Promotion, count int, err error)
 
-	BrowseAll(filters []map[string]interface{}) (data models.Promotion, err error)
+	BrowseAll(filters map[string]interface{}) (data []models.Promotion, err error)
 
 	ReadBy(column, value string) (data models.Promotion, err error)
 

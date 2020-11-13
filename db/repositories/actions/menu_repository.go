@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -77,6 +78,7 @@ func (repository MenuRepository) Browse(parentID, search, order, sort string, li
 	if err != nil {
 		return data, count, err
 	}
+	fmt.Println(count)
 
 	return data, count, err
 }
