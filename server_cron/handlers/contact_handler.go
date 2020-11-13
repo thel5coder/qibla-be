@@ -5,13 +5,14 @@ import (
 	"github.com/labstack/echo"
 	"net/http"
 	"qibla-backend/helpers/str"
+	"qibla-backend/server/handlers"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"
 )
 
 type ContactHandler struct {
-	Handler
+	handlers.Handler
 }
 
 func (handler ContactHandler) Browse(ctx echo.Context) error {
