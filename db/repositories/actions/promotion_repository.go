@@ -19,10 +19,19 @@ func NewPromotionRepository(DB *sql.DB) contracts.IPromotionRepository {
 	return &PromotionRepository{DB: DB}
 }
 
+const (
+	promotionSelectStatement = `select p.id,pp.id,pp.package_name,pp.slug,p.package_promotion,p.start_date,p.end_date,p.price,p.description,
+                               array_to_string(array_agg(plat.id || ':' || plat.platform),','),
+                               array_to_string(array_agg(pos.id || ':' || pos.promotion_platform_id || ':' || pos.position),',')`
+	promotionJoinStatement = `inner join "promotion_platforms" plat on plat.promotion_id=p.id
+                              inner join "promotion_positions" pos on pos.promotion_platform_id=plat.id`
+	promotionGroupByStatement = `group by p.id`
+)
+
 func (repository PromotionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Promotion, count int, err error) {
 	statement := `select p.*, pp."package_name" from "promotions" p
                  inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
+                 where (lower(pp."package_name") l ike $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
                  and p."deleted_at" is null 
                  order by ` + order + " " + sort + " limit $2 offset $3"
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
@@ -62,6 +71,10 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 	}
 
 	return data, count, err
+}
+
+func (repository PromotionRepository) BrowseAll(filters []map[string]interface{}) (data models.Promotion, err error) {
+	panic("implement me")
 }
 
 func (repository PromotionRepository) ReadBy(column, value string) (data models.Promotion, err error) {

@@ -29,4 +29,6 @@ type Partner struct {
 	IsPaid                      bool           `db:"is_paid"`
 	InvoicePublishDate          sql.NullString `db:"invoice_publish_date"`
 	Contact                     Contact        `db:"contacts"`
+	DBUserName                  sql.NullString `db:"db_username"`
+	DBPassword                  sql.NullString `db:"db_password"`
 }

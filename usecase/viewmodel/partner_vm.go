@@ -10,6 +10,8 @@ type PartnerVm struct {
 	DomainSite                  string                  `json:"domain_site"`
 	DomainErp                   string                  `json:"domair_erp"`
 	Database                    string                  `json:"database"`
+	DBUserName                  string                  `json:"db_user_name"`
+	DBPassword                  string                  `json:"db_password"`
 	InvoicePublishDate          string                  `json:"invoice_publish_date"`
 	DueDateAging                int                     `json:"due_date_aging"`
 	IsActive                    bool                    `json:"is_active"`

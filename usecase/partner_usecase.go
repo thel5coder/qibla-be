@@ -57,8 +57,9 @@ func (uc PartnerUseCase) BrowseProfilePartner(search, order, sort string, page, 
 func (uc PartnerUseCase) ReadBy(column, value string) (res viewmodel.PartnerVm, err error) {
 	repository := actions.NewParterRepository(uc.DB)
 	partner, err := repository.ReadBy(column, value)
+	res = uc.buildBody(partner)
 
-	return uc.buildBody(partner), err
+	return res, err
 }
 
 func (uc PartnerUseCase) Edit(ID string, input *requests.PartnerRegisterRequest) (err error) {
@@ -136,7 +137,7 @@ func (uc PartnerUseCase) EditBoolStatus(ID, column, reason, userID, password str
 	now := time.Now().UTC().Format(time.RFC3339)
 	userUc := UserUseCase{UcContract: uc.UcContract}
 
-	isPasswordValid,err := userUc.IsPasswordValid(userID, password)
+	isPasswordValid, err := userUc.IsPasswordValid(userID, password)
 	if err != nil {
 		return err
 	}
@@ -151,11 +152,11 @@ func (uc PartnerUseCase) EditBoolStatus(ID, column, reason, userID, password str
 	return nil
 }
 
-func (uc PartnerUseCase) EditPaymentStatus(ID string) (err error){
+func (uc PartnerUseCase) EditPaymentStatus(ID string) (err error) {
 	repository := actions.NewParterRepository(uc.DB)
 	now := time.Now().UTC().Format(time.RFC3339)
 
-	err = repository.EditPaymentStatus(ID,now,now,uc.TX)
+	err = repository.EditPaymentStatus(ID, now, now, uc.TX)
 	if err != nil {
 		return err
 	}
@@ -189,7 +190,7 @@ func (uc PartnerUseCase) Add(input *requests.PartnerRegisterRequest) (res viewmo
 	//add user
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	password, _ := hashing.HashAndSalt(str.RandomString(6))
-	userID, err := userUc.Add(contact.TravelAgentName, input.UserName, contact.Email, contact.PhoneNumber, "ee694491-5166-441b-8262-9745bf866aa9", password, "",true, false)
+	userID, err := userUc.Add(contact.TravelAgentName, input.UserName, contact.Email, contact.PhoneNumber, "ee694491-5166-441b-8262-9745bf866aa9", password, "", true, false)
 	if err != nil {
 		uc.TX.Rollback()
 
@@ -327,6 +328,8 @@ func (uc PartnerUseCase) buildBody(data models.Partner) (res viewmodel.PartnerVm
 		DomainSite:                  data.DomainSite.String,
 		DomainErp:                   data.DomainErp.String,
 		Database:                    data.Database.String,
+		DBUserName:                  data.DBUserName.String,
+		DBPassword:                  data.DBPassword.String,
 		InvoicePublishDate:          data.InvoicePublishDate.String,
 		DueDateAging:                int(data.DueDateAging.Int32),
 		IsActive:                    data.IsActive,

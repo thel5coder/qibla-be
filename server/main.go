@@ -98,8 +98,8 @@ func main() {
 	c, err := odoo.NewClient(&odoo.ClientConfig{
 		Admin:    "admin",
 		Password: "admin",
-		Database: "him",
-		URL:      "https://demo.garudea.com",
+		Database: "Demo",
+		URL:      "https://staging.qibla.co.id",
 	})
 
 	//aws setup

@@ -98,6 +98,7 @@ type UcContract struct {
 	YoutubeService *youtube.Service
 	UserID         string
 	Fcm            fcm.Connection
+	OdooDBConn     *sql.DB
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {

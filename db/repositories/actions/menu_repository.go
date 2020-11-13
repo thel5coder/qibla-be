@@ -107,10 +107,10 @@ func (repository MenuRepository) BrowseAllBy(column, value, operator string) (da
 
 func (repository MenuRepository) ReadBy(column, value, operator string) (data models.Menu, err error) {
 	menuSelectStatementParams = []interface{}{}
-	whereStatement := `where ` + column + ` is null and m."deleted_at" is null and m."is_active"=true`
+	whereStatement := `where ` + column + ` is null and m."deleted_at" is null`
 	if value != "" {
 		menuSelectStatementParams = []interface{}{value}
-		whereStatement = `where ` + column + `` + operator + `$1 and m."deleted_at" is null and m."is_active"=true`
+		whereStatement = `where ` + column + `` + operator + `$1 and m."deleted_at" is null`
 	}
 	statement := menuSelect + ` from "menus" m ` + menuJoin + ` ` + whereStatement + ` ` + menuGroupBy
 	row := repository.DB.QueryRow(statement, menuSelectStatementParams...)

@@ -18,10 +18,12 @@ func NewParterRepository(DB *sql.DB) contracts.IPartnerRepository {
 	return &PartnerRepository{DB: DB}
 }
 
-const partnerSelectStatement = `select p.*,u."username",c.* from "partners" p 
+const (
+	partnerSelectStatement = `select p.*,u."username",c.* from "partners" p 
                  inner join "users" u on u."id"=p."user_id"
                  inner join "setting_products" sp on sp."product_id"=p."product_id"
                  inner join "contacts" c on c."id"=p."contact_id"`
+)
 
 func (repository PartnerRepository) Browse(search, order, sort string, limit, offset int) (data []models.Partner, count int, err error) {
 	statement := partnerSelectStatement + ` where (lower(c."travel_agent_name") like $1 or lower(c."email") like $1) and p."deleted_at" is null
@@ -57,6 +59,8 @@ func (repository PartnerRepository) Browse(search, order, sort string, limit, of
 			&dataTemp.IsPaid,
 			&dataTemp.InvoicePublishDate,
 			&dataTemp.PaidAt,
+			&dataTemp.DBUserName,
+			&dataTemp.DBPassword,
 
 			&dataTemp.UserName,
 
@@ -141,6 +145,8 @@ func (repository PartnerRepository) BrowseProfilePartner(search, order, sort str
 			&dataTemp.IsPaid,
 			&dataTemp.InvoicePublishDate,
 			&dataTemp.PaidAt,
+			&dataTemp.DBUserName,
+			&dataTemp.DBPassword,
 
 			&dataTemp.UserName,
 
@@ -217,6 +223,8 @@ func (repository PartnerRepository) ReadBy(column, value string) (data models.Pa
 		&data.IsPaid,
 		&data.InvoicePublishDate,
 		&data.PaidAt,
+		&data.DBUserName,
+		&data.DBPassword,
 
 		&data.UserName,
 
