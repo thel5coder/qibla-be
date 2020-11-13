@@ -7,7 +7,6 @@ import (
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
 	"qibla-backend/usecase/viewmodel"
-	"reflect"
 	"strings"
 	"time"
 )
@@ -22,15 +21,17 @@ func NewPromotionRepository(DB *sql.DB) contracts.IPromotionRepository {
 
 const (
 	promotionSelectStatement = `select p.id,pp.id,pp.package_name,pp.slug,p.package_promotion,p.start_date,p.end_date,p.price,p.description,
-                               array_to_string(array_agg(plat.id || ':' || plat.platform),','),
+                               array_to_string(array_agg(plat.id || ':' || plat.platform || ':'),','),
                                array_to_string(array_agg(pos.id || ':' || pos.promotion_platform_id || ':' || pos.position),',')`
-	promotionJoinStatement = `inner join "promotion_platforms" plat on plat.promotion_id=p.id
+	promotionJoinStatement = `inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
+                              inner join "promotion_platforms" plat on plat.promotion_id=p.id
                               inner join "promotion_positions" pos on pos.promotion_platform_id=plat.id`
-	promotionGroupByStatement = `group by p.id`
+	promotionGroupByStatement = `GROUP BY p."id",pp."id"`
 )
 
 func (repository PromotionRepository) scanRows(rows *sql.Rows) (res models.Promotion,err error){
-	err = rows.Scan(&res.ID,&res.PromotionPackageID,&res.PackageName,&res.PackagePromotionSlug,&res.StartDate,&res.EndDate,&res.Price,&res.Description,&res.Platform,&res.Position)
+	err = rows.Scan(&res.ID,&res.PromotionPackageID,&res.PackageName,&res.PackagePromotionSlug,&res.PackagePromotion,&res.StartDate,&res.EndDate,&res.Price,&res.Description,&res.Platform,
+		&res.Position)
 	if err != nil {
 		return res,err
 	}
@@ -39,7 +40,8 @@ func (repository PromotionRepository) scanRows(rows *sql.Rows) (res models.Promo
 }
 
 func (repository PromotionRepository) scanRow(row *sql.Row) (res models.Promotion,err error){
-	err = row.Scan(&res.ID,&res.PromotionPackageID,&res.PackageName,&res.PackagePromotionSlug,&res.StartDate,&res.EndDate,&res.Price,&res.Description,&res.Platform,&res.Position)
+	err = row.Scan(&res.ID,&res.PromotionPackageID,&res.PackagePromotion,&res.PackagePromotionSlug,&res.PackageName,&res.StartDate,&res.EndDate,&res.Price,&res.Description,&res.Platform,
+		&res.Position)
 	if err != nil {
 		return res,err
 	}
@@ -94,32 +96,38 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 
 func (repository PromotionRepository) BrowseAll(filters map[string]interface{}) (data []models.Promotion, err error) {
 	var filterStatement string
-	keys := reflect.ValueOf(filters).MapKeys()
-	for _,key := range keys {
-		if key.String() == "position" {
-			filterStatement += `and lower(pos.position) = '`+filters[key.String()].(string)+`' `
-		}
-
-		if key.String() == "platform" {
-			filterStatement += `and lower(plat.platform)='`+filters[key.String()].(string)+`' `
-		}
-
-		if key.String() == "startDate" {
-			filterStatement += `and p.start_date < '`+filters[key.String()].(string)+`' `
-		}
-
-		if key.String() == "endDate" {
-			filterStatement += `and p.end_date > '`+filters[key.String()].(string)+`' `
-		}
+	if val,ok := filters["position"];ok {
+		filterStatement += ` and lower(pos.position) = '`+val.(string)+`'`
 	}
 
-	statement := promotionSelectStatement +` from "promotions" p `+promotionJoinStatement+` where p."deleted_at" is null `+filterStatement+` `+promotionGroupByStatement
+	if val,ok := filters["platform"];ok {
+		platforms := strings.Split(val.(string),",")
+		if len(platforms) > 1 {
+			filterStatement += ` and (lower(plat.platform)='`+platforms[0]+`' or lower(plat.platform)='`+platforms[1]+`')`
+		}else{
+			filterStatement += ` and lower(plat.platform)='`+platforms[0]+`'`
+		}
+
+	}
+
+	if val,ok := filters["startDate"];ok {
+		filterStatement += ` and p.start_date < '`+val.(string)+`'`
+	}
+
+	if val,ok := filters["endDate"];ok {
+		filterStatement += ` and p.end_date > '`+val.(string)+`'`
+	}
+
+	if val,ok := filters["type"];ok {
+		filterStatement += ` and lower(p.package_promotion) = '`+val.(string)+`'`
+	}
+
+	statement := promotionSelectStatement +` from "promotions" p `+promotionJoinStatement+` where p."deleted_at" is null`+filterStatement+` `+promotionGroupByStatement
 	rows,err := repository.DB.Query(statement)
 	if err != nil {
 		return data,err
 	}
-
-	for rows.Next(){
+	for rows.Next() {
 		temp,err := repository.scanRows(rows)
 		if err != nil {
 			return data,err

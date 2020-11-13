@@ -3,8 +3,11 @@ package usecase
 import (
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/helpers/functioncaller"
+	"qibla-backend/helpers/logruslogger"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
+	"strings"
 	"time"
 )
 
@@ -44,6 +47,22 @@ func (uc PromotionUseCase) Browse(search, order, sort string, page, limit int) (
 	pagination = uc.setPaginationResponse(page, limit, count)
 
 	return res, pagination, err
+}
+
+func (uc PromotionUseCase) BrowseAll(filters map[string]interface{}) (res []viewmodel.PromotionVm,err error){
+	repository := actions.NewPromotionRepository(uc.DB)
+
+	promotions,err := repository.BrowseAll(filters)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functioncaller.PrintFuncName(),"query-browseAll-promotion")
+		return res,err
+	}
+
+	for _, promotion := range promotions{
+		res = append(res,uc.buildBody(promotion))
+	}
+
+	return res,err
 }
 
 func (uc PromotionUseCase) ReadBy(column, value string) (res viewmodel.PromotionVm, err error) {
@@ -263,6 +282,45 @@ func (uc PromotionUseCase) CountBy(ID, promotionPackageID, column, value string)
 	return res, err
 }
 
-func (uc PromotionUseCase) buildBody(model models.Promotion) viewmodel.PromotionVm{
-	return viewmodel.PromotionVm{}
+func (uc PromotionUseCase) buildBody(model models.Promotion) viewmodel.PromotionVm {
+	var platformVm []viewmodel.PromotionPlatformVm
+
+	platforms := strings.Split(model.Platform, ",")
+	for _, platform := range platforms {
+		platformArr := strings.Split(platform, ":")
+		platformVm = append(platformVm, viewmodel.PromotionPlatformVm{
+			ID:       platformArr[0],
+			Platform: platformArr[1],
+			Position: nil,
+		})
+	}
+
+	positions := strings.Split(model.Position, ",")
+	for _, position := range positions {
+		positionArr := strings.Split(position, ":")
+		for i := 0; i < len(platformVm); i++ {
+			if positionArr[1] == platformVm[i].ID {
+				platformVm[i].Position = append(platformVm[i].Position, viewmodel.PlatformPositionVm{
+					ID:       positionArr[0],
+					Position: positionArr[2],
+				})
+			}
+		}
+	}
+
+	return viewmodel.PromotionVm{
+		ID:                   model.ID,
+		PromotionPackageID:   model.PromotionPackageID,
+		PromotionPackageName: model.PackageName,
+		PackagePromotion:     model.PackagePromotion,
+		StartDate:            model.StartDate,
+		EndDate:              model.EndDate,
+		Platform:             platformVm,
+		Price:                model.Price,
+		Description:          model.Description,
+		IsActive:             model.IsActive,
+		CreatedAt:            model.CreatedAt,
+		UpdatedAt:            model.UpdatedAt,
+		DeletedAt:            model.DeletedAt.String,
+	}
 }
