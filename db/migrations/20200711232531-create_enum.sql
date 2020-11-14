@@ -81,4 +81,21 @@ CREATE TYPE "payment_status_enum" AS ENUM (
     'sukses',
     'gagal'
     );
+
+CREATE TYPE "identity_type_enum" AS ENUM (
+    'ktp',
+    'kk'
+    );
+
+CREATE TYPE "marital_status_enum" AS ENUM (
+    'belum_kawin',
+    'kawin',
+    'cerai_hidup',
+    'cerai_mati'
+    );
+
+CREATE TYPE "sex_enum" AS ENUM (
+    'female',
+    'male'
+    );
 -- +migrate Down
