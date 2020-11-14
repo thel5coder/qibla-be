@@ -8,10 +8,10 @@ type PartnerVm struct {
 	WebinarStatus               bool                    `json:"webinar_status"`
 	WebsiteStatus               bool                    `json:"website_status"`
 	DomainSite                  string                  `json:"domain_site"`
-	DomainErp                   string                  `json:"domair_erp"`
+	DomainErp                   string                  `json:"domain_erp"`
 	Database                    string                  `json:"database"`
-	DBUserName                  string                  `json:"db_user_name"`
-	DBPassword                  string                  `json:"db_password"`
+	DatabaseUsername            string                  `json:"database_username"`
+	DatabasePassword            string                  `json:"database_password"`
 	InvoicePublishDate          string                  `json:"invoice_publish_date"`
 	DueDateAging                int                     `json:"due_date_aging"`
 	IsActive                    bool                    `json:"is_active"`

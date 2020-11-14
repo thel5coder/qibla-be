@@ -20,15 +20,15 @@ type Partner struct {
 	ProductID                   string         `db:"product_id"`
 	SubscriptionPeriod          int            `db:"subscription_period"`
 	SubscriptionPeriodExpiredAt sql.NullString `db:"subscription_period_expired_at"`
-	IsSubscriptionExpired       sql.NullBool   `json:"is_subscription_expired"`
-	CreatedAt                   string         `db:"created_at"`
-	UpdatedAt                   string         `db:"updated_at"`
-	DeletedAt                   sql.NullString `db:"deleted_at"`
-	PaidAt                      sql.NullString `db:"paid_at"`
-	VerifiedAt                  sql.NullString `db:"verified_at"`
-	IsPaid                      bool           `db:"is_paid"`
-	InvoicePublishDate          sql.NullString `db:"invoice_publish_date"`
-	Contact                     Contact        `db:"contacts"`
-	DBUserName                  sql.NullString `db:"db_username"`
-	DBPassword                  sql.NullString `db:"db_password"`
+	IsSubscriptionExpired sql.NullBool   `json:"is_subscription_expired"`
+	CreatedAt             string         `db:"created_at"`
+	UpdatedAt             string         `db:"updated_at"`
+	DeletedAt             sql.NullString `db:"deleted_at"`
+	PaidAt                sql.NullString `db:"paid_at"`
+	VerifiedAt            sql.NullString `db:"verified_at"`
+	IsPaid                bool           `db:"is_paid"`
+	InvoicePublishDate    sql.NullString `db:"invoice_publish_date"`
+	Contact               Contact        `db:"contacts"`
+	DatabaseUsername      sql.NullString `db:"database_username"`
+	DatabasePassword      sql.NullString `db:"database_password"`
 }

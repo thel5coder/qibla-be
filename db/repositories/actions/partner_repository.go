@@ -59,8 +59,8 @@ func (repository PartnerRepository) Browse(search, order, sort string, limit, of
 			&dataTemp.IsPaid,
 			&dataTemp.InvoicePublishDate,
 			&dataTemp.PaidAt,
-			&dataTemp.DBUserName,
-			&dataTemp.DBPassword,
+			&dataTemp.DatabaseUsername,
+			&dataTemp.DatabasePassword,
 
 			&dataTemp.UserName,
 
@@ -145,8 +145,8 @@ func (repository PartnerRepository) BrowseProfilePartner(search, order, sort str
 			&dataTemp.IsPaid,
 			&dataTemp.InvoicePublishDate,
 			&dataTemp.PaidAt,
-			&dataTemp.DBUserName,
-			&dataTemp.DBPassword,
+			&dataTemp.DatabaseUsername,
+			&dataTemp.DatabasePassword,
 
 			&dataTemp.UserName,
 
@@ -223,8 +223,8 @@ func (repository PartnerRepository) ReadBy(column, value string) (data models.Pa
 		&data.IsPaid,
 		&data.InvoicePublishDate,
 		&data.PaidAt,
-		&data.DBUserName,
-		&data.DBPassword,
+		&data.DatabaseUsername,
+		&data.DatabasePassword,
 
 		&data.UserName,
 

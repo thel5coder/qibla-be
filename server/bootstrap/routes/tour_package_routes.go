@@ -12,10 +12,9 @@ type TourPackageRoutes struct {
 }
 
 func (route TourPackageRoutes) RegisterRoute(){
-	handler := handlers.TourPackageHandler{Handler:route.Handler}
+	_ = handlers.TourPackageHandler{Handler:route.Handler}
 	jwtMiddleware := middleware.JwtVerify{UcContract:route.Handler.UseCaseContract}
 
 	tourPackageRoute := route.RouteGroup.Group("/tour-package")
 	tourPackageRoute.Use(jwtMiddleware.JWTWithConfig)
-	tourPackageRoute.GET("",handler.Browse)
 }
