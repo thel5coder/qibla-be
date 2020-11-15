@@ -3,6 +3,7 @@ module qibla-backend
 go 1.13
 
 require (
+	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.6.0
 	github.com/appleboy/go-fcm v0.1.5
 	github.com/aws/aws-sdk-go v1.34.5
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

@@ -36,4 +36,5 @@ var (
 	PaymentFailed          = "pembayaran gagal"
 	SameMethod             = "same method"
 	ParticipantRequired    = "partisipan harus ada"
+	InvalidUser            = "invalid user"
 )

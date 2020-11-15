@@ -19,11 +19,11 @@ type DisbursementUseCase struct {
 }
 
 // Browse ...
-func (uc DisbursementUseCase) Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, originAccountBankName, order, sort string, page, limit int) (res []viewmodel.DisbursementVm, pagination viewmodel.PaginationVm, err error) {
+func (uc DisbursementUseCase) Browse(filters map[string]interface{}, order, sort string, page, limit int) (res []viewmodel.DisbursementVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewDisbursementRepository(uc.DB)
 
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
-	disbursements, count, err := repository.Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, originAccountBankName, order, sort, limit, offset)
+	disbursements, count, err := repository.Browse(filters, order, sort, limit, offset)
 	if err != nil {
 		return res, pagination, err
 	}

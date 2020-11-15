@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"net/http"
+	"os"
 	"qibla-backend/helpers/DtoResponse"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/str"
@@ -32,6 +33,24 @@ func (h Handler) SendResponse(ctx echo.Context, data interface{}, pagination int
 	}
 
 	return ctx.JSON(response.StatusCode, response.Body)
+}
+
+func (h Handler) SendResponseFile(ctx echo.Context, location, contentType string, err error) error {
+	if err != nil {
+		response := DtoResponse.ErrorResponse(http.StatusUnprocessableEntity, err.Error())
+		return ctx.JSON(response.StatusCode, response.Body)
+	}
+
+	f, err := os.Open(location)
+	if err != nil {
+		response := DtoResponse.ErrorResponse(http.StatusUnprocessableEntity, err.Error())
+		return ctx.JSON(response.StatusCode, response.Body)
+	}
+	defer f.Close()
+
+	os.Remove(location)
+
+	return ctx.Stream(http.StatusOK, contentType, f)
 }
 
 func (h Handler) SendResponseBadRequest(ctx echo.Context, statusCode int, err interface{}) error {

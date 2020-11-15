@@ -48,6 +48,8 @@ var (
 		UserTourPurchaseFilterStatusReschedule, UserTourPurchaseFilterStatusCancel,
 	}
 
+	// UserTourPurchaseStatusPending ...
+	UserTourPurchaseStatusPending = "pending"
 	// UserTourPurchaseStatusActive ...
 	UserTourPurchaseStatusActive = "active"
 	// UserTourPurchaseStatusFinish ...
@@ -56,7 +58,8 @@ var (
 	UserTourPurchaseStatusCancel = "cancel"
 	// UserTourPurchaseStatusWhitelist ...
 	UserTourPurchaseStatusWhitelist = []string{
-		UserTourPurchaseStatusActive, UserTourPurchaseStatusFinish, UserTourPurchaseStatusCancel,
+		UserTourPurchaseStatusPending, UserTourPurchaseStatusActive,
+		UserTourPurchaseStatusFinish, UserTourPurchaseStatusCancel,
 	}
 
 	// UserTourPurchasePaymentTypeFull ...
