@@ -1,17 +1,18 @@
 package models
 
 type OdooMasterPackage struct {
-	ID                 int64  `db:"id"`
-	Quota              int    `db:"quota"`
-	PackageProgram     string `db:"package_program"`
-	PackageProgramID   int64  `db:"package_program_id"`
-	ReturnDate         string `db:"return_date"`
-	DepartureDate      string `db:"departure_date"`
-	WebsiteDescription string `db:"website_description"`
-	Hotels             string `db:"hotels"`
-	Busses             string `db:"busses"`
-	Meals              string `db:"meals"`
-	AirLines           string `db:"air_lines"`
-	Days               string `db:"days"`
-	Prices             string `db:"prices"`
+	ID                   string `json:"id"`
+	EquipmentPackageID   int32  `json:"equipment_package_id"`
+	EquipmentPackageName string `json:"equipment_package_name"`
+	Name                 string `json:"name"`
+	Quota                int32  `json:"quota"`
+	DepartureDate        string `json:"departure_date"`
+	ReturnDate           string `json:"return_date"`
+	Notes                string `json:"notes"`
+	WebsiteDescription   string `json:"website_description"`
+	Hotels               string `json:"hotels"`
+	Meals                string `json:"meals"`
+	Transportations      string `json:"transportations"`
+	Airlines             string `json:"airlines"`
+	RoomRates            string `json:"room_rates"`
 }
