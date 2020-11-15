@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS "user_tour_purchase_participants"
     "photo_4x6"                   char(36)             NOT NULL,
     "meningitis_free_certificate" char(36),
     "passport_file"               char(36),
+    "is_depart"                   bool,
     "created_at"                  timestamp            NOT NULL,
     "updated_at"                  timestamp            NOT NULL,
     "deleted_at"                  timestamp
