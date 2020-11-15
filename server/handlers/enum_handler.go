@@ -79,9 +79,16 @@ func (handler EnumHandler) GetTypeZakat(ctx echo.Context) error {
 	return handler.SendResponse(ctx, res, nil, nil)
 }
 
-func (handler EnumHandler) GetRememberOptions(ctx echo.Context) error{
+func (handler EnumHandler) GetRemember(ctx echo.Context) error {
 	uc := usecase.EnumOptionsUseCase{UcContract: handler.UseCaseContract}
 	res := uc.GetRememberOptions()
+
+	return handler.SendResponse(ctx, res, nil, nil)
+}
+
+func (handler EnumHandler) GetSex(ctx echo.Context) error {
+	uc := usecase.EnumOptionsUseCase{UcContract: handler.UseCaseContract}
+	res := uc.GetSexEnum()
 
 	return handler.SendResponse(ctx, res, nil, nil)
 }
