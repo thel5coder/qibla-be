@@ -70,7 +70,7 @@ var (
 	// UserTourPurchaseSelect ...
 	UserTourPurchaseSelect = `SELECT def."id", def."tour_package_id", def."payment_type", def."customer_name",
 	def."customer_identity_type", def."identity_number", def."full_name", def."sex",
-	def."birth_date", def."birth_place", def."phone_number", def."city_id", def."marital_status"
+	def."birth_date", def."birth_place", def."phone_number", def."city_id", def."marital_status",
 	def."customer_address", def."user_id", def."contact_id", def."old_user_tour_purchase_id",
 	def."cancelation_fee", def."total", def."status", def."created_at", def."updated_at", def."deleted_at",
 	u."email", u."name", c."branch_name", c."travel_agent_name"
