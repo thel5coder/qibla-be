@@ -27,5 +27,6 @@ func (route EnumOptionRoutes) RegisterRoute() {
 	enumRoute.GET("/discount-type", handler.GetDiscountType)
 	enumRoute.GET("/complaint-status", handler.GetComplaintStatus)
 	enumRoute.GET("/type-zakat", handler.GetTypeZakat)
-	enumRoute.GET("/remember-calender", handler.GetRememberOptions)
+	enumRoute.GET("/remember-calender", handler.GetRemember)
+	enumRoute.GET("/sex", handler.GetSex)
 }

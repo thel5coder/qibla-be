@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"qibla-backend/helpers/enums"
+	"qibla-backend/helpers/enums/sexenum"
 	"qibla-backend/usecase/viewmodel"
 	"strconv"
 )
@@ -238,3 +239,18 @@ func (uc EnumOptionsUseCase) GetRememberOptions() (res []viewmodel.EnumVm) {
 
 	return res
 }
+
+func (uc EnumOptionsUseCase) GetSexEnum() []map[string]interface{}{
+	var res []map[string]interface{}
+	sexEnums := sexenum.GetEnums()
+
+	for _,sexEnum := range sexEnums{
+		res = append(res,map[string]interface{}{
+			"key":sexEnum["key"],
+			"text":sexEnum["text"],
+		})
+	}
+
+	return res
+}
+
