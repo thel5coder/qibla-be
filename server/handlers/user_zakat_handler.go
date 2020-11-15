@@ -16,20 +16,34 @@ type UserZakatHandler struct {
 
 // Browse ..
 func (handler UserZakatHandler) Browse(ctx echo.Context) error {
-	search := ctx.QueryParam("search")
-	createdAt := ctx.QueryParam("created_at")
-	bankName := ctx.QueryParam("bank_name")
-	typeZakat := ctx.QueryParam("type_zakat")
-	invoiceNumber := ctx.QueryParam("invoice_number")
-	total := ctx.QueryParam("total")
-	travelAgentName := ctx.QueryParam("travel_agent_name")
+	filters := make(map[string]interface{})
+
+	if ctx.QueryParam("created_at") != "" {
+		filters["created_at"] = ctx.QueryParam("created_at")
+	}
+	if ctx.QueryParam("bank_name") != "" {
+		filters["bank_name"] = ctx.QueryParam("bank_name")
+	}
+	if ctx.QueryParam("bank_name") != "" {
+		filters["type_zakat"] = ctx.QueryParam("bank_name")
+	}
+	if ctx.QueryParam("invoice_number") != "" {
+		filters["invoice_number"] = ctx.QueryParam("invoice_number")
+	}
+	if ctx.QueryParam("total") != "" {
+		filters["total"] = ctx.QueryParam("total")
+	}
+	if ctx.QueryParam("travel_agent_name") != "" {
+		filters["travel_agent_name"] = ctx.QueryParam("travel_agent_name")
+	}
+
 	order := ctx.QueryParam("order")
 	sort := ctx.QueryParam("sort")
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
 
 	uc := usecase.UserZakatUseCase{UcContract: handler.UseCaseContract}
-	res, pagination, err := uc.Browse(search, createdAt, bankName, typeZakat, invoiceNumber, total, travelAgentName, order, sort, page, limit)
+	res, pagination, err := uc.Browse(filters, order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
 }

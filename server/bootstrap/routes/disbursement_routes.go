@@ -22,4 +22,5 @@ func (route DisbursementRoutes) RegisterRoute() {
 	disbursementRoute.GET("", disbursementHandler.Browse)
 	disbursementRoute.GET("/all", disbursementHandler.BrowseAll)
 	disbursementRoute.GET("/:id", disbursementHandler.Read)
+	disbursementRoute.GET("/pdf/:id", disbursementHandler.PdfExport)
 }

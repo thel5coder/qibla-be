@@ -6,8 +6,9 @@ import (
 	"qibla-backend/usecase/viewmodel"
 )
 
+// IUserZakatRepository ...
 type IUserZakatRepository interface {
-	Browse(search, createdAt, bankName, typeZakat, invoiceNumber, total, travelAgentName, order, sort string, limit, offset int) (data []models.UserZakat, count int, err error)
+	Browse(filters map[string]interface{}, order, sort string, limit, offset int) (data []models.UserZakat, count int, err error)
 
 	BrowseBy(column, value, operator string) (data []models.UserZakat, err error)
 

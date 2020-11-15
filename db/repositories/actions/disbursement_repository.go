@@ -53,34 +53,34 @@ func (repository DisbursementRepository) scanRow(row *sql.Row) (d models.Disburs
 }
 
 // Browse ...
-func (repository DisbursementRepository) Browse(search, contactTravelAgentName, contactBranchName, total, startPeriod, endPeriod, contactAccountBankName, status, disburseAt, originAccountBankName, order, sort string, limit, offset int) (data []models.Disbursement, count int, err error) {
+func (repository DisbursementRepository) Browse(filters map[string]interface{}, order, sort string, limit, offset int) (data []models.Disbursement, count int, err error) {
 	var conditionString string
-	if contactTravelAgentName != "" {
-		conditionString += ` AND LOWER(c."travel_agent_name") LIKE '%` + strings.ToLower(contactTravelAgentName) + `%'`
+	if val, ok := filters["contact_travel_agent_name"]; ok {
+		conditionString += ` AND LOWER(c."travel_agent_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`
 	}
-	if contactBranchName != "" {
-		conditionString += ` AND LOWER(c."branch_name") LIKE '%` + strings.ToLower(contactBranchName) + `%'`
+	if val, ok := filters["contact_branch_name"]; ok {
+		conditionString += ` AND LOWER(c."branch_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`
 	}
-	if total != "" {
-		conditionString += ` AND def."total"::TEXT LIKE '%` + total + `%'`
+	if val, ok := filters["total"]; ok {
+		conditionString += ` AND def."total"::TEXT LIKE '%` + val.(string) + `%'`
 	}
-	if startPeriod != "" {
-		conditionString += ` AND def."start_period"::TEXT LIKE '%` + startPeriod + `%'`
+	if val, ok := filters["start_period"]; ok {
+		conditionString += ` AND def."start_period"::TEXT LIKE '%` + val.(string) + `%'`
 	}
-	if endPeriod != "" {
-		conditionString += ` AND def."end_period"::TEXT LIKE '%` + endPeriod + `%'`
+	if val, ok := filters["end_period"]; ok {
+		conditionString += ` AND def."end_period"::TEXT LIKE '%` + val.(string) + `%'`
 	}
-	if contactAccountBankName != "" {
-		conditionString += ` AND LOWER(c."account_bank_name") LIKE '%` + strings.ToLower(contactAccountBankName) + `%'`
+	if val, ok := filters["contact_account_bank_name"]; ok {
+		conditionString += ` AND LOWER(c."account_bank_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`
 	}
-	if status != "" {
-		conditionString += ` AND def."status" = '` + status + `'`
+	if val, ok := filters["status"]; ok {
+		conditionString += ` AND def."status" = '` + val.(string) + `'`
 	}
-	if disburseAt != "" {
-		conditionString += ` AND def."disburse_at"::TEXT LIKE '%` + disburseAt + `%'`
+	if val, ok := filters["disburse_at"]; ok {
+		conditionString += ` AND def."disburse_at"::TEXT LIKE '%` + val.(string) + `%'`
 	}
-	if originAccountBankName != "" {
-		conditionString += ` AND LOWER(def."origin_account_bank_name") LIKE '%` + strings.ToLower(originAccountBankName) + `%'`
+	if val, ok := filters["origin_account_bank_name"]; ok {
+		conditionString += ` AND LOWER(def."origin_account_bank_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`
 	}
 
 	statement := models.DisbursementSelect + ` WHERE def."deleted_at" IS NULL ` + conditionString + `

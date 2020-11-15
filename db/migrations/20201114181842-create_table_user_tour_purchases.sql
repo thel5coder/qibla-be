@@ -16,9 +16,10 @@ CREATE TABLE IF NOT EXISTS "user_tour_purchases"
     "customer_address"       text,
     "user_id"                char(36)             NOT NULL,
     "contact_id"             char(36)             NOT NULL,
-    "airline_odoo_id"        int2,
-    "airlines_class"         varchar(50),
-    "airline_price"          float4,
+    "old_user_tour_purchase_id" char(36),
+    "cancelation_fee"        float4,
+    "total"                  float4,
+    "status"                 char(36)             NOT NULL,
     "created_at"             timestamp            NOT NULL,
     "updated_at"             timestamp            NOT NULL,
     "deleted_at"             timestamp

@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS "user_tour_purchase_participants"
 (
     "id"                          char(36) PRIMARY KEY NOT NULL DEFAULT (uuid_generate_v4()),
-    "tour_package_id"             char(36)             NOT NULL,
+    "user_tour_purchase_id"             char(36)             NOT NULL,
     "user_id"                     char(36)             NOT NULL,
     "is_new_jamaah"               bool                          DEFAULT true,
     "identity_type"               identity_type_enum   NOT NULL DEFAULT 'ktp',
@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS "user_tour_purchase_participants"
     "photo_4x6"                   char(36)             NOT NULL,
     "meningitis_free_certificate" char(36),
     "passport_file"               char(36),
+    "is_depart"                   bool,
+    "status"                      varchar(50),
     "created_at"                  timestamp            NOT NULL,
     "updated_at"                  timestamp            NOT NULL,
     "deleted_at"                  timestamp
