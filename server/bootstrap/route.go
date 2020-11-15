@@ -246,6 +246,20 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	disbursementRoutes.RegisterRoute()
 
+	//province routes
+	provinceRoutes := routes.ProvinceRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	provinceRoutes.RegisterRoute()
+
+	//city routes
+	cityRoutes := routes.CityRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	cityRoutes.RegisterRoute()
+
 	//mobile
 	//video kajian routes
 	videoKajianRoutes := routes.VideoKajianRoutes{
