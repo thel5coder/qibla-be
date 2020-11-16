@@ -23,11 +23,12 @@ func (uc OdooMasterPackageUseCase) BrowseAll(partnerID string) (res []viewmodel.
 		User:     "czmiusbdajga",
 		Password: "SwaddlingChoosingMatador",
 		Port:     "5433",
+		SslMode: "disable",
 	}
 	conn, err := odooDb.DbConnect()
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "odoo-connection-initialization")
-		return
+		return res, err
 	}
 
 	repository := actions.NewOdooMasterPackageRepository(conn)
@@ -138,8 +139,8 @@ func (uc OdooMasterPackageUseCase) buildBody(model models.OdooMasterPackage) vie
 		DepartureDate:   model.DepartureDate,
 		ReturnDate:      model.ReturnDate,
 		Quota:           model.Quota,
-		Notes:           model.Notes,
-		WebDescription:  model.WebsiteDescription,
+		Notes:           model.Notes.String,
+		WebDescription:  model.WebsiteDescription.String,
 		Hotels:          odooMasterPackageHotelVm,
 		Airlines:        odooMasterPackageAirlineVm,
 		Meals:           odooMasterPackageMealVm,

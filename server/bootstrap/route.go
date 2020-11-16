@@ -260,6 +260,13 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	cityRoutes.RegisterRoute()
 
+	//odooMasterPackage routes
+	odooMasterPackageRoutes := routes.OdooMasterPackageRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	odooMasterPackageRoutes.RegisterRoute()
+
 	//mobile
 	//video kajian routes
 	videoKajianRoutes := routes.VideoKajianRoutes{
