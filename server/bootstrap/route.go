@@ -240,6 +240,12 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	transactionRoutes.RegisterRoute()
 
+	invoiceRoutes := routes.InvoiceRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	invoiceRoutes.RegisterRoute()
+
 	disbursementRoutes := routes.DisbursementRoutes{
 		RouteGroup: apiV1,
 		Handler:    handlerType,

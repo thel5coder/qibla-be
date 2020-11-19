@@ -88,3 +88,13 @@ func Unique(intSlice []string) []string {
 
 	return list
 }
+
+// StringInSlice ...
+func StringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
