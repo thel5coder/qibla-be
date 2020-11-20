@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS "tour_package_prices"
     "room_capacity" int,
     "price"         float4,
     "promo_price"   float4,
+    "airline_class" varchar(30),
     "created_at"    timestamp            NOT NULL,
     "updated_at"    timestamp            NOT NULL,
     "deleted_at"    timestamp

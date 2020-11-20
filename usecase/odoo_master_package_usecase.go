@@ -34,6 +34,8 @@ func (uc OdooMasterPackageUseCase) BrowseAll(partnerID string) (res []viewmodel.
 	repository := actions.NewOdooMasterPackageRepository(conn)
 	odooMasterPackages, err := repository.BrowseAll()
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-browseAll-odoo-master-package")
+		return res, err
 		return res, err
 	}
 	defer conn.Close()
@@ -43,6 +45,32 @@ func (uc OdooMasterPackageUseCase) BrowseAll(partnerID string) (res []viewmodel.
 	}
 
 	return res, nil
+}
+
+func (uc OdooMasterPackageUseCase) ReadBy(column,value,operator string) (res viewmodel.OdooMasterPackageVm,err error){
+	odooDb := odoohelper.Connection{
+		Host:     "staging.qibla.co.id",
+		DbName:   "himupd",
+		User:     "czmiusbdajga",
+		Password: "SwaddlingChoosingMatador",
+		Port:     "5433",
+		SslMode: "disable",
+	}
+	conn, err := odooDb.DbConnect()
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "odoo-connection-initialization")
+		return res, err
+	}
+
+	repository := actions.NewOdooMasterPackageRepository(conn)
+	odooMasterPackage,err := repository.ReadBy(column,value,operator)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-readBy-odoo-master-package")
+		return res, err
+	}
+	res = uc.buildBody(odooMasterPackage)
+
+	return res,nil
 }
 
 func (uc OdooMasterPackageUseCase) hotelBuildBody(hotels string) (res []viewmodel.OdooMasterPackagePackageHotelVm) {

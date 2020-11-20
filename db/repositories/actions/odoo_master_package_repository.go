@@ -47,7 +47,18 @@ const (
 )
 
 func (repository OdooMasterPackageRepository) scanRows(rows *sql.Rows) (res models.OdooMasterPackage, err error) {
-	err = rows.Scan(&res.ID, &res.EquipmentPackageID, &res.EquipmentPackageName, &res.Name, &res.Quota, &res.DepartureDate, &res.ReturnDate, &res.Notes, &res.WebsiteDescription, &res.Hotels, &res.Meals, &res.Transportations, &res.Airlines, &res.RoomRates)
+	err = rows.Scan(&res.ID, &res.EquipmentPackageID, &res.EquipmentPackageName, &res.Name, &res.Quota, &res.DepartureDate, &res.ReturnDate, &res.Notes, &res.WebsiteDescription,
+		&res.Hotels, &res.Meals, &res.Transportations, &res.Airlines, &res.RoomRates)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (repository OdooMasterPackageRepository) scanRow(row *sql.Row) (res models.OdooMasterPackage, err error) {
+	err = row.Scan(&res.ID, &res.EquipmentPackageID, &res.EquipmentPackageName, &res.Name, &res.Quota, &res.DepartureDate, &res.ReturnDate, &res.Notes, &res.WebsiteDescription,
+		&res.Hotels, &res.Meals, &res.Transportations, &res.Airlines, &res.RoomRates)
 	if err != nil {
 		return res, err
 	}
@@ -68,6 +79,17 @@ func (repository OdooMasterPackageRepository) BrowseAll() (data []models.OdooMas
 			return data, err
 		}
 		data = append(data, temp)
+	}
+
+	return data, nil
+}
+
+func (repository OdooMasterPackageRepository) ReadBy(column, value, operator string) (data models.OdooMasterPackage, err error) {
+	statement := odooMasterPackageSelectStatement + ` from "master_package" mp ` + odooMasterPackageJoinStatement + ` where mp.is_active=true and ` + column + `` + operator + `$1`
+	row := repository.DB.QueryRow(statement, value)
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
 	}
 
 	return data, nil

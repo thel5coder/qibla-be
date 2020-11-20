@@ -17,5 +17,6 @@ func (route OdooMasterPackageRoutes) RegisterRoute() {
 
 	odooMasterPackageRoutes := route.RouteGroup.Group("/odoo-master-package")
 	odooMasterPackageRoutes.Use(jwtMiddleware.JWTWithConfig)
-	odooMasterPackageRoutes.GET("", handler.BrowseAll)
+	odooMasterPackageRoutes.GET("/all", handler.BrowseAll)
+	odooMasterPackageRoutes.GET("/:id", handler.ReadByPk)
 }
