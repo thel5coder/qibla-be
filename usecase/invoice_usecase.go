@@ -3,6 +3,8 @@ package usecase
 import (
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/helpers/messages"
+	"errors"
 	"qibla-backend/helpers/str"
 	"qibla-backend/usecase/viewmodel"
 )
@@ -28,12 +30,12 @@ func (uc InvoiceUseCase) Browse(order, sort string, page, limit int) (res []view
 
 	checkOrder := str.StringInSlice(order, allowOrderInvoice)
 	if checkOrder == false {
-		order = actions.InvoiceFieldDate
+		return res, pagination, errors.New(messages.OrderNotMatch)
 	}
 
 	checkShort := str.StringInSlice(sort, allowSortInvoice)
 	if checkShort == false {
-		order = actions.DefaultSortDesc
+		return res, pagination, errors.New(messages.SortNotMatch)
 	}
 
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
@@ -54,6 +56,13 @@ func (uc InvoiceUseCase) Browse(order, sort string, page, limit int) (res []view
 
 // buildBody ...
 func (uc InvoiceUseCase) buildBody(data models.Invoice) (res viewmodel.InvoiceVm) {
+
+	var status string
+
+	if data.PaymentStatus.String == ""{
+		status = "open"
+	}
+
 	return viewmodel.InvoiceVm{
 		ID:              data.ID,
 		Name:            data.Name.String,
@@ -62,7 +71,7 @@ func (uc InvoiceUseCase) buildBody(data models.Invoice) (res viewmodel.InvoiceVm
 		FeeQibla:        data.FeeQibla.Float64,
 		Total:           data.Total.Float64,
 		DueDate:         data.DueDate.String,
-		BillingStatus:   data.BillingStatus.String,
+		BillingStatus:   status,
 		DueDatePeriod:   data.DueDatePeriod.Int32,
 		PaymentStatus:   data.PaymentStatus.String,
 		PaidDate:        data.PaidDate.String,

@@ -15,7 +15,6 @@ type Invoice struct {
 	FeeQibla        sql.NullFloat64 `db:"fee_qibla"`
 	Total           sql.NullFloat64 `db:"total"`
 	DueDate         sql.NullString  `db:"due_date"`
-	BillingStatus   sql.NullString  `db:"billing_status"`
 	DueDatePeriod   sql.NullInt32   `db:"due_date_period"`
 	PaymentStatus   sql.NullString  `db:"payment_status"`
 	PaidDate        sql.NullString  `db:"paid_date"`

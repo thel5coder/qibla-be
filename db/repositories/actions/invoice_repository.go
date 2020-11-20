@@ -19,12 +19,13 @@ func NewInvoiceRepository(DB *sql.DB) contracts.IInvoiceRepository {
 const (
 	// selectStatement ...
 	invoiceSelectStatement = `SELECT inv."id", inv."transaction_type", inv."invoice_number", inv."fee_qibla",
-	inv."total", inv."due_date", inv."due_date_period", inv."payment_status", inv."paid_date", inv."direction", inv."transaction_date", inv."updated_at"`
+	inv."total", inv."due_date", inv."due_date_period", inv."payment_status", inv."paid_date", inv."direction", 
+	inv."transaction_date", inv."updated_at"`
 )
 
 var (
 	// DefaultDirection ...
-	DefaultDirection = "out"
+	DefaultDirection = "in"
 
 	// InvoiceFieldDate ...
 	InvoiceFieldDate = "transaction_date"
@@ -37,9 +38,9 @@ var (
 
 // scanRow ...
 func (repository InvoiceRepository) scanRow(row *sql.Row) (res models.Invoice, err error) {
-	err = row.Scan(&res.ID, &res.Name, &res.TransactionType, &res.InvoiceNumber,
-		&res.FeeQibla, &res.Total, &res.DueDate, &res.BillingStatus, &res.DueDatePeriod,
-		&res.PaymentStatus, &res.PaidDate, &res.InvoiceStatus, &res.Direction, &res.TransactionDate, &res.UpdatedAt,
+	err = row.Scan(&res.ID, &res.TransactionType, &res.InvoiceNumber,
+		&res.FeeQibla, &res.Total, &res.DueDate, &res.DueDatePeriod,
+		&res.PaymentStatus, &res.PaidDate, &res.Direction, &res.TransactionDate, &res.UpdatedAt,
 	)
 	if err != nil {
 		return res, err
@@ -50,9 +51,9 @@ func (repository InvoiceRepository) scanRow(row *sql.Row) (res models.Invoice, e
 
 // scanRows ...
 func (repository InvoiceRepository) scanRows(rows *sql.Rows) (res models.Invoice, err error) {
-	err = rows.Scan(&res.ID, &res.Name, &res.TransactionType, &res.InvoiceNumber,
-		&res.FeeQibla, &res.Total, &res.DueDate, &res.BillingStatus, &res.DueDatePeriod,
-		&res.PaymentStatus, &res.PaidDate, &res.InvoiceStatus, &res.Direction, &res.TransactionDate, &res.UpdatedAt,
+	err = rows.Scan(&res.ID, &res.TransactionType, &res.InvoiceNumber,
+		&res.FeeQibla, &res.Total, &res.DueDate, &res.DueDatePeriod,
+		&res.PaymentStatus, &res.PaidDate, &res.Direction, &res.TransactionDate, &res.UpdatedAt,
 	)
 	if err != nil {
 		return res, err
