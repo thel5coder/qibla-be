@@ -2,10 +2,6 @@ package models
 
 import "database/sql"
 
-var (
-	jancuk = "jancuk"
-)
-
 // Invoice ...
 type Invoice struct {
 	ID              string          `db:"id"`

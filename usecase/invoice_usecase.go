@@ -1,12 +1,13 @@
 package usecase
 
 import (
+	"errors"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/messages"
-	"errors"
 	"qibla-backend/helpers/str"
 	"qibla-backend/usecase/viewmodel"
+	"time"
 )
 
 // InvoiceUseCase ...
@@ -59,8 +60,19 @@ func (uc InvoiceUseCase) buildBody(data models.Invoice) (res viewmodel.InvoiceVm
 
 	var status string
 
-	if data.PaymentStatus.String == ""{
+	if data.PaymentStatus.String == "pending" {
 		status = "open"
+	} else if data.PaymentStatus.String == "finish" {
+		status = "close"
+	}
+
+	if data.DueDate.String != "" {
+		dueDate, _ := time.Parse(time.RFC3339, data.DueDate.String)
+		transacionDate, _ := time.Parse(time.RFC3339, data.TransactionDate)
+
+		if transacionDate.After(dueDate) {
+			status = "overdue"
+		}
 	}
 
 	return viewmodel.InvoiceVm{
