@@ -1,14 +1,15 @@
 package handlers
 
 import (
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo"
 	"net/http"
 	"qibla-backend/helpers/jwt"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo"
 )
 
 type PartnerHandler struct {
@@ -98,8 +99,8 @@ func (handler PartnerHandler) EditAccountStatus(ctx echo.Context) error {
 	uc := usecase.PartnerUseCase{UcContract: handler.UseCaseContract}
 	err := uc.EditBoolStatus(ID, "is_active", input.Reason, claims.Id, input.Password, input.IsActive)
 	if err != nil {
-		if err.Error() == messages.CredentialDoNotMatch{
-			return handler.SendResponseUnauthorized(ctx,err)
+		if err.Error() == messages.CredentialDoNotMatch {
+			return handler.SendResponseUnauthorized(ctx, err)
 		}
 	}
 
@@ -121,8 +122,8 @@ func (handler PartnerHandler) EditWebinarStatus(ctx echo.Context) error {
 	uc := usecase.PartnerUseCase{UcContract: handler.UseCaseContract}
 	err := uc.EditBoolStatus(ID, "webinar_status", input.Reason, claims.Id, input.Password, input.IsActive)
 	if err != nil {
-		if err.Error() == messages.CredentialDoNotMatch{
-			return handler.SendResponseUnauthorized(ctx,err)
+		if err.Error() == messages.CredentialDoNotMatch {
+			return handler.SendResponseUnauthorized(ctx, err)
 		}
 	}
 
@@ -140,7 +141,7 @@ func (handler PartnerHandler) Add(ctx echo.Context) error {
 	}
 
 	uc := usecase.PartnerUseCase{UcContract: handler.UseCaseContract}
-	res,err := uc.Add(input)
+	res, err := uc.Add(input)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }

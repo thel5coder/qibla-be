@@ -37,4 +37,6 @@ var (
 	SameMethod             = "same method"
 	ParticipantRequired    = "partisipan harus ada"
 	InvalidUser            = "invalid user"
+	OrderNotMatch 		   = "Order field not match"
+	SortNotMatch 		   = "Sort field not match"
 )

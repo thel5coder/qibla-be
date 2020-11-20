@@ -11,7 +11,7 @@ type TourPackageHotelRepository struct {
 }
 
 func (TourPackageHotelRepository) Edit(input models.TourPackageHotel, tx *sql.Tx) (err error) {
-	statement := `update `
+	panic("implement me")
 }
 
 func (TourPackageHotelRepository) Add(input models.TourPackageHotel, tx *sql.Tx) (err error) {
