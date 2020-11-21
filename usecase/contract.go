@@ -9,6 +9,7 @@ import (
 	"os"
 	queue "qibla-backend/helpers/amqp"
 	"qibla-backend/helpers/aws"
+	"qibla-backend/helpers/faspaydisbursementapi"
 	"qibla-backend/helpers/fcm"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
@@ -79,26 +80,27 @@ var xRequestID interface{}
 
 // UcContract ...
 type UcContract struct {
-	ReqID          string
-	E              *echo.Echo
-	DB             *sql.DB
-	TX             *sql.Tx
-	AmqpConn       *amqp.Connection
-	AmqpChannel    *amqp.Channel
-	RedisClient    redis.RedisClient
-	Jwe            jwe.Credential
-	Validate       *validator.Validate
-	Translator     ut.Translator
-	JwtConfig      middleware.JWTConfig
-	JwtCred        jwt.JwtCredential
-	Odoo           *odoo.Client
-	AWSS3          aws.AWSS3
-	Pusher         pusher.Credential
-	GoMailConfig   mailing.GoMailConfig
-	YoutubeService *youtube.Service
-	UserID         string
-	Fcm            fcm.Connection
-	OdooDBConn     *sql.DB
+	ReqID              string
+	E                  *echo.Echo
+	DB                 *sql.DB
+	TX                 *sql.Tx
+	AmqpConn           *amqp.Connection
+	AmqpChannel        *amqp.Channel
+	RedisClient        redis.RedisClient
+	Jwe                jwe.Credential
+	Validate           *validator.Validate
+	Translator         ut.Translator
+	JwtConfig          middleware.JWTConfig
+	JwtCred            jwt.JwtCredential
+	Odoo               *odoo.Client
+	AWSS3              aws.AWSS3
+	Pusher             pusher.Credential
+	GoMailConfig       mailing.GoMailConfig
+	YoutubeService     *youtube.Service
+	UserID             string
+	Fcm                fcm.Connection
+	OdooDBConn         *sql.DB
+	FaspayDisbursement faspaydisbursementapi.Credential
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {

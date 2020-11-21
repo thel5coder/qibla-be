@@ -22,6 +22,7 @@ import (
 	"qibla-backend/db"
 	"qibla-backend/helpers/amqp"
 	awsHelper "qibla-backend/helpers/aws"
+	"qibla-backend/helpers/faspaydisbursementapi"
 	"qibla-backend/helpers/fcm"
 	"qibla-backend/helpers/google"
 	"qibla-backend/helpers/jwe"
@@ -161,29 +162,43 @@ func main() {
 	usecase.AmqpConnection = amqpConn
 	usecase.AmqpChannel = amqpChannel
 
+	// Faspay disb
+	faspayDisbursementCredential := faspaydisbursementapi.Credential{
+		BaseURL:      os.Getenv("FASPAY_DISBURSEMENT_BASE_URL"),
+		Key:          os.Getenv("FASPAY_DISBURSEMENT_KEY"),
+		Secret:       os.Getenv("FASPAY_DISBURSEMENT_SECRET"),
+		AppKey:       os.Getenv("FASPAY_DISBURSEMENT_APP_KEY"),
+		AppSecret:    os.Getenv("FASPAY_DISBURSEMENT_APP_SECRET"),
+		ClientKey:    os.Getenv("FASPAY_DISBURSEMENT_CLIENT_KEY"),
+		ClientSecret: os.Getenv("FASPAY_DISBURSEMENT_CLIENT_SECRET"),
+		IV:           os.Getenv("FASPAY_DISBURSEMENT_IV"),
+		SourceVA:     os.Getenv("FASPAY_DISBURSEMENT_SOURCE_VA"),
+	}
+
 	//init validator
 	validatorInit()
 
 	e := echo.New()
 
 	ucContract := usecase.UcContract{
-		ReqID:          xid.New().String(),
-		E:              e,
-		DB:             database,
-		RedisClient:    redisClient,
-		Jwe:            jweCredential,
-		Validate:       validatorDriver,
-		Translator:     translator,
-		JwtConfig:      jwtConfig,
-		JwtCred:        jwtCred,
-		Odoo:           c,
-		AWSS3:          awsS3,
-		Pusher:         pusherCredential,
-		GoMailConfig:   goMailConfig,
-		YoutubeService: youtubeService,
-		Fcm:            fcmConnection,
-		AmqpConn:       amqpConn,
-		AmqpChannel:    amqpChannel,
+		ReqID:              xid.New().String(),
+		E:                  e,
+		DB:                 database,
+		RedisClient:        redisClient,
+		Jwe:                jweCredential,
+		Validate:           validatorDriver,
+		Translator:         translator,
+		JwtConfig:          jwtConfig,
+		JwtCred:            jwtCred,
+		Odoo:               c,
+		AWSS3:              awsS3,
+		Pusher:             pusherCredential,
+		GoMailConfig:       goMailConfig,
+		YoutubeService:     youtubeService,
+		Fcm:                fcmConnection,
+		AmqpConn:           amqpConn,
+		AmqpChannel:        amqpChannel,
+		FaspayDisbursement: faspayDisbursementCredential,
 	}
 
 	bootApp := bootstrap.Bootstrap{

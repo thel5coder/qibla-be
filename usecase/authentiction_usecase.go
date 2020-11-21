@@ -6,13 +6,13 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"os"
 	"qibla-backend/helpers/facebook"
+	functionCaller "qibla-backend/helpers/functioncaller"
 	"qibla-backend/helpers/google"
 	"qibla-backend/helpers/logruslogger"
 	"qibla-backend/helpers/messages"
 	"qibla-backend/helpers/str"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
-	functionCaller "qibla-backend/helpers/functioncaller"
 )
 
 type AuthenticationUseCase struct {
@@ -45,9 +45,26 @@ func (uc AuthenticationUseCase) GenerateJwtToken(jwePayload, email, session stri
 	return token, refreshToken, expTokenAt, expRefreshTokenAt, err
 }
 
+// Login ...
 func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string) (res viewmodel.UserJwtTokenVm, err error) {
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	isPinSet := false
+
+	bank, err := uc.FaspayDisbursement.Register(map[string]interface{}{
+		"beneficiary_account":      "6120220126",
+		"beneficiary_account_name": "Ivan",
+		"beneficiary_va_name":      "Qibla",
+		"beneficiary_bank_code":    "008",
+		"beneficiary_bank_branch":  "Mandiri KCP",
+		"beneficiary_region_code":  "0102",
+		"beneficiary_country_code": "ID",
+		"beneficiary_purpose_code": "1",
+	})
+	fmt.Println(bank)
+	fmt.Println(err)
+	t, err := uc.FaspayDisbursement.GenerateToken()
+	fmt.Println(t)
+	fmt.Println(err)
 
 	isExist, err := userUc.IsUserNameExist("", username)
 	if err != nil {
@@ -187,13 +204,13 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	//count email by email profile
 	count, err := userUc.CountBy("", "email", email)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"count-user")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "count-user")
 		return res, err
 	}
 	if count > 0 {
 		user, err = userUc.ReadBy("u.email", email)
 		if err != nil {
-			logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"read-by-user")
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "read-by-user")
 			return res, err
 		}
 		userID = user.ID
@@ -203,7 +220,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	} else {
 		uc.TX, err = uc.DB.Begin()
 		if err != nil {
-			logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"init-transaction")
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "init-transaction")
 			uc.TX.Rollback()
 
 			return res, err
@@ -214,7 +231,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 		password := str.RandomString(6)
 		userID, err = jamaahUc.Add(name, "guest", email, password, "")
 		if err != nil {
-			logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"add-jamaah")
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "add-jamaah")
 			uc.TX.Rollback()
 
 			return res, err
@@ -226,7 +243,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	//edit fcm token
 	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"edit-fcm")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "edit-fcm")
 		return res, err
 	}
 
