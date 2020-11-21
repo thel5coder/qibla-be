@@ -2,7 +2,7 @@ package faspaydisbursementapi
 
 import (
 	"bytes"
-	"crypto/hmac"
+	// "crypto/hmac"
 	"crypto/sha256"
 	"crypto/tls"
 	"encoding/base64"
@@ -68,14 +68,14 @@ func (cred *Credential) getSignature(method, path, timestamp, body string) strin
 	token := base64.StdEncoding.EncodeToString([]byte(cred.ClientKey + ":" + cred.ClientSecret))
 	stringToSign := method + ":" + path + ":" + timestamp + ":" + token + ":" + encodedStr
 	fmt.Println(stringToSign)
-	secret := []byte(cred.Secret)
-	message := []byte(stringToSign)
+	key := GeneratePassword(cred.Secret)
+	firstIv := GenerateIv(cred.IV)
 
-	hash := hmac.New(sha256.New, secret)
-	hash.Write(message)
+	// Initialize new crypter struct. Errors are ignored.
+	crypter, _ := NewCrypter(key, firstIv)
+	encoded, _ := crypter.Encrypt([]byte(stringToSign))
 
-	// to lowercase hexits
-	return hex.EncodeToString(hash.Sum(nil))
+	return base64.StdEncoding.EncodeToString(encoded)
 }
 
 // GenerateToken ...
