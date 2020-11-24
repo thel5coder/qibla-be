@@ -24,6 +24,7 @@ import (
 	awsHelper "qibla-backend/helpers/aws"
 	"qibla-backend/helpers/faspaydisbursementapi"
 	"qibla-backend/helpers/fcm"
+	"qibla-backend/helpers/flip"
 	"qibla-backend/helpers/google"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
@@ -175,6 +176,12 @@ func main() {
 		SourceVA:     os.Getenv("FASPAY_DISBURSEMENT_SOURCE_VA"),
 	}
 
+	// Flip
+	flipCredential := flip.Credential{
+		BaseURL:   os.Getenv("FLIP_BASE_URL"),
+		SecretKey: os.Getenv("FLIP_SECRET_KEY"),
+	}
+
 	//init validator
 	validatorInit()
 
@@ -199,6 +206,7 @@ func main() {
 		AmqpConn:           amqpConn,
 		AmqpChannel:        amqpChannel,
 		FaspayDisbursement: faspayDisbursementCredential,
+		Flip:               flipCredential,
 	}
 
 	bootApp := bootstrap.Bootstrap{
