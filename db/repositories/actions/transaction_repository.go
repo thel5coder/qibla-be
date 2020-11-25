@@ -21,16 +21,24 @@ func NewTransactionRepository(DB *sql.DB) contracts.ITransactionRepository {
 const (
 	transactionSelect = `select t."id",t."user_id",t."invoice_number",t."trx_id",t."due_date",t."due_date_period",t."payment_status",
                          t."payment_method_code",t."va_number",t."bank_name",t."direction",t."transaction_type",t."paid_date",t."invoice_status",
-                         t."transaction_date",t."updated_at",t."total",t."fee_qibla",t."is_disburse",t."is_disburse_allowed",
-                         array_to_string(array_agg(td."name" || ':' td."price" || ':' || tx."quantity"),',')`
-	jointTransaction   = `left join "transaction_details" td on td."transaction_id"=t."id"`
+                         t."transaction_date",t."updated_at",t."total",t."fee_qibla",t."is_disburse",t."is_disburse_allowed",t."jamaah_count"`
+	jointTransaction   = `left`
 	groupByTransaction = `group by t."id"`
 )
 
 func (repository TransactionRepository) scanRow(row *sql.Row) (res models.Transaction, err error) {
 	err = row.Scan(&res.ID, &res.UserID, &res.InvoiceNumber, &res.TrxID, &res.DueDate, &res.DueDatePeriod, &res.PaymentStatus, &res.PaymentMethodCode, &res.VaNumber, &res.BankName,
-		&res.Direction, &res.TransactionType, &res.PaidDate, &res.InvoiceStatus, &res.TransactionDate, &res.UpdatedAt, &res.Total, &res.FeeQibla, &res.IsDisburse, &res.IsDisburseAllowed,
-		&res.Details)
+		&res.Direction, &res.TransactionType, &res.PaidDate, &res.InvoiceStatus, &res.TransactionDate, &res.UpdatedAt, &res.Total, &res.FeeQibla, &res.IsDisburse, &res.IsDisburseAllowed)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (repository TransactionRepository) scanRows(rows *sql.Rows) (res models.Transaction,err error){
+	err = rows.Scan(&res.ID, &res.UserID, &res.InvoiceNumber, &res.TrxID, &res.DueDate, &res.DueDatePeriod, &res.PaymentStatus, &res.PaymentMethodCode, &res.VaNumber, &res.BankName,
+		&res.Direction, &res.TransactionType, &res.PaidDate, &res.InvoiceStatus, &res.TransactionDate, &res.UpdatedAt, &res.Total, &res.FeeQibla, &res.IsDisburse, &res.IsDisburseAllowed)
 	if err != nil {
 		return res, err
 	}
