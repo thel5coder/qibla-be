@@ -2,7 +2,6 @@ package faspaydisbursementapi
 
 import (
 	"bytes"
-	// "crypto/hmac"
 	"crypto/sha256"
 	"crypto/tls"
 	"encoding/base64"
@@ -94,10 +93,10 @@ func (cred *Credential) GenerateToken() (res map[string]interface{}, err error) 
 	}
 	client := &http.Client{Transport: tr}
 	r, _ := http.NewRequest(method, fullURL, nil)
-	r.Header.Add("faspay-key", cred.Key)
-	r.Header.Add("faspay-timestamp", timestamp)
-	r.Header.Add("faspay-signature", signature)
-	r.Header.Add("faspay-authorization", authorization)
+	r.Header.Add("Faspay-Key", cred.Key)
+	r.Header.Add("Faspay-Timestamp", timestamp)
+	r.Header.Add("Faspay-Signature", signature)
+	r.Header.Add("Faspay-Authorization", authorization)
 
 	resp, err := client.Do(r)
 	if err != nil {

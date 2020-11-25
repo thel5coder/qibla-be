@@ -11,6 +11,7 @@ import (
 	"qibla-backend/helpers/aws"
 	"qibla-backend/helpers/faspaydisbursementapi"
 	"qibla-backend/helpers/fcm"
+	"qibla-backend/helpers/flip"
 	"qibla-backend/helpers/jwe"
 	"qibla-backend/helpers/jwt"
 	"qibla-backend/helpers/mailing"
@@ -101,6 +102,7 @@ type UcContract struct {
 	Fcm                fcm.Connection
 	OdooDBConn         *sql.DB
 	FaspayDisbursement faspaydisbursementapi.Credential
+	Flip               flip.Credential
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {
