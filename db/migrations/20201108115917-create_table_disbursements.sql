@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS "disbursements"
     "account_name"      varchar(50)          NOT NULL,
     "account_bank_name" varchar(20)          NOT NULL,
     "account_bank_code" varchar(5)           NOT NULL,
+    "payment_details"   jsonb,
     "created_at"        timestamp            NOT NULL,
     "updated_at"        timestamp            NOT NULL,
     "disburse_at"       timestamp,

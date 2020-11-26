@@ -234,6 +234,12 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	faspayRoutes.RegisterRoute()
 
+	flipRoutes := routes.FlipRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	flipRoutes.RegisterRoute()
+
 	transactionRoutes := routes.TransactionRoute{
 		RouteGroup: apiV1,
 		Handler:    handlerType,

@@ -23,6 +23,7 @@ type Disbursement struct {
 	OriginAccountName     sql.NullString  `db:"origin_account_name"`
 	OriginAccountBankName sql.NullString  `db:"origin_account_bank_name"`
 	OriginAccountBankCode sql.NullString  `db:"origin_account_bank_code"`
+	PaymentDetails        sql.NullString  `db:"payment_details"`
 	CreatedAt             string          `db:"created_at"`
 	UpdatedAt             string          `db:"updated_at"`
 	DeletedAt             sql.NullString  `db:"deleted_at"`
@@ -34,7 +35,7 @@ var (
 	def."disbursement_type", def."start_period", def."end_period", def."disburse_at",
 	def."account_number", def."account_name", def."account_bank_name", def."account_bank_code",
 	def."origin_account_number", def."origin_account_name", def."origin_account_bank_name", def."origin_account_bank_code",
-	def."created_at", def."updated_at", def."deleted_at",
+	def."payment_details", def."created_at", def."updated_at", def."deleted_at",
 	t."invoice_number", t."payment_method_code", t."payment_status",
 	t."due_date", t."va_number", t."bank_name",
 	c."branch_name", c."travel_agent_name", c."account_bank_name"

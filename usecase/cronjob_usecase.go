@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"qibla-backend/helpers/amqp"
+	"qibla-backend/helpers/enums"
 	"qibla-backend/helpers/logruslogger"
 	timepkg "qibla-backend/helpers/time"
 )
@@ -48,6 +49,41 @@ func (uc CronjobUseCase) DisbursementMutation() {
 			"contact": c,
 		}
 		AmqpConnection, AmqpChannel, err = mqueue.PushQueueReconnect(os.Getenv("AMQP_URL"), queueBody, amqp.DisbursementMutation, amqp.DisbursementMutationDeadLetter)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "amqp", uc.ReqID)
+			failed++
+		} else {
+			success++
+		}
+	}
+
+	logruslogger.Log(logruslogger.InfoLevel, "Success: "+strconv.Itoa(success)+", Failed: "+strconv.Itoa(failed), ctx, "finish", uc.ReqID)
+}
+
+// DisbursementRequest ...
+func (uc CronjobUseCase) DisbursementRequest() {
+	ctx := "CronjobUseCase.DisbursementRequest"
+	now := time.Now().UTC()
+	date := timepkg.InFormatNoErr(now, DefaultLocation, "2006-01-02")
+	success := 0
+	failed := 0
+
+	logruslogger.Log(logruslogger.InfoLevel, date, ctx, "begin", uc.ReqID)
+
+	disbursementUc := DisbursementUseCase{UcContract: uc.UcContract}
+	disbursement, err := disbursementUc.BrowseAll(enums.KeyPaymentStatus4)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "select_disb", uc.ReqID)
+		return
+	}
+
+	mqueue := amqp.NewQueue(AmqpConnection, AmqpChannel)
+	for _, d := range disbursement {
+		queueBody := map[string]interface{}{
+			"qid": uc.UcContract.ReqID,
+			"id":  d.ID,
+		}
+		AmqpConnection, AmqpChannel, err = mqueue.PushQueueReconnect(os.Getenv("AMQP_URL"), queueBody, amqp.DisbursementRequest, amqp.DisbursementRequestDeadLetter)
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "amqp", uc.ReqID)
 			failed++

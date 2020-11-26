@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -24,7 +25,7 @@ var (
 )
 
 // GetBank ...
-func (cred *Credential) GetBank() (res map[string]interface{}, err error) {
+func (cred *Credential) GetBank() (res []Bank, err error) {
 	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(cred.SecretKey+":"))
 	fullURL := cred.BaseURL + getBankURL
 
@@ -48,6 +49,7 @@ func (cred *Credential) GetBank() (res map[string]interface{}, err error) {
 	}
 	err = json.Unmarshal([]byte(body), &res)
 	if err != nil {
+		fmt.Println(err)
 		return res, errors.New(fullURL + " " + string(body))
 	}
 
@@ -62,7 +64,7 @@ func (cred *Credential) Disbursement(id, accountNumber, bankCode string, amount 
 	data := url.Values{}
 	data.Set("account_number", accountNumber)
 	data.Set("bank_code", bankCode)
-	data.Set("amount", fmt.Sprintf("%f", amount))
+	data.Set("amount", strconv.Itoa(int(amount)))
 	data.Set("remark", remark)
 	data.Set("recipient_city", recipientCity)
 

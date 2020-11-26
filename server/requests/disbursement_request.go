@@ -20,3 +20,13 @@ type DisbursementRequest struct {
 	OriginAccountBankCode string                      `json:"origin_account_bank_code"`
 	Details               []DisbursementDetailRequest `json:"details"`
 }
+
+// DisbursementReqRequest ...
+type DisbursementReqRequest struct {
+	Data []DisbursementReqIDRequest `json:"data"`
+}
+
+// DisbursementReqIDRequest ...
+type DisbursementReqIDRequest struct {
+	ID string `json:"id"`
+}

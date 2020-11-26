@@ -2,10 +2,10 @@ package usecase
 
 import (
 	"errors"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/enums"
+	"qibla-backend/helpers/interfacepkg"
 	"qibla-backend/helpers/logruslogger"
 	timepkg "qibla-backend/helpers/time"
 	"qibla-backend/server/requests"
@@ -37,10 +37,10 @@ func (uc DisbursementUseCase) Browse(filters map[string]interface{}, order, sort
 }
 
 // BrowseAll ...
-func (uc DisbursementUseCase) BrowseAll() (res []viewmodel.DisbursementVm, err error) {
+func (uc DisbursementUseCase) BrowseAll(status string) (res []viewmodel.DisbursementVm, err error) {
 	repository := actions.NewDisbursementRepository(uc.DB)
 
-	disbursements, err := repository.BrowseAll()
+	disbursements, err := repository.BrowseAll(status)
 	if err != nil {
 		return res, err
 	}
@@ -79,7 +79,6 @@ func (uc DisbursementUseCase) ReadBy(column, value string) (res viewmodel.Disbur
 
 // ReadByPk ...
 func (uc DisbursementUseCase) ReadByPk(ID string) (res viewmodel.DisbursementVm, err error) {
-	fmt.Println(ID)
 	res, err = uc.ReadBy("def.id", ID)
 	if err != nil {
 		return res, err
@@ -233,6 +232,88 @@ func (uc DisbursementUseCase) AddZakatByContact(contact *viewmodel.ContactVm) (e
 	return err
 }
 
+// EditPaymentDetails ...
+func (uc DisbursementUseCase) EditPaymentDetails(ID string, paymentDetails interface{}) (err error) {
+	now := time.Now().UTC().Format(time.RFC3339)
+	repository := actions.NewDisbursementRepository(uc.DB)
+	body := viewmodel.DisbursementVm{
+		ID:             ID,
+		PaymentDetails: paymentDetails,
+		Status:         enums.KeyPaymentStatus5,
+		UpdatedAt:      now,
+	}
+	err = repository.EditPaymentDetails(body, uc.TX)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+// EditStatus ...
+func (uc DisbursementUseCase) EditStatus(ID, status string) (err error) {
+	now := time.Now().UTC().Format(time.RFC3339)
+	repository := actions.NewDisbursementRepository(uc.DB)
+	body := viewmodel.DisbursementVm{
+		ID:        ID,
+		Status:    status,
+		UpdatedAt: now,
+	}
+	err = repository.EditStatus(body, uc.TX)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+// DisbursementReq ...
+func (uc DisbursementUseCase) DisbursementReq(data *requests.DisbursementReqRequest) (err error) {
+	for _, d := range data.Data {
+		disbursement, err := uc.ReadByPk(d.ID)
+		if err != nil {
+			return err
+		}
+		if disbursement.Status != enums.KeyPaymentStatus1 {
+			return errors.New("Invalid status")
+		}
+
+		err = uc.EditStatus(d.ID, enums.KeyPaymentStatus4)
+		if err != nil {
+			return err
+		}
+	}
+
+	return err
+}
+
+// DisbursementFlip ...
+func (uc DisbursementUseCase) DisbursementFlip(id string) (err error) {
+	disbursement, err := uc.ReadByPk(id)
+	if err != nil {
+		return err
+	}
+	if disbursement.Status != enums.KeyPaymentStatus4 {
+		return errors.New("Invalid status")
+	}
+
+	flipUc := FlipUseCase{UcContract: uc.UcContract}
+	res, err := flipUc.Disbursement(
+		id, disbursement.AccountNumber, disbursement.AccountBankCode, disbursement.Total,
+		disbursement.DisbursementType, "",
+	)
+	if err != nil {
+		return err
+	}
+
+	err = uc.EditPaymentDetails(id, res)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 // Delete ...
 func (uc DisbursementUseCase) Delete(ID string) (err error) {
 	now := time.Now().UTC().Format(time.RFC3339)
@@ -253,6 +334,8 @@ func (uc DisbursementUseCase) countBy(ID, column, value string) (res int, err er
 }
 
 func (uc DisbursementUseCase) buildBody(data *models.Disbursement) (res viewmodel.DisbursementVm) {
+	interfacepkg.UnmarshallCb(data.PaymentDetails.String, &res.PaymentDetails)
+
 	return viewmodel.DisbursementVm{
 		ID:                           data.ID,
 		ContactID:                    data.ContactID,
@@ -279,6 +362,7 @@ func (uc DisbursementUseCase) buildBody(data *models.Disbursement) (res viewmode
 		OriginAccountName:            data.OriginAccountName.String,
 		OriginAccountBankName:        data.OriginAccountBankName.String,
 		OriginAccountBankCode:        data.OriginAccountBankCode.String,
+		PaymentDetails:               res.PaymentDetails,
 		CreatedAt:                    data.CreatedAt,
 		UpdatedAt:                    data.UpdatedAt,
 		DeletedAt:                    data.DeletedAt.String,

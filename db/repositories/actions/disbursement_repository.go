@@ -8,6 +8,7 @@ import (
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
+	"qibla-backend/helpers/interfacepkg"
 	"qibla-backend/helpers/str"
 	"qibla-backend/usecase/viewmodel"
 )
@@ -27,7 +28,7 @@ func (repository DisbursementRepository) scanRows(rows *sql.Rows) (d models.Disb
 		&d.ID, &d.ContactID, &d.TransactionID, &d.Total, &d.Status, &d.DisbursementType,
 		&d.StartPeriod, &d.EndPeriod, &d.DisburseAt, &d.AccountNumber, &d.AccountName,
 		&d.AccountBankName, &d.AccountBankCode, &d.OriginAccountNumber, &d.OriginAccountName,
-		&d.OriginAccountBankName, &d.OriginAccountBankCode, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
+		&d.OriginAccountBankName, &d.OriginAccountBankCode, &d.PaymentDetails, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
 		&d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
 		&d.Transaction.PaymentStatus, &d.Transaction.DueDate, &d.Transaction.VaNumber,
 		&d.Transaction.BankName, &d.Contact.BranchName, &d.Contact.TravelAgentName,
@@ -42,7 +43,7 @@ func (repository DisbursementRepository) scanRow(row *sql.Row) (d models.Disburs
 		&d.ID, &d.ContactID, &d.TransactionID, &d.Total, &d.Status, &d.DisbursementType,
 		&d.StartPeriod, &d.EndPeriod, &d.DisburseAt, &d.AccountNumber, &d.AccountName,
 		&d.AccountBankName, &d.AccountBankCode, &d.OriginAccountNumber, &d.OriginAccountName,
-		&d.OriginAccountBankName, &d.OriginAccountBankCode, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
+		&d.OriginAccountBankName, &d.OriginAccountBankCode, &d.PaymentDetails, &d.CreatedAt, &d.UpdatedAt, &d.DeletedAt,
 		&d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
 		&d.Transaction.PaymentStatus, &d.Transaction.DueDate, &d.Transaction.VaNumber,
 		&d.Transaction.BankName, &d.Contact.BranchName, &d.Contact.TravelAgentName,
@@ -131,8 +132,13 @@ func (repository DisbursementRepository) BrowseBy(column, value, operator string
 }
 
 // BrowseAll ...
-func (repository DisbursementRepository) BrowseAll() (data []models.Disbursement, err error) {
-	statement := models.DisbursementSelect + ` WHERE def."deleted_at" IS NULL`
+func (repository DisbursementRepository) BrowseAll(status string) (data []models.Disbursement, err error) {
+	conditionString := ``
+	if status != "" {
+		conditionString += ` AND def."status" = '` + status + `'`
+	}
+
+	statement := models.DisbursementSelect + ` WHERE def."deleted_at" IS NULL ` + conditionString
 	rows, err := repository.DB.Query(statement)
 	if err != nil {
 		return data, err
@@ -197,6 +203,29 @@ func (DisbursementRepository) Edit(input viewmodel.DisbursementVm, tx *sql.Tx) (
 		input.AccountBankName, input.AccountBankCode, input.OriginAccountNumber, input.OriginAccountName,
 		input.OriginAccountBankName, input.OriginAccountBankCode, datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
 		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID,
+	)
+
+	return err
+}
+
+// EditPaymentDetails ...
+func (DisbursementRepository) EditPaymentDetails(input viewmodel.DisbursementVm, tx *sql.Tx) (err error) {
+	statement := `UPDATE "disbursements" set "payment_details" = $1, "status" = $2, "updated_at" = $3
+	WHERE "id" = $4 AND "deleted_at" IS NULL`
+	_, err = tx.Exec(statement,
+		interfacepkg.Marshall(input.PaymentDetails), input.Status,
+		datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID,
+	)
+
+	return err
+}
+
+// EditStatus ...
+func (DisbursementRepository) EditStatus(input viewmodel.DisbursementVm, tx *sql.Tx) (err error) {
+	statement := `UPDATE "disbursements" set "status" = $1, "updated_at" = $2
+	WHERE "id" = $3 AND "deleted_at" IS NULL`
+	_, err = tx.Exec(statement,
+		input.Status, datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID,
 	)
 
 	return err

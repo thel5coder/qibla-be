@@ -12,11 +12,15 @@ type IDisbursementRepository interface {
 
 	BrowseBy(column, value, operator string) (data []models.Disbursement, err error)
 
-	BrowseAll() (data []models.Disbursement, err error)
+	BrowseAll(status string) (data []models.Disbursement, err error)
 
 	ReadBy(column, value string) (data models.Disbursement, err error)
 
 	Edit(input viewmodel.DisbursementVm, tx *sql.Tx) (err error)
+
+	EditPaymentDetails(input viewmodel.DisbursementVm, tx *sql.Tx) (err error)
+
+	EditStatus(input viewmodel.DisbursementVm, tx *sql.Tx) (err error)
 
 	Add(input viewmodel.DisbursementVm, tx *sql.Tx) (res string, err error)
 

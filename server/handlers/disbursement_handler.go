@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
+	"net/http"
+	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"
 )
@@ -56,8 +59,10 @@ func (handler DisbursementHandler) Browse(ctx echo.Context) error {
 
 // BrowseAll ...
 func (handler DisbursementHandler) BrowseAll(ctx echo.Context) error {
+	status := ctx.QueryParam("status")
+
 	uc := usecase.DisbursementUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.BrowseAll()
+	res, err := uc.BrowseAll(status)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }
@@ -80,4 +85,33 @@ func (handler DisbursementHandler) PdfExport(ctx echo.Context) error {
 	res, err := uc.Disbursement(ID)
 
 	return handler.SendResponseFile(ctx, res, "application/pdf", err)
+}
+
+// Request ...
+func (handler DisbursementHandler) Request(ctx echo.Context) error {
+	input := new(requests.DisbursementReqRequest)
+
+	if err := ctx.Bind(input); err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	if err := handler.Validate.Struct(input); err != nil {
+		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
+	}
+
+	var err error
+	handler.UseCaseContract.TX, err = handler.UseCaseContract.DB.Begin()
+	if err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	uc := usecase.DisbursementUseCase{UcContract: handler.UseCaseContract}
+	err = uc.DisbursementReq(input)
+	if err != nil {
+		handler.UseCaseContract.TX.Rollback()
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	handler.UseCaseContract.TX.Commit()
+
+	return handler.SendResponse(ctx, nil, nil, err)
 }

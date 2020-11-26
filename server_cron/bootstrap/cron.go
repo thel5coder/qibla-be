@@ -22,6 +22,7 @@ func (boot *Bootstrap) RegisterCronjob() {
 	// c.AddFunc("* * * * *", cronjobUc.Test)
 
 	c.AddFunc("@daily 00 00 * *", cronjobUc.DisbursementMutation)
+	c.AddFunc("* * * * *", cronjobUc.DisbursementRequest)
 
 	c.Run()
 }
