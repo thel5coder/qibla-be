@@ -20,5 +20,5 @@ func (route InvoiceRoutes) RegisterRoute() {
 
 	InvoiceRoute := route.RouteGroup.Group("/invoices")
 	InvoiceRoute.Use(jwtMiddleware.JWTWithConfig)
-	InvoiceRoute.GET("", handler.Browse)
+	InvoiceRoute.GET("", handler.BrowseInvoicesHandler)
 }

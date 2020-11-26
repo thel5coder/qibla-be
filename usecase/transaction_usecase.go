@@ -8,6 +8,7 @@ import (
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/helpers/enums"
 	"qibla-backend/helpers/messages"
+	"qibla-backend/helpers/str"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"strconv"
@@ -17,6 +18,20 @@ import (
 type TransactionUseCase struct {
 	*UcContract
 }
+
+var (
+	allowOrderInvoice = []string{
+		actions.TransactionFieldDate, actions.TransactionFieldInvoice, actions.TransactionFieldTrxID,
+		actions.TransactionFieldDueDate, actions.TransactionFieldDueDatePeriod, actions.TransactionFieldPaymentStatus,
+		actions.TransactionFieldPaymentMethodCode, actions.TransactionFieldVaNumber, actions.TransactionFieldBankName,
+		actions.TransactionFieldTransactionType, actions.TransactionFieldPaidDate, actions.TransactionFieldTransactionDate,
+		actions.TransactionFieldTotal, actions.TransactionFieldFeeQibla, actions.TransactionFieldIsDisburse,
+	}
+
+	allowSortInvoice = []string{
+		actions.DefaultSortAsc, actions.DefaultSortDesc,
+	}
+)
 
 // BrowseAllZakatDisbursement ...
 func (uc TransactionUseCase) BrowseAllZakatDisbursement(contactID string) (res []viewmodel.TransactionVm, err error) {
@@ -32,6 +47,36 @@ func (uc TransactionUseCase) BrowseAllZakatDisbursement(contactID string) (res [
 	}
 
 	return res, err
+}
+
+// BrowseInvoices ...
+func (uc InvoiceUseCase) BrowseInvoices(order, sort string, page, limit int) (res []viewmodel.InvoiceVm, pagination viewmodel.PaginationVm, err error) {
+	repository := actions.NewTransactionRepository(uc.DB)
+
+	checkOrder := str.StringInSlice(order, allowOrderInvoice)
+	if checkOrder == false {
+		checkOrder = actions.TransactionFieldDate
+	}
+
+	checkShort := str.StringInSlice(sort, allowSortInvoice)
+	if checkShort == false {
+		checkShort = actions.DefaultSortDesc
+	}
+
+	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
+
+	invoices, count, err := repository.BrowseInvoices(order, sort, limit, offset)
+	if err != nil {
+		return res, pagination, err
+	}
+
+	for _, invoice := range invoices {
+		res = append(res, uc.buildBody(invoice))
+	}
+
+	pagination = uc.setPaginationResponse(page, limit, count)
+
+	return res, pagination, err
 }
 
 func (uc TransactionUseCase) ReadBy(column, value, operator string) (res viewmodel.TransactionVm, err error) {
@@ -313,28 +358,56 @@ func (uc TransactionUseCase) CountBy(ID, column, value string) (res int, err err
 }
 
 func (uc TransactionUseCase) buildBody(model models.Transaction) (res viewmodel.TransactionVm) {
+	var status string
+	var name string
+
+	if model.PaymentStatus.String == "pending" {
+		status = "open"
+	} else if model.PaymentStatus.String == "finish" {
+		status = "close"
+	}
+
+	if model.DueDate.String != "" {
+		dueDate, _ := time.Parse(time.RFC3339, model.DueDate.String)
+		transactionDate, _ := time.Parse(time.RFC3339, model.TransactionDate)
+
+		if transactionDate.After(dueDate) {
+			status = "overdue"
+		}
+	}
+
+	if model.TransactionType == enums.KeyTransactionType2 {
+		name = model.PartnerName
+	} else if model.TransactionType == enums.KeyTransactionType1 {
+		name = ""
+	} else {
+		name = model.TravelAgentName
+	}
+
 	res = viewmodel.TransactionVm{
-		ID:                model.ID,
-		UserID:            model.UserID,
-		InvoiceNumber:     model.InvoiceNumber.String,
-		TrxID:             model.TrxID.String,
-		DueDate:           model.DueDate.String,
-		DueDatePeriod:     model.DueDatePeriod.Int32,
-		PaymentStatus:     model.PaymentStatus.String,
-		PaymentMethodCode: model.PaymentMethodCode.Int32,
-		VaNumber:          model.VaNumber.String,
-		BankName:          model.BankName.String,
-		Direction:         model.Direction,
-		TransactionType:   model.TransactionType,
-		PaidDate:          model.PaidDate.String,
-		TransactionDate:   model.TransactionDate,
-		UpdatedAt:         model.UpdatedAt,
-		Total:             float32(model.Total.Float64),
-		FeeQibla:          float32(model.FeeQibla.Float64),
-		IsDisburse:        model.IsDisburse.Bool,
-		IsDisburseAllowed: model.IsDisburseAllowed.Bool,
-		Details:           nil,
-		FaspayResponse:    nil,
+		ID:                 model.ID,
+		UserID:             model.UserID,
+		InvoiceNumber:      model.InvoiceNumber.String,
+		TrxID:              model.TrxID.String,
+		DueDate:            model.DueDate.String,
+		DueDatePeriod:      model.DueDatePeriod.Int32,
+		PaymentStatus:      model.PaymentStatus.String,
+		PaymentMethodCode:  model.PaymentMethodCode.Int32,
+		VaNumber:           model.VaNumber.String,
+		BankName:           model.BankName.String,
+		Direction:          model.Direction,
+		TransactionType:    model.TransactionType,
+		PaidDate:           model.PaidDate.String,
+		TransactionDate:    model.TransactionDate,
+		UpdatedAt:          model.UpdatedAt,
+		Total:              float32(model.Total.Float64),
+		FeeQibla:           float32(model.FeeQibla.Float64),
+		IsDisburse:         model.IsDisburse.Bool,
+		IsDisburseAllowed:  model.IsDisburseAllowed.Bool,
+		Details:            nil,
+		FaspayResponse:     nil,
+		InvoiceStatus:      status,
+		NumberOfWorshipers: 0,
 	}
 
 	return res
