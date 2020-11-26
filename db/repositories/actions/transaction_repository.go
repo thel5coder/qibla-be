@@ -26,6 +26,47 @@ const (
 	groupByTransaction = `group by t."id"`
 )
 
+var (
+	// DefaultDirectionInvoice ...
+	DefaultDirectionInvoice = "in"
+
+	// TransactionFieldDate ...
+	TransactionFieldDate = "transaction_date"
+	// TransactionFieldInvoice ...
+	TransactionFieldInvoice = "invoice_number"
+	// TransactionFieldTrxID ...
+	TransactionFieldTrxID = "trx_id"
+	// TransactionFieldDueDate ...
+	TransactionFieldDueDate = "due_date"
+	// TransactionFieldDueDatePeriod ...
+	TransactionFieldDueDatePeriod = "due_date_period"
+	// TransactionFieldPaymentStatus ...
+	TransactionFieldPaymentStatus = "payment_status"
+	// TransactionFieldPaymentMethodCode ...
+	TransactionFieldPaymentMethodCode = "payment_method_code"
+	// TransactionFieldVaNumber ...
+	TransactionFieldVaNumber = "va_number"
+	// TransactionFieldBankName ...
+	TransactionFieldBankName = "bank_name"
+	// TransactionFieldTransactionType ...
+	TransactionFieldTransactionType = "transaction_type"
+	// TransactionFieldPaidDate ...
+	TransactionFieldPaidDate = "paid_date"
+	// TransactionFieldTransactionDate ...
+	TransactionFieldTransactionDate = "transaction_date"
+	// TransactionFieldTotal ...
+	TransactionFieldTotal = "total"
+	// TransactionFieldFeeQibla ...
+	TransactionFieldFeeQibla = "fee_qibla"
+	// TransactionFieldIsDisburse ...
+	TransactionFieldIsDisburse = "is_disburse"
+
+	// DefaultSortAsc ...
+	DefaultSortAsc = "asc"
+	// DefaultSortDesc ...
+	DefaultSortDesc = "desc"
+)
+
 func (repository TransactionRepository) scanRow(row *sql.Row) (res models.Transaction, err error) {
 	err = row.Scan(&res.ID, &res.UserID, &res.InvoiceNumber, &res.TrxID, &res.DueDate, &res.DueDatePeriod, &res.PaymentStatus, &res.PaymentMethodCode, &res.VaNumber, &res.BankName,
 		&res.Direction, &res.TransactionType, &res.PaidDate, &res.InvoiceStatus, &res.TransactionDate, &res.UpdatedAt, &res.Total, &res.FeeQibla, &res.IsDisburse, &res.IsDisburseAllowed)
@@ -36,7 +77,7 @@ func (repository TransactionRepository) scanRow(row *sql.Row) (res models.Transa
 	return res, nil
 }
 
-func (repository TransactionRepository) scanRows(rows *sql.Rows) (res models.Transaction,err error){
+func (repository TransactionRepository) scanRows(rows *sql.Rows) (res models.Transaction, err error) {
 	err = rows.Scan(&res.ID, &res.UserID, &res.InvoiceNumber, &res.TrxID, &res.DueDate, &res.DueDatePeriod, &res.PaymentStatus, &res.PaymentMethodCode, &res.VaNumber, &res.BankName,
 		&res.Direction, &res.TransactionType, &res.PaidDate, &res.InvoiceStatus, &res.TransactionDate, &res.UpdatedAt, &res.Total, &res.FeeQibla, &res.IsDisburse, &res.IsDisburseAllowed)
 	if err != nil {
@@ -47,7 +88,7 @@ func (repository TransactionRepository) scanRows(rows *sql.Rows) (res models.Tra
 }
 
 func (repository TransactionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Transaction, count int, err error) {
-	return data,count,err
+	return data, count, err
 }
 
 func (repository TransactionRepository) BrowseAllZakatDisbursement(contactID string) (data []models.Transaction, err error) {
@@ -84,6 +125,55 @@ func (repository TransactionRepository) BrowseAllZakatDisbursement(contactID str
 	}
 
 	return data, err
+}
+
+// BrowseInvoices ...
+func (repository TransactionRepository) BrowseInvoices(order, sort string, limit, offset int) (data []models.Transaction, count int, err error) {
+	statement := `SELECT inv."id", inv."transaction_type", inv."invoice_number", inv."fee_qibla",
+	inv."total", inv."due_date", inv."due_date_period", inv."payment_status", inv."paid_date", inv."direction",
+	inv."transaction_date", inv."updated_at", tp."full_name" as partner_name, c."travel_agent_name"
+	FROM transactions inv
+	LEFT JOIN user_tour_purchase_transactions tt ON tt.transaction_id = inv."id"
+	LEFT JOIN user_tour_purchase_participants tp ON tp.user_tour_purchase_id = tt.user_tour_purchase_id
+	LEFT JOIN partners p on p.user_id = inv.user_id
+	LEFT JOIN contacts c on c."id" = p.contact_id
+	WHERE inv."direction" = $1 AND inv."deleted_at" IS NULL
+	ORDER BY inv.` + order + ` ` + sort + ` limit $2 offset $3`
+
+	rows, err := repository.DB.Query(statement, DefaultDirectionInvoice)
+	if err != nil {
+		return data, count, err
+	}
+
+	for rows.Next() {
+		dataTemp := models.Transaction{}
+
+		err = rows.Scan(&dataTemp.ID, &dataTemp.TransactionType, &dataTemp.InvoiceNumber,
+			&dataTemp.FeeQibla, &dataTemp.Total, &dataTemp.DueDate, &dataTemp.DueDatePeriod,
+			&dataTemp.PaymentStatus, &dataTemp.PaidDate, &dataTemp.Direction, &dataTemp.TransactionDate,
+			&dataTemp.UpdatedAt, &dataTemp.PartnerName, &dataTemp.TravelAgentName,
+		)
+
+		if err != nil {
+			return data, count, err
+		}
+
+		data = append(data, dataTemp)
+	}
+
+	statement = `SELECT COUNT(1) FROM transactions inv
+		LEFT JOIN user_tour_purchase_transactions tt ON tt.transaction_id = inv."id"
+		LEFT JOIN user_tour_purchase_participants tp ON tp.user_tour_purchase_id = tt.user_tour_purchase_id
+		LEFT JOIN partners p on p.user_id = inv.user_id
+		LEFT JOIN contacts c on c."id" = p.contact_id
+		WHERE inv."direction" = $1 AND inv."deleted_at" IS NULL`
+
+	err = repository.DB.QueryRow(statement, DefaultDirectionInvoice).Scan(&count)
+	if err != nil {
+		return data, count, err
+	}
+
+	return data, count, err
 }
 
 func (repository TransactionRepository) ReadBy(column, value, operator string) (data models.Transaction, err error) {

@@ -24,4 +24,6 @@ type Transaction struct {
 	IsDisburse        sql.NullBool    `db:"is_disburse"`
 	IsDisburseAllowed sql.NullBool    `db:"is_disburse_allowed"`
 	Details           sql.NullString  `json:"details"`
+	PartnerName       sql.NullString  `db:"partner_name"`
+	TravelAgentName   sql.NullString  `db:"travel_agent_name"`
 }
