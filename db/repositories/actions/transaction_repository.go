@@ -128,7 +128,43 @@ func (repository TransactionRepository) BrowseAllZakatDisbursement(contactID str
 }
 
 // BrowseInvoices ...
-func (repository TransactionRepository) BrowseInvoices(order, sort string, limit, offset int) (data []models.Transaction, count int, err error) {
+func (repository TransactionRepository) BrowseInvoices(filters map[string]interface{}, order, sort string, limit, offset int) (data []models.Transaction, count int, err error) {
+	var filterStatement string
+
+	if val, ok := filters["name"]; ok {
+		filterStatement += ` AND (lower(tp."full_name")='` + val.(string) + `' or lower(c."travel_agent_name")='` + val.(string) + `')`
+	}
+	if val, ok := filters["transaction_type"]; ok {
+		filterStatement += `  AND inv.transaction_type = '` + val.(string) + `'`
+	}
+	if val, ok := filters["invoice_number"]; ok {
+		filterStatement += `  AND inv.invoice_number = '` + val.(string) + `'`
+	}
+	if val, ok := filters["wumber_of_worshipers"]; ok {
+		filterStatement += `  AND inv.wumber_of_worshipers = '` + val.(string) + `'`
+	}
+	if val, ok := filters["transaction_date"]; ok {
+		filterStatement += `  AND inv.transaction_date = '` + val.(string) + `'`
+	}
+	if val, ok := filters["fee_qibla"]; ok {
+		filterStatement += `  AND inv.fee_qibla = '` + val.(string) + `'`
+	}
+	if val, ok := filters["due_date"]; ok {
+		filterStatement += `  AND inv.due_date = '` + val.(string) + `'`
+	}
+	if val, ok := filters["due_date_period"]; ok {
+		filterStatement += `  AND inv.due_date_period = '` + val.(string) + `'`
+	}
+	if val, ok := filters["total"]; ok {
+		filterStatement += `  AND inv.total = '` + val.(string) + `'`
+	}
+	if val, ok := filters["payment_status"]; ok {
+		filterStatement += `  AND inv.payment_status = '` + val.(string) + `'`
+	}
+	if val, ok := filters["startDate"]; ok {
+		filterStatement += ` and p.start_date < '` + val.(string) + `'`
+	}
+
 	statement := `SELECT inv."id", inv."transaction_type", inv."invoice_number", inv."fee_qibla",
 	inv."total", inv."due_date", inv."due_date_period", inv."payment_status", inv."paid_date", inv."direction",
 	inv."transaction_date", inv."updated_at", tp."full_name" as partner_name, c."travel_agent_name"
@@ -137,10 +173,10 @@ func (repository TransactionRepository) BrowseInvoices(order, sort string, limit
 	LEFT JOIN user_tour_purchase_participants tp ON tp.user_tour_purchase_id = tt.user_tour_purchase_id
 	LEFT JOIN partners p on p.user_id = inv.user_id
 	LEFT JOIN contacts c on c."id" = p.contact_id
-	WHERE inv."direction" = $1 AND inv."deleted_at" IS NULL
+	WHERE inv."direction" = $1 AND inv."deleted_at" IS NULL ` + filterStatement + `
 	ORDER BY inv.` + order + ` ` + sort + ` limit $2 offset $3`
 
-	rows, err := repository.DB.Query(statement, DefaultDirectionInvoice)
+	rows, err := repository.DB.Query(statement, DefaultDirectionInvoice, limit, offset)
 	if err != nil {
 		return data, count, err
 	}
@@ -166,7 +202,7 @@ func (repository TransactionRepository) BrowseInvoices(order, sort string, limit
 		LEFT JOIN user_tour_purchase_participants tp ON tp.user_tour_purchase_id = tt.user_tour_purchase_id
 		LEFT JOIN partners p on p.user_id = inv.user_id
 		LEFT JOIN contacts c on c."id" = p.contact_id
-		WHERE inv."direction" = $1 AND inv."deleted_at" IS NULL`
+		WHERE inv."direction" = $1 AND inv."deleted_at" IS NULL ` + filterStatement
 
 	err = repository.DB.QueryRow(statement, DefaultDirectionInvoice).Scan(&count)
 	if err != nil {

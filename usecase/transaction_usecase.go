@@ -50,22 +50,22 @@ func (uc TransactionUseCase) BrowseAllZakatDisbursement(contactID string) (res [
 }
 
 // BrowseInvoices ...
-func (uc InvoiceUseCase) BrowseInvoices(order, sort string, page, limit int) (res []viewmodel.InvoiceVm, pagination viewmodel.PaginationVm, err error) {
+func (uc TransactionUseCase) BrowseInvoices(filters map[string]interface{}, order, sort string, page, limit int) (res []viewmodel.TransactionVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewTransactionRepository(uc.DB)
 
 	checkOrder := str.StringInSlice(order, allowOrderInvoice)
 	if checkOrder == false {
-		checkOrder = actions.TransactionFieldDate
+		order = actions.TransactionFieldDate
 	}
 
 	checkShort := str.StringInSlice(sort, allowSortInvoice)
 	if checkShort == false {
-		checkShort = actions.DefaultSortDesc
+		sort = actions.DefaultSortDesc
 	}
 
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
-	invoices, count, err := repository.BrowseInvoices(order, sort, limit, offset)
+	invoices, count, err := repository.BrowseInvoices(filters, order, sort, limit, offset)
 	if err != nil {
 		return res, pagination, err
 	}
@@ -377,11 +377,11 @@ func (uc TransactionUseCase) buildBody(model models.Transaction) (res viewmodel.
 	}
 
 	if model.TransactionType == enums.KeyTransactionType2 {
-		name = model.PartnerName
+		name = model.PartnerName.String
 	} else if model.TransactionType == enums.KeyTransactionType1 {
 		name = ""
 	} else {
-		name = model.TravelAgentName
+		name = model.TravelAgentName.String
 	}
 
 	res = viewmodel.TransactionVm{
@@ -408,6 +408,7 @@ func (uc TransactionUseCase) buildBody(model models.Transaction) (res viewmodel.
 		FaspayResponse:     nil,
 		InvoiceStatus:      status,
 		NumberOfWorshipers: 0,
+		Name:               name,
 	}
 
 	return res
