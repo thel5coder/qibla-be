@@ -19,6 +19,10 @@ func NewSatisfactionCategoryRepository(db *sql.DB) contracts.ISatisfactionCatego
 	return &SatisfactionCategoryRepository{DB: db}
 }
 
+const(
+	satisfactionCategorySelectStatement = ``
+)
+
 func (repository SatisfactionCategoryRepository) BrowseAllBy(column, value string) (data []models.SatisfactionCategory, err error) {
 	var rows *sql.Rows
 	if value == "" && column == "parent_id" {
