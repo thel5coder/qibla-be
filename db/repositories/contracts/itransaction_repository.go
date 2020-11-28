@@ -11,6 +11,8 @@ type ITransactionRepository interface {
 
 	BrowseAllZakatDisbursement(contactID string) (data []models.Transaction, err error)
 
+	BrowseInvoices(filters map[string]interface{}, order, sort string, limit, offset int) (data []models.Transaction, count int, err error)
+
 	ReadBy(column, value, operator string) (data models.Transaction, err error)
 
 	Add(input viewmodel.TransactionVm, tx *sql.Tx) (res string, err error)
