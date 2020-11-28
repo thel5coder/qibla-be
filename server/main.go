@@ -22,6 +22,7 @@ import (
 	"qibla-backend/db"
 	"qibla-backend/helpers/amqp"
 	awsHelper "qibla-backend/helpers/aws"
+	"qibla-backend/helpers/env"
 	"qibla-backend/helpers/faspaydisbursementapi"
 	"qibla-backend/helpers/fcm"
 	"qibla-backend/helpers/flip"
@@ -49,6 +50,9 @@ func main() {
 		fmt.Println(err.Error())
 		log.Fatal("Error loading ..env file")
 	}
+
+	// Load env into map
+	envConfig := env.NewEnvConfig("../.env")
 
 	//jwe
 	jweCredential := jwe.Credential{
@@ -178,8 +182,9 @@ func main() {
 
 	// Flip
 	flipCredential := flip.Credential{
-		BaseURL:   os.Getenv("FLIP_BASE_URL"),
-		SecretKey: os.Getenv("FLIP_SECRET_KEY"),
+		BaseURL:         os.Getenv("FLIP_BASE_URL"),
+		SecretKey:       os.Getenv("FLIP_SECRET_KEY"),
+		ValidationToken: envConfig["FLIP_VALIDATION_TOKEN"],
 	}
 
 	//init validator
