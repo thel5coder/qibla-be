@@ -16,6 +16,7 @@ type MenuUseCase struct {
 	*UcContract
 }
 
+//browse
 func (uc MenuUseCase) Browse(parentID, search, order, sort string, page, limit int) (res []viewmodel.MenuVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewMenuRepository(uc.DB)
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
