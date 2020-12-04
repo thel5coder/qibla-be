@@ -16,6 +16,8 @@ type IDisbursementRepository interface {
 
 	ReadBy(column, value string) (data models.Disbursement, err error)
 
+	ReadByPaymentID(paymentID int) (data models.Disbursement, err error)
+
 	Edit(input viewmodel.DisbursementVm, tx *sql.Tx) (err error)
 
 	EditPaymentDetails(input viewmodel.DisbursementVm, tx *sql.Tx) (err error)

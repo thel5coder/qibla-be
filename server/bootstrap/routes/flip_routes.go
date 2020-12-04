@@ -21,4 +21,7 @@ func (route FlipRoutes) RegisterRoute() {
 	flipRoute.Use(jwtMiddleware.JWTWithConfig)
 	flipRoute.GET("/bank", handler.GetBank)
 	flipRoute.GET("/bank/:code", handler.GetBankByCode)
+
+	flipRouteNoAuth := route.RouteGroup.Group("/flip")
+	flipRouteNoAuth.POST("/disbursement/callback", handler.DisbursementCallback)
 }

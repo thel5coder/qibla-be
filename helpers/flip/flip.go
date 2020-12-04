@@ -9,14 +9,16 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"qibla-backend/usecase/viewmodel"
 	"strconv"
 	"strings"
 )
 
 // Credential ...
 type Credential struct {
-	BaseURL   string
-	SecretKey string
+	BaseURL         string
+	SecretKey       string
+	ValidationToken string
 }
 
 var (
@@ -25,7 +27,7 @@ var (
 )
 
 // GetBank ...
-func (cred *Credential) GetBank() (res []Bank, err error) {
+func (cred *Credential) GetBank() (res []viewmodel.BankVM, err error) {
 	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(cred.SecretKey+":"))
 	fullURL := cred.BaseURL + getBankURL
 
@@ -57,7 +59,7 @@ func (cred *Credential) GetBank() (res []Bank, err error) {
 }
 
 // Disbursement ...
-func (cred *Credential) Disbursement(id, accountNumber, bankCode string, amount float64, remark, recipientCity string) (res map[string]interface{}, err error) {
+func (cred *Credential) Disbursement(id, accountNumber, bankCode string, amount float64, remark, recipientCity string) (res viewmodel.DisbursementVM, err error) {
 	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(cred.SecretKey+":"))
 	fullURL := cred.BaseURL + disbursementURL
 

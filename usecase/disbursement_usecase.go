@@ -87,6 +87,19 @@ func (uc DisbursementUseCase) ReadByPk(ID string) (res viewmodel.DisbursementVm,
 	return res, err
 }
 
+// ReadByPaymentID ...
+func (uc DisbursementUseCase) ReadByPaymentID(paymentID int) (res viewmodel.DisbursementVm, err error) {
+	repository := actions.NewDisbursementRepository(uc.DB)
+	disbursement, err := repository.ReadByPaymentID(paymentID)
+	if err != nil {
+		return res, err
+	}
+
+	res = uc.buildBody(&disbursement)
+
+	return res, err
+}
+
 // Add ...
 func (uc DisbursementUseCase) Add(input *requests.DisbursementRequest) (res viewmodel.DisbursementVm, err error) {
 	ctx := "DisbursementUseCase.Add"
@@ -233,13 +246,13 @@ func (uc DisbursementUseCase) AddZakatByContact(contact *viewmodel.ContactVm) (e
 }
 
 // EditPaymentDetails ...
-func (uc DisbursementUseCase) EditPaymentDetails(ID string, paymentDetails interface{}) (err error) {
+func (uc DisbursementUseCase) EditPaymentDetails(ID string, paymentDetails interface{}, status string) (err error) {
 	now := time.Now().UTC().Format(time.RFC3339)
 	repository := actions.NewDisbursementRepository(uc.DB)
 	body := viewmodel.DisbursementVm{
 		ID:             ID,
 		PaymentDetails: paymentDetails,
-		Status:         enums.KeyPaymentStatus5,
+		Status:         status,
 		UpdatedAt:      now,
 	}
 	err = repository.EditPaymentDetails(body, uc.TX)
@@ -306,7 +319,7 @@ func (uc DisbursementUseCase) DisbursementFlip(id string) (err error) {
 		return err
 	}
 
-	err = uc.EditPaymentDetails(id, res)
+	err = uc.EditPaymentDetails(id, res, enums.KeyPaymentStatus5)
 	if err != nil {
 		return err
 	}

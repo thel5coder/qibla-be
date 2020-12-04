@@ -21,6 +21,7 @@ import (
 	"qibla-backend/helpers/pusher"
 	redisHelper "qibla-backend/helpers/redis"
 	"qibla-backend/helpers/str"
+	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -39,10 +40,10 @@ var (
 	threads      = flag.Int("threads", 1, "The max amount of go routines that you would like the process to use")
 	maxprocs     = flag.Int("max_procs", 1, "The max amount of processors that your application should use")
 	paymentsKey  = flag.String("payments_key", "secret", "Access key")
-	exchange     = flag.String("exchange", amqpPkg.DisbursementRequestExchange, "The exchange we will be binding to")
+	exchange     = flag.String("exchange", amqpPkg.DisbursementCallbackExchange, "The exchange we will be binding to")
 	exchangeType = flag.String("exchange_type", "direct", "Type of exchange we are binding to | topic | direct| etc..")
-	queue        = flag.String("queue", amqpPkg.DisbursementRequest, "Name of the queue that you would like to connect to")
-	routingKey   = flag.String("routing_key", amqpPkg.DisbursementRequestDeadLetter, "queue to route messages to")
+	queue        = flag.String("queue", amqpPkg.DisbursementCallback, "Name of the queue that you would like to connect to")
+	routingKey   = flag.String("routing_key", amqpPkg.DisbursementCallbackDeadLetter, "queue to route messages to")
 	workerName   = flag.String("worker_name", "worker.name", "name to identify worker by")
 	verbosity    = flag.Bool("verbos", false, "Set true if you would like to log EVERYTHING")
 
@@ -192,7 +193,7 @@ func main() {
 }
 
 func handler(deliveries <-chan amqp.Delivery, uc *usecase.UcContract) {
-	ctx := "DisbursementMutationListener"
+	ctx := "DisbursementCallbackListener"
 	for d := range deliveries {
 		var formData map[string]interface{}
 
@@ -210,8 +211,10 @@ func handler(deliveries <-chan amqp.Delivery, uc *usecase.UcContract) {
 			d.Reject(false)
 		}
 
-		disbursementUc := usecase.DisbursementUseCase{UcContract: uc}
-		err = disbursementUc.DisbursementFlip(formData["id"].(string))
+		var data requests.FlipDisbursementRequest
+		interfacepkg.Convert(formData["data"].(interface{}), &data)
+		flipUc := usecase.FlipUseCase{UcContract: uc}
+		err = flipUc.DisbursementCallback(&data)
 		if err != nil {
 			uc.TX.Rollback()
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "err", formData["qid"].(string))
