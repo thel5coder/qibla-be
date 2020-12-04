@@ -10,7 +10,8 @@ variables:
 stages:
   - prepare
   - build-server
-  - build-listener
+  - build-listener-1
+  - build-listener-2
   - push
   - deploy
   - finish
@@ -38,7 +39,7 @@ build:one:
     - dev
 
 build:two:
-  stage: build-listener
+  stage: build-listener-1
   needs: ["build:one"]
   script:
     - docker build . -f ${SRC_SEND_NOTIFICATION}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_SEND_NOTIFICATION}-${CI_COMMIT_REF_NAME}
@@ -54,7 +55,7 @@ build:three:
     - dev
 
 build:four:
-  stage: build-listener
+  stage: build-listener-1
   needs: ["build:three"]
   script:
     - docker build . -f ${SRC_DISBURSEMENT_CALLBACK}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_DISBURSEMENT_CALLBACK}-${CI_COMMIT_REF_NAME}
@@ -62,7 +63,7 @@ build:four:
     - dev
 
 build:five:
-  stage: build-listener
+  stage: build-listener-2
   needs: ["build:two"]
   script:
     - docker build . -f ${SRC_DISBURSEMENT_MUTATION}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_DISBURSEMENT_MUTATION}-${CI_COMMIT_REF_NAME}
@@ -70,7 +71,7 @@ build:five:
     - dev
 
 build:six:
-  stage: build-listener
+  stage: build-listener-2
   needs: ["build:four"]
   script:
     - docker build . -f ${SRC_DISBURSEMENT_REQUEST}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_DISBURSEMENT_REQUEST}-${CI_COMMIT_REF_NAME}
