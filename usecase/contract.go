@@ -9,7 +9,6 @@ import (
 	"os"
 	queue "qibla-backend/helpers/amqp"
 	"qibla-backend/helpers/aws"
-	"qibla-backend/helpers/faspaydisbursementapi"
 	"qibla-backend/helpers/fcm"
 	"qibla-backend/helpers/flip"
 	"qibla-backend/helpers/jwe"
@@ -101,7 +100,6 @@ type UcContract struct {
 	UserID             string
 	Fcm                fcm.Connection
 	OdooDBConn         *sql.DB
-	FaspayDisbursement faspaydisbursementapi.Credential
 	Flip               flip.Credential
 }
 

@@ -50,22 +50,6 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	isPinSet := false
 
-	bank, err := uc.FaspayDisbursement.Register(map[string]interface{}{
-		"beneficiary_account":      "6120220126",
-		"beneficiary_account_name": "Ivan",
-		"beneficiary_va_name":      "Qibla",
-		"beneficiary_bank_code":    "008",
-		"beneficiary_bank_branch":  "Mandiri KCP",
-		"beneficiary_region_code":  "0102",
-		"beneficiary_country_code": "ID",
-		"beneficiary_purpose_code": "1",
-	})
-	fmt.Println(bank)
-	fmt.Println(err)
-	t, err := uc.FaspayDisbursement.GenerateToken()
-	fmt.Println(t)
-	fmt.Println(err)
-
 	isExist, err := userUc.IsUserNameExist("", username)
 	if err != nil {
 		return res, err

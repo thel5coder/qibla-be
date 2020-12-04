@@ -27,7 +27,6 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.6.0
 	github.com/skilld-labs/go-odoo v1.5.0
-	github.com/spacemonkeygo/openssl v0.0.0-20181017203307-c2dcc5cca94a
 	github.com/streadway/amqp v1.0.0
 	golang.org/x/crypto v0.0.0-20200707235045-ab33eee955e0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
