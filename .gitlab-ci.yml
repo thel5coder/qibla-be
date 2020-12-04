@@ -1,14 +1,16 @@
-image: docker:git
-services:
-  - docker:dind
-
 variables:
   DOCKER: ${CI_REGISTRY_IMAGE}
   SRC_SERVER: server
+  SRC_SERVER_CRON: server_cron
   SRC_SEND_NOTIFICATION: amqp_listener_send_notification
+  SRC_DISBURSEMENT_CALLBACK: amqp_listener_disbursement_callback
+  SRC_DISBURSEMENT_MUTATION: amqp_listener_disbursement_mutation
+  SRC_DISBURSEMENT_REQUEST: amqp_listener_disbursement_request
 
 stages:
-  - build
+  - prepare
+  - build-server
+  - build-listener
   - push
   - deploy
   - finish
@@ -20,17 +22,58 @@ before_script:
 after_script:
   - docker logout ${REGISTRY}
 
+prepare:base:
+  stage: prepare
+  script:
+    - docker build . --compress --no-cache -t qibla-base
+  only:
+    - dev
+
 build:one:
-  stage: build
+  stage: build-server
+  needs: ["prepare:base"]
   script:
     - docker build . -f ${SRC_SERVER}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_SERVER}-${CI_COMMIT_REF_NAME}
   only:
     - dev
 
 build:two:
-  stage: build
+  stage: build-listener
+  needs: ["build:one"]
   script:
     - docker build . -f ${SRC_SEND_NOTIFICATION}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_SEND_NOTIFICATION}-${CI_COMMIT_REF_NAME}
+  only:
+    - dev
+
+build:three:
+  stage: build-server
+  needs: ["prepare:base"]
+  script:
+    - docker build . -f ${SRC_SERVER_CRON}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_SERVER_CRON}-${CI_COMMIT_REF_NAME}
+  only:
+    - dev
+
+build:four:
+  stage: build-listener
+  needs: ["build:three"]
+  script:
+    - docker build . -f ${SRC_DISBURSEMENT_CALLBACK}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_DISBURSEMENT_CALLBACK}-${CI_COMMIT_REF_NAME}
+  only:
+    - dev
+
+build:five:
+  stage: build-listener
+  needs: ["build:two"]
+  script:
+    - docker build . -f ${SRC_DISBURSEMENT_MUTATION}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_DISBURSEMENT_MUTATION}-${CI_COMMIT_REF_NAME}
+  only:
+    - dev
+
+build:six:
+  stage: build-listener
+  needs: ["build:four"]
+  script:
+    - docker build . -f ${SRC_DISBURSEMENT_REQUEST}/Dockerfile --compress --no-cache -t ${DOCKER}:${SRC_DISBURSEMENT_REQUEST}-${CI_COMMIT_REF_NAME}
   only:
     - dev
 
@@ -50,6 +93,38 @@ push:two:
   only:
     - dev
 
+push:three:
+  stage: push
+  needs: ["build:three"]
+  script:
+    - docker push ${DOCKER}:${SRC_SERVER_CRON}-${CI_COMMIT_REF_NAME}
+  only:
+    - dev
+
+push:four:
+  stage: push
+  needs: ["build:four"]
+  script:
+    - docker push ${DOCKER}:${SRC_DISBURSEMENT_CALLBACK}-${CI_COMMIT_REF_NAME}
+  only:
+    - dev
+
+push:five:
+  stage: push
+  needs: ["build:five"]
+  script:
+    - docker push ${DOCKER}:${SRC_DISBURSEMENT_MUTATION}-${CI_COMMIT_REF_NAME}
+  only:
+    - dev
+
+push:six:
+  stage: push
+  needs: ["build:six"]
+  script:
+    - docker push ${DOCKER}:${SRC_DISBURSEMENT_REQUEST}-${CI_COMMIT_REF_NAME}
+  only:
+    - dev
+
 deploy:one:
   stage: deploy
   needs: ["push:one"]
@@ -63,7 +138,39 @@ deploy:two:
   needs: ["push:two"]
   script:
     - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER}:${SRC_SEND_NOTIFICATION}-${CI_COMMIT_REF_NAME}"
-  only: 
+  only:
+    - dev
+
+deploy:three:
+  stage: deploy
+  needs: ["push:three"]
+  script:
+    - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER}:${SRC_SERVER_CRON}-${CI_COMMIT_REF_NAME}"
+  only:
+    - dev
+
+deploy:four:
+  stage: deploy
+  needs: ["push:four"]
+  script:
+    - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER}:${SRC_DISBURSEMENT_CALLBACK}-${CI_COMMIT_REF_NAME}"
+  only:
+    - dev
+
+deploy:five:
+  stage: deploy
+  needs: ["push:five"]
+  script:
+    - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER}:${SRC_DISBURSEMENT_MUTATION}-${CI_COMMIT_REF_NAME}"
+  only:
+    - dev
+
+deploy:six:
+  stage: deploy
+  needs: ["push:six"]
+  script:
+    - ssh -tq ${SERVER_DEV} "docker login -u ${USERNAME} -p ${TOKEN} ${REGISTRY} && docker pull ${DOCKER}:${SRC_DISBURSEMENT_REQUEST}-${CI_COMMIT_REF_NAME}"
+  only:
     - dev
 
 finish:one:
@@ -79,7 +186,39 @@ finish:two:
   needs: ["deploy:two"]
   script:
     - ssh -tq ${SERVER_DEV} "cd ${SRC_DEV}/${SRC_SEND_NOTIFICATION} && docker-compose up -d"
-  only: 
+  only:
+    - dev
+
+finish:three:
+  stage: finish
+  needs: ["deploy:three"]
+  script:
+    - ssh -tq ${SERVER_DEV} "cd ${SRC_DEV}/${SRC_SERVER_CRON} && docker-compose up -d"
+  only:
+    - dev
+
+finish:four:
+  stage: finish
+  needs: ["deploy:four"]
+  script:
+    - ssh -tq ${SERVER_DEV} "cd ${SRC_DEV}/${SRC_DISBURSEMENT_CALLBACK} && docker-compose up -d"
+  only:
+    - dev
+
+finish:five:
+  stage: finish
+  needs: ["deploy:five"]
+  script:
+    - ssh -tq ${SERVER_DEV} "cd ${SRC_DEV}/${SRC_DISBURSEMENT_MUTATION} && docker-compose up -d"
+  only:
+    - dev
+
+finish:six:
+  stage: finish
+  needs: ["deploy:six"]
+  script:
+    - ssh -tq ${SERVER_DEV} "cd ${SRC_DEV}/${SRC_DISBURSEMENT_REQUEST} && docker-compose up -d"
+  only:
     - dev
 
 cleanup:
