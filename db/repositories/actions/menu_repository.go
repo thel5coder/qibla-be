@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/helpers/datetime"
@@ -73,12 +72,11 @@ func (repository MenuRepository) Browse(parentID, search, order, sort string, li
 		data = append(data, temp)
 	}
 
-	statement = `select distinct count(m."id") from "menus" m ` + menuJoin + ` ` + menuWhereStatement + ` ` + menuGroupBy
+	statement = `select count(distinct m."id") from "menus" m ` + menuJoin + ` ` + menuWhereStatement
 	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
 	if err != nil {
 		return data, count, err
 	}
-	fmt.Println(count)
 
 	return data, count, err
 }
