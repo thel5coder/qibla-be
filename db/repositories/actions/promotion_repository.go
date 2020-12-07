@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
-	"qibla-backend/helpers/datetime"
+	"qibla-backend/pkg/datetime"
 	"qibla-backend/usecase/viewmodel"
 	"strings"
 	"time"
@@ -122,7 +122,7 @@ func (repository PromotionRepository) BrowseAll(filters map[string]interface{}) 
 		filterStatement += ` and lower(p.package_promotion) = '`+val.(string)+`'`
 	}
 
-	statement := promotionSelectStatement +` from "promotions" p `+promotionJoinStatement+` where p."deleted_at" is null`+filterStatement+` `+promotionGroupByStatement
+	statement := promotionSelectStatement +` from "promotions" p `+promotionJoinStatement+` where p."deleted_at" is nullO`+filterStatement+` `+promotionGroupByStatement
 	rows,err := repository.DB.Query(statement)
 	if err != nil {
 		return data,err

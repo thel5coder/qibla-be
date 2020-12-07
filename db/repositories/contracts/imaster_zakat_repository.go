@@ -6,7 +6,7 @@ import (
 )
 
 type IMasterZakatRepository interface {
-	Browse(search, order, sort string, limit, offset int) (data []models.MasterZakat, count int, err error)
+	Browse(search map[string]interface{}, order, sort string, limit, offset int) (data []models.MasterZakat, count int, err error)
 
 	BrowseAll() (data []models.MasterZakat, err error)
 

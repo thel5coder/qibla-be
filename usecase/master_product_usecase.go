@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/gosimple/slug"
 	"qibla-backend/db/repositories/actions"
-	"qibla-backend/helpers/messages"
+	"qibla-backend/pkg/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"

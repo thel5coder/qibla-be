@@ -3,8 +3,11 @@ package usecase
 import (
 	"errors"
 	"fmt"
+	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
-	"qibla-backend/helpers/messages"
+	"qibla-backend/pkg/functioncaller"
+	"qibla-backend/pkg/logruslogger"
+	"qibla-backend/pkg/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"
@@ -14,47 +17,17 @@ type ContactUseCase struct {
 	*UcContract
 }
 
-func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.ContactVm, pagination viewmodel.PaginationVm, err error) {
+func (uc ContactUseCase) Browse(filters map[string]interface{}, order, sort string, page, limit int) (res []viewmodel.ContactVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
-	fileUc := FileUseCase{UcContract: uc.UcContract}
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
-	contacts, count, err := repository.Browse(search, order, sort, limit, offset)
+	contacts, count, err := repository.Browse(filters, order, sort, limit, offset)
 	if err != nil {
 		return res, pagination, err
 	}
 
 	for _, contact := range contacts {
-		file, _ := fileUc.ReadByPk(contact.Logo)
-		res = append(res, viewmodel.ContactVm{
-			ID:                   contact.ID,
-			BranchName:           contact.BranchName.String,
-			TravelAgentName:      contact.TravelAgentName.String,
-			Address:              contact.Address.String,
-			Longitude:            contact.Longitude.String,
-			Latitude:             contact.Latitude.String,
-			AreaCode:             contact.AreaCode,
-			PhoneNumber:          contact.PhoneNumber,
-			SKNumber:             contact.SKNumber.String,
-			SKDate:               contact.SKDate.String,
-			Accreditation:        contact.Accreditation.String,
-			AccreditationDate:    contact.AccreditationDate.String,
-			DirectorName:         contact.DirectorName.String,
-			DirectorContact:      contact.DirectorContact.String,
-			PicName:              contact.PicName,
-			PicContact:           contact.PicContact,
-			FileLogo:             file,
-			VirtualAccountNumber: contact.VirtualAccountNumber.String,
-			AccountNumber:        contact.AccountNumber,
-			AccountName:          contact.AccountName,
-			AccountBankName:      contact.AccountBankName,
-			AccountBankCode:      contact.AccountBankCode,
-			Email:                contact.Email,
-			IsZakatPartner:       contact.IsZakatPartner,
-			CreatedAt:            contact.CreatedAt,
-			UpdatedAt:            contact.UpdatedAt,
-			DeletedAt:            contact.DeletedAt.String,
-		})
+		res = append(res, uc.buildBody(contact))
 	}
 
 	pagination = uc.setPaginationResponse(page, limit, count)
@@ -64,43 +37,13 @@ func (uc ContactUseCase) Browse(search, order, sort string, page, limit int) (re
 
 func (uc ContactUseCase) BrowseAll(search string, isZakatPartner bool) (res []viewmodel.ContactVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
-	fileUc := FileUseCase{UcContract: uc.UcContract}
 	contacts, err := repository.BrowseAll(search, isZakatPartner)
 	if err != nil {
 		return res, err
 	}
 
 	for _, contact := range contacts {
-		file, _ := fileUc.ReadByPk(contact.Logo)
-		res = append(res, viewmodel.ContactVm{
-			ID:                   contact.ID,
-			BranchName:           contact.BranchName.String,
-			TravelAgentName:      contact.TravelAgentName.String,
-			Address:              contact.Address.String,
-			Longitude:            contact.Longitude.String,
-			Latitude:             contact.Latitude.String,
-			AreaCode:             contact.AreaCode,
-			PhoneNumber:          contact.PhoneNumber,
-			SKNumber:             contact.SKNumber.String,
-			SKDate:               contact.SKDate.String,
-			Accreditation:        contact.Accreditation.String,
-			AccreditationDate:    contact.AccreditationDate.String,
-			DirectorName:         contact.DirectorName.String,
-			DirectorContact:      contact.DirectorContact.String,
-			PicName:              contact.PicName,
-			PicContact:           contact.PicContact,
-			FileLogo:             file,
-			VirtualAccountNumber: contact.VirtualAccountNumber.String,
-			AccountNumber:        contact.AccountNumber,
-			AccountName:          contact.AccountName,
-			AccountBankName:      contact.AccountBankName,
-			AccountBankCode:      contact.AccountBankCode,
-			Email:                contact.Email,
-			IsZakatPartner:       contact.IsZakatPartner,
-			CreatedAt:            contact.CreatedAt,
-			UpdatedAt:            contact.UpdatedAt,
-			DeletedAt:            contact.DeletedAt.String,
-		})
+		res = append(res, uc.buildBody(contact))
 	}
 
 	return res, err
@@ -168,44 +111,11 @@ func (uc ContactUseCase) BrowseAllZakatPlace(search string) (res []viewmodel.Zak
 
 func (uc ContactUseCase) ReadBy(column, value string) (res viewmodel.ContactVm, err error) {
 	repository := actions.NewContactRepository(uc.DB)
-	fileUc := FileUseCase{UcContract: uc.UcContract}
-	var file viewmodel.FileVm
 	contact, err := repository.ReadBy(column, value)
 	if err != nil {
 		return res, err
 	}
-
-	file, _ = fileUc.ReadByPk(contact.Logo)
-
-	res = viewmodel.ContactVm{
-		ID:                   contact.ID,
-		BranchName:           contact.BranchName.String,
-		TravelAgentName:      contact.TravelAgentName.String,
-		Address:              contact.Address.String,
-		Longitude:            contact.Longitude.String,
-		Latitude:             contact.Latitude.String,
-		AreaCode:             contact.AreaCode,
-		PhoneNumber:          contact.PhoneNumber,
-		SKNumber:             contact.SKNumber.String,
-		SKDate:               contact.SKDate.String,
-		Accreditation:        contact.Accreditation.String,
-		AccreditationDate:    contact.AccreditationDate.String,
-		DirectorName:         contact.DirectorName.String,
-		DirectorContact:      contact.DirectorContact.String,
-		PicName:              contact.PicName,
-		PicContact:           contact.PicContact,
-		FileLogo:             file,
-		VirtualAccountNumber: contact.VirtualAccountNumber.String,
-		AccountNumber:        contact.AccountNumber,
-		AccountName:          contact.AccountName,
-		AccountBankName:      contact.AccountBankName,
-		AccountBankCode:      contact.AccountBankCode,
-		Email:                contact.Email,
-		IsZakatPartner:       contact.IsZakatPartner,
-		CreatedAt:            contact.CreatedAt,
-		UpdatedAt:            contact.UpdatedAt,
-		DeletedAt:            contact.DeletedAt.String,
-	}
+	res = uc.buildBody(contact)
 
 	return res, err
 }
@@ -370,4 +280,48 @@ func (uc ContactUseCase) countBy(ID, column, value string) (res int, err error) 
 	}
 
 	return res, err
+}
+
+//buld body
+func (uc ContactUseCase) buildBody(model models.Contact) viewmodel.ContactVm {
+	path, err := uc.AWSS3.GetURL(model.LogoPath.String)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "pkg-aws-s3-getUrl")
+	}
+
+	fileLogo := viewmodel.FileVm{
+		ID:   model.Logo,
+		Name: model.LogoName.String,
+		Path: path,
+	}
+
+	return viewmodel.ContactVm{
+		ID:                   model.ID,
+		BranchName:           model.BranchName.String,
+		TravelAgentName:      model.TravelAgentName.String,
+		Address:              model.Address.String,
+		Longitude:            model.Longitude.String,
+		Latitude:             model.Latitude.String,
+		AreaCode:             model.AreaCode,
+		PhoneNumber:          model.PhoneNumber,
+		SKNumber:             model.SKNumber.String,
+		SKDate:               model.SKDate.String,
+		Accreditation:        model.Accreditation.String,
+		AccreditationDate:    model.AccreditationDate.String,
+		DirectorName:         model.DirectorName.String,
+		DirectorContact:      model.DirectorContact.String,
+		PicName:              model.PicName,
+		PicContact:           model.PicContact,
+		FileLogo:             fileLogo,
+		VirtualAccountNumber: model.VirtualAccountNumber.String,
+		AccountNumber:        model.AccountNumber,
+		AccountName:          model.AccountName,
+		AccountBankName:      model.AccountBankName,
+		AccountBankCode:      model.AccountBankCode,
+		Email:                model.Email,
+		IsZakatPartner:       model.IsZakatPartner,
+		CreatedAt:            model.CreatedAt,
+		UpdatedAt:            model.UpdatedAt,
+		DeletedAt:            model.DeletedAt.String,
+	}
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type IContactRepository interface {
-	Browse(search, order, sort string, limit, offset int) (data []models.Contact, count int, err error)
+	Browse(filters map[string]interface{}, order, sort string, limit, offset int) (data []models.Contact, count int, err error)
 
 	BrowseAll(search string, isZakatPartner bool) (data []models.Contact, err error)
 

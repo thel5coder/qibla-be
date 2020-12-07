@@ -4,8 +4,8 @@ import (
 	"github.com/rs/xid"
 	"io/ioutil"
 	"os"
-	"qibla-backend/helpers/logruslogger"
-	"qibla-backend/helpers/wkhtmltopdf"
+	"qibla-backend/pkg/logruslogger"
+	"qibla-backend/pkg/wkhtmltopdf"
 	"qibla-backend/usecase/viewmodel"
 	"strings"
 )

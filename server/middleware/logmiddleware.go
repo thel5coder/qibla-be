@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo"
 	"net/http"
-	"qibla-backend/helpers/logrus"
+	"qibla-backend/pkg/logrus"
 )
 
 func LoggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {

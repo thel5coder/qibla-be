@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"qibla-backend/helpers/enums"
-	"qibla-backend/helpers/enums/maritalstatusenum"
-	"qibla-backend/helpers/enums/sexenum"
+	"qibla-backend/pkg/enums"
+	"qibla-backend/pkg/enums/maritalstatusenum"
+	"qibla-backend/pkg/enums/sexenum"
 	"qibla-backend/usecase/viewmodel"
 	"strconv"
 )

@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
-	"qibla-backend/helpers/datetime"
-	"qibla-backend/helpers/enums"
-	"qibla-backend/helpers/str"
+	"qibla-backend/pkg/datetime"
+	"qibla-backend/pkg/enums"
+	"qibla-backend/pkg/str"
 	"qibla-backend/usecase/viewmodel"
 	"strings"
 	"time"
@@ -20,55 +20,76 @@ func NewContactRepository(DB *sql.DB) contracts.IContactRepository {
 	return &ContactRepository{DB: DB}
 }
 
-func (repository ContactRepository) Browse(search, order, sort string, limit, offset int) (data []models.Contact, count int, err error) {
-	statement := `select * from "contacts"
-                  where (lower("branch_name") like $1 or lower("travel_agent_name") like $1 or "phone_number" like $1 or lower("email") like $1) and "deleted_at" is null 
-                 order by ` + order + ` ` + sort + ` limit $2 offset $3`
-	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
+const (
+	contactSelectStatement = `select c.id,c.branch_name,c.travel_agent_name,c.address,c.longitude,c.latitude,c.area_code,c.phone_number,c.sk_number,c.sk_date,accreditation,
+                              c.accreditation_date,c.director_name,c.director_contact,c.pic_name,c.pic_contact,c.logo,f.name,f.path,c.virtual_account_number,c.account_number,c.account_name,
+                              c.account_bank_name,c.account_bank_code,c.email,c.is_zakat_partner,c.created_at,c.updated_at`
+	contactJoinStatement = `left join "files" f on f.id = c.logo`
+)
+
+func (repository ContactRepository) scanRows(rows *sql.Rows) (res models.Contact, err error) {
+	err = rows.Scan(&res.ID, &res.BranchName, &res.TravelAgentName, &res.Address, &res.Longitude, &res.Latitude, &res.AreaCode, &res.PhoneNumber, &res.SKNumber, &res.SKDate, &res.Accreditation,
+		&res.AccreditationDate, &res.DirectorName, &res.DirectorContact, &res.PicName, &res.PicContact, &res.Logo, &res.LogoName, &res.LogoPath, &res.VirtualAccountNumber, &res.AccountNumber, &res.AccountName, &res.AccountBankName,
+		&res.AccountBankCode, &res.Email, &res.IsZakatPartner, &res.CreatedAt, &res.UpdatedAt,
+	)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (repository ContactRepository) scanRow(row *sql.Row) (res models.Contact, err error) {
+	err = row.Scan(&res.ID, &res.BranchName, &res.TravelAgentName, &res.Address, &res.Longitude, &res.Latitude, &res.AreaCode, &res.PhoneNumber, &res.SKNumber, &res.SKDate, &res.Accreditation,
+		&res.AccreditationDate, &res.DirectorName, &res.DirectorContact, &res.PicName, &res.PicContact, &res.Logo, &res.LogoName, &res.LogoPath, &res.VirtualAccountNumber, &res.AccountNumber, &res.AccountName, &res.AccountBankName,
+		&res.AccountBankCode, &res.Email, &res.IsZakatPartner, &res.CreatedAt, &res.UpdatedAt,
+	)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (repository ContactRepository) Browse(filters map[string]interface{}, order, sort string, limit, offset int) (data []models.Contact, count int, err error) {
+	filterStatement := ``
+
+	if val, ok := filters["branch_name"]; ok {
+		filterStatement += ` and lower(c.branch_name) like '%` + val.(string) + `%'`
+	}
+
+	if val, ok := filters["travel_agent_name"]; ok {
+		filterStatement += ` and lower(c.travel_agent_name) like '%` + val.(string) + `%'`
+	}
+
+	if val, ok := filters["address"]; ok {
+		filterStatement += ` and lower(c.address) like '%` + val.(string) + `%'`
+	}
+
+	if val, ok := filters["phone_number"]; ok {
+		filterStatement += ` and c.phone_number like '%` + val.(string) + `%'`
+	}
+
+	if val, ok := filters["email"]; ok {
+		filterStatement += ` and (lower(c.email) like '%` + val.(string) + `%'`
+	}
+
+	statement := contactSelectStatement + ` from "contacts" c ` + contactJoinStatement + ` where c.deleted_at is null` + filterStatement + ` order by c.` + order + ` ` + sort + ` limit $1 offset $2`
+	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
 		return data, count, err
 	}
 
 	for rows.Next() {
-		dataTemp := models.Contact{}
-		err = rows.Scan(
-			&dataTemp.ID,
-			&dataTemp.BranchName,
-			&dataTemp.TravelAgentName,
-			&dataTemp.Address,
-			&dataTemp.Longitude,
-			&dataTemp.Latitude,
-			&dataTemp.AreaCode,
-			&dataTemp.PhoneNumber,
-			&dataTemp.SKNumber,
-			&dataTemp.SKDate,
-			&dataTemp.Accreditation,
-			&dataTemp.AccreditationDate,
-			&dataTemp.DirectorName,
-			&dataTemp.DirectorContact,
-			&dataTemp.PicName,
-			&dataTemp.PicContact,
-			&dataTemp.Logo,
-			&dataTemp.VirtualAccountNumber,
-			&dataTemp.AccountName,
-			&dataTemp.AccountNumber,
-			&dataTemp.AccountBankName,
-			&dataTemp.AccountBankCode,
-			&dataTemp.CreatedAt,
-			&dataTemp.UpdatedAt,
-			&dataTemp.DeletedAt,
-			&dataTemp.Email,
-			&dataTemp.IsZakatPartner,
-		)
+		temp, err := repository.scanRows(rows)
 		if err != nil {
 			return data, count, err
 		}
-		data = append(data, dataTemp)
+		data = append(data, temp)
 	}
 
-	statement = `select count("id") from "contacts"
-                  where (lower("branch_name") like $1 or lower("travel_agent_name") like $1 or "phone_number" like $1 or lower("email") like $1) and "deleted_at" is null`
-	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
+	statement = `select count(c."id") from "contacts" c ` + contactJoinStatement + ` where c."deleted_at" is null` + filterStatement
+	err = repository.DB.QueryRow(statement).Scan(&count)
 	if err != nil {
 		return data, count, err
 	}
@@ -78,52 +99,24 @@ func (repository ContactRepository) Browse(search, order, sort string, limit, of
 
 func (repository ContactRepository) BrowseAll(search string, isZakatPartner bool) (data []models.Contact, err error) {
 	var rows *sql.Rows
-	if search == "" {
-		statement := `select * from "contacts" where "is_zakat_partner"=$1 and "deleted_at" is null`
-		rows, err = repository.DB.Query(statement, isZakatPartner)
-	} else {
-		statement := `select * from "contacts" where (lower("travel_agent_name") like $1 or lower("branch_name") like $1) and "is_zakat_partner"=$2 and "deleted_at" is null`
-		rows, err = repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", isZakatPartner)
+	whereStatement := `where c."is_zakat_partner"=$1 and c."deleted_at" is null`
+	whereParams := []interface{}{isZakatPartner}
+	if search != "" {
+		whereStatement += `and (lower(c."travel_agent_name") like $2 or lower(c."branch_name") like $2)`
+		whereParams = append(whereParams, "%"+strings.ToLower(search)+"%")
 	}
+	statement := contactSelectStatement + ` from "contacts" c ` + contactJoinStatement + ` ` + whereStatement
+	rows, err = repository.DB.Query(statement, whereParams...)
 	if err != nil {
 		return data, err
 	}
 
 	for rows.Next() {
-		dataTemp := models.Contact{}
-		err = rows.Scan(
-			&dataTemp.ID,
-			&dataTemp.BranchName,
-			&dataTemp.TravelAgentName,
-			&dataTemp.Address,
-			&dataTemp.Longitude,
-			&dataTemp.Latitude,
-			&dataTemp.AreaCode,
-			&dataTemp.PhoneNumber,
-			&dataTemp.SKNumber,
-			&dataTemp.SKDate,
-			&dataTemp.Accreditation,
-			&dataTemp.AccreditationDate,
-			&dataTemp.DirectorName,
-			&dataTemp.DirectorContact,
-			&dataTemp.PicName,
-			&dataTemp.PicContact,
-			&dataTemp.Logo,
-			&dataTemp.VirtualAccountNumber,
-			&dataTemp.AccountName,
-			&dataTemp.AccountNumber,
-			&dataTemp.AccountBankName,
-			&dataTemp.AccountBankCode,
-			&dataTemp.CreatedAt,
-			&dataTemp.UpdatedAt,
-			&dataTemp.DeletedAt,
-			&dataTemp.Email,
-			&dataTemp.IsZakatPartner,
-		)
+		temp, err := repository.scanRows(rows)
 		if err != nil {
 			return data, err
 		}
-		data = append(data, dataTemp)
+		data = append(data, temp)
 	}
 
 	return data, err
@@ -184,39 +177,14 @@ func (repository ContactRepository) BrowseAllZakatDisbursement() (data []models.
 }
 
 func (repository ContactRepository) ReadBy(column, value string) (data models.Contact, err error) {
-	statement := `select * from "contacts"
-                  where ` + column + `=$1 and "deleted_at" is null`
-	err = repository.DB.QueryRow(statement, value).Scan(
-		&data.ID,
-		&data.BranchName,
-		&data.TravelAgentName,
-		&data.Address,
-		&data.Longitude,
-		&data.Latitude,
-		&data.AreaCode,
-		&data.PhoneNumber,
-		&data.SKNumber,
-		&data.SKDate,
-		&data.Accreditation,
-		&data.AccreditationDate,
-		&data.DirectorName,
-		&data.DirectorContact,
-		&data.PicName,
-		&data.PicContact,
-		&data.Logo,
-		&data.VirtualAccountNumber,
-		&data.AccountName,
-		&data.AccountNumber,
-		&data.AccountBankName,
-		&data.AccountBankCode,
-		&data.CreatedAt,
-		&data.UpdatedAt,
-		&data.DeletedAt,
-		&data.Email,
-		&data.IsZakatPartner,
-	)
+	statement := contactSelectStatement + ` from "contacts" c ` + contactJoinStatement + ` where c.` + column + `=$1 and c."deleted_at" is null`
+	row := repository.DB.QueryRow(statement, value)
+	data, err = repository.scanRow(row)
+	if err != nil {
+		return data, err
+	}
 
-	return data, err
+	return data, nil
 }
 
 func (repository ContactRepository) Edit(input viewmodel.ContactVm) (res string, err error) {

@@ -3,7 +3,7 @@ package usecase
 import (
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
-	"qibla-backend/helpers/hashing"
+	"qibla-backend/pkg/hashing"
 	"qibla-backend/usecase/viewmodel"
 	"time"
 )

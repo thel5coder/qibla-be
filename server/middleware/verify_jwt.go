@@ -3,8 +3,8 @@ package middleware
 import (
 	"errors"
 	"fmt"
-	jwt2 "qibla-backend/helpers/jwt"
-	"qibla-backend/helpers/messages"
+	jwt2 "qibla-backend/pkg/jwt"
+	"qibla-backend/pkg/messages"
 	"qibla-backend/server/handlers"
 	"qibla-backend/usecase"
 	"strings"

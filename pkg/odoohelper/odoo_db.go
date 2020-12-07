@@ -3,8 +3,8 @@ package odoohelper
 import (
 	"database/sql"
 	"fmt"
-	"qibla-backend/helpers/functioncaller"
-	"qibla-backend/helpers/logruslogger"
+	"qibla-backend/pkg/functioncaller"
+	"qibla-backend/pkg/logruslogger"
 	"time"
 )
 

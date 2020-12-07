@@ -2,10 +2,11 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
-	"qibla-backend/helpers/datetime"
-	"qibla-backend/helpers/str"
+	"qibla-backend/pkg/datetime"
+	"qibla-backend/pkg/str"
 	"qibla-backend/usecase/viewmodel"
 	"strings"
 	"time"
@@ -49,26 +50,28 @@ func (repository UserZakatRepository) scanRow(row *sql.Row) (d models.UserZakat,
 func (repository UserZakatRepository) Browse(filters map[string]interface{}, order, sort string, limit, offset int) (data []models.UserZakat, count int, err error) {
 	var conditionString string
 	if val, ok := filters["created_at"]; ok {
-		conditionString += ` AND LOWER(uz."created_at"::TEXT) LIKE '%` + strings.ToLower(val.(string)) + `%'`
+		fmt.Println(val.(string))
+		conditionString += ` AND cast(uz."created_at" as varchar) like'%` + strings.ToLower(val.(string)) + `%'`
 	}
-	if val, ok := filters["bank_name"]; ok {
-		conditionString += ` AND LOWER(t."bank_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`
+	if val, ok := filters["transaction_bank_name"]; ok {
+		conditionString += ` AND LOWER(t."transaction_bank_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`
 	}
 	if val, ok := filters["type_zakat"]; ok {
 		conditionString += ` AND uz."type_zakat" = '` + val.(string) + `'`
 	}
 	if val, ok := filters["invoice_number"]; ok {
-		conditionString += ` AND LOWER(t."invoice_number") LIKE '%` + strings.ToLower(val.(string)) + `%'`
+		conditionString += ` AND LOWER(t."transaction_invoice_number") LIKE '%` + strings.ToLower(val.(string)) + `%'`
 	}
 	if val, ok := filters["total"]; ok {
 		conditionString += ` AND LOWER(uz."total"::TEXT) LIKE '%` + strings.ToLower(val.(string)) + `%'`
 	}
 	if val, ok := filters["travel_agent_name"]; ok {
-		conditionString += ` AND LOWER(c."travel_agent_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`
+		conditionString += ` AND LOWER(c."contact_travel_agent_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`
 	}
 
 	statement := models.UserZakatSelect + ` WHERE uz."deleted_at" IS NULL ` + conditionString + `
 		ORDER BY uz.` + order + ` ` + sort + ` LIMIT $1 OFFSET $2`
+	fmt.Println()
 	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
 		return data, count, err

@@ -5,7 +5,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
-	"qibla-backend/helpers/jwt"
+	"qibla-backend/pkg/jwt"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 )

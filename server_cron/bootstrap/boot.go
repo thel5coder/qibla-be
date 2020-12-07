@@ -7,8 +7,8 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/skilld-labs/go-odoo"
-	"qibla-backend/helpers/jwe"
-	"qibla-backend/helpers/jwt"
+	"qibla-backend/pkg/jwe"
+	"qibla-backend/pkg/jwt"
 	"qibla-backend/usecase"
 )
 

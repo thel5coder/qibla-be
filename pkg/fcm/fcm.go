@@ -2,7 +2,7 @@ package fcm
 
 import (
 	"github.com/maddevsio/fcm"
-	"qibla-backend/helpers/interfacepkg"
+	"qibla-backend/pkg/interfacepkg"
 )
 
 // Connection ...

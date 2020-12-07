@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/gosimple/slug"
 	"qibla-backend/db/repositories/actions"
-	"qibla-backend/helpers/messages"
+	"qibla-backend/pkg/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"time"
@@ -14,7 +14,7 @@ type MasterZakatUseCase struct {
 	*UcContract
 }
 
-func (uc MasterZakatUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.MasterZakatVm, pagination viewmodel.PaginationVm, err error) {
+func (uc MasterZakatUseCase) Browse(search map[string]interface{}, order, sort string, page, limit int) (res []viewmodel.MasterZakatVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewMasterZakatRepository(uc.DB)
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 

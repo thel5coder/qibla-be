@@ -2,12 +2,12 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
-	"qibla-backend/helpers/datetime"
-	"qibla-backend/helpers/str"
+	"qibla-backend/pkg/datetime"
+	"qibla-backend/pkg/str"
 	"qibla-backend/usecase/viewmodel"
-	"strings"
 	"time"
 )
 
@@ -19,37 +19,67 @@ func NewMasterZakatRepository(DB *sql.DB) contracts.IMasterZakatRepository {
 	return &MasterZakatRepository{DB: DB}
 }
 
-func (repository MasterZakatRepository) Browse(search, order, sort string, limit, offset int) (data []models.MasterZakat, count int, err error) {
-	statement := `select * from "master_zakats" where (lower(cast("type_zakat" as varchar)) like $1 or lower("name") like $1 or lower("description") like $1 or cast("updated_at" as varchar) like $1) and "deleted_at" is null
-                order by ` + order + ` ` + sort + ` limit $2 offset $3`
-	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
+const(
+	masterZakatSelectStatement =`select id,slug,type_zakat,name,description,amount,current_gold_price,gold_nishab,created_at,updated_at`
+)
+
+func (repository MasterZakatRepository) scanRows(rows *sql.Rows)(res models.MasterZakat,err error){
+	err = rows.Scan(&res.ID, &res.Slug, &res.TypeZakat, &res.Name, &res.Description, &res.Amount, &res.CurrentGoldPrice, &res.GoldNishab,
+		&res.CreatedAt, &res.UpdatedAt,
+	)
+	if err != nil {
+		return res,err
+	}
+
+	return res,nil
+}
+
+func (repository MasterZakatRepository) scanRow(row *sql.Row)(res models.MasterZakat,err error){
+	err = row.Scan(&res.ID, &res.Slug, &res.TypeZakat, &res.Name, &res.Description, &res.Amount, &res.CurrentGoldPrice, &res.GoldNishab,
+		&res.CreatedAt, &res.UpdatedAt,
+	)
+	if err != nil {
+		return res,err
+	}
+
+	return res,nil
+}
+
+func (repository MasterZakatRepository) Browse(filters map[string]interface{}, order, sort string, limit, offset int) (data []models.MasterZakat, count int, err error) {
+	filterStatement := ``
+	if val,ok := filters["type_zakat"]; ok {
+		filterStatement +=` and lower(cast("type_zakat" as varchar)) like '%`+val.(string)+`%'`
+	}
+
+	if val,ok := filters["name"]; ok {
+		filterStatement +=` and lower("name") like '%`+val.(string)+`%'`
+	}
+
+	if val,ok := filters["description"]; ok {
+		filterStatement +=` and lower("description") like '%`+val.(string)+`%'`
+	}
+
+	if val,ok := filters["updated_at"]; ok {
+		filterStatement +=` and lower(cast("updated_at" as varchar)) like '%`+val.(string)+`%'`
+	}
+
+	statement := masterZakatSelectStatement+` from "master_zakats" where "deleted_at" is null`+filterStatement+` order by ` + order + ` ` + sort + ` limit $1 offset $2`
+	fmt.Println(statement)
+	rows, err := repository.DB.Query(statement,limit, offset)
 	if err != nil {
 		return data, count, err
 	}
 
 	for rows.Next() {
-		dataTemp := models.MasterZakat{}
-		err = rows.Scan(
-			&dataTemp.ID,
-			&dataTemp.Slug,
-			&dataTemp.TypeZakat,
-			&dataTemp.Name,
-			&dataTemp.Description,
-			&dataTemp.Amount,
-			&dataTemp.CurrentGoldPrice,
-			&dataTemp.GoldNishab,
-			&dataTemp.CreatedAt,
-			&dataTemp.UpdatedAt,
-			&dataTemp.DeletedAt,
-		)
+		temp,err := repository.scanRows(rows)
 		if err != nil {
 			return data, count, err
 		}
-		data = append(data, dataTemp)
+		data = append(data, temp)
 	}
 
-	statement = `select count("id") from "master_zakats" where (lower(cast("type_zakat" as varchar)) like $1 or lower("name") like $1 or lower("description") like $1 or cast("updated_at" as varchar) like $1) and "deleted_at" is null`
-	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
+	statement = `select count("id") from "master_zakats" where "deleted_at" is null`+filterStatement
+	err = repository.DB.QueryRow(statement).Scan(&count)
 	if err != nil {
 		return data, count, err
 	}
@@ -65,24 +95,14 @@ func (repository MasterZakatRepository) BrowseAll() (data []models.MasterZakat, 
 	}
 
 	for rows.Next() {
-		dataTemp := models.MasterZakat{}
-		err = rows.Scan(
-			&dataTemp.ID,
-			&dataTemp.Slug,
-			&dataTemp.TypeZakat,
-			&dataTemp.Name,
-			&dataTemp.Description,
-			&dataTemp.Amount,
-			&dataTemp.CurrentGoldPrice,
-			&dataTemp.GoldNishab,
-			&dataTemp.CreatedAt,
-			&dataTemp.UpdatedAt,
-			&dataTemp.DeletedAt,
-		)
+		temp,err := repository.scanRows(rows)
 		if err != nil {
 			return data, err
 		}
-		data = append(data, dataTemp)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
 	}
 
 	return data, err
@@ -90,19 +110,8 @@ func (repository MasterZakatRepository) BrowseAll() (data []models.MasterZakat, 
 
 func (repository MasterZakatRepository) ReadBy(column, value string) (data models.MasterZakat, err error) {
 	statement := `select * from "master_zakats" where ` + column + `=$1 and "deleted_at" is null`
-	err = repository.DB.QueryRow(statement, value).Scan(
-		&data.ID,
-		&data.Slug,
-		&data.TypeZakat,
-		&data.Name,
-		&data.Description,
-		&data.Amount,
-		&data.CurrentGoldPrice,
-		&data.GoldNishab,
-		&data.CreatedAt,
-		&data.UpdatedAt,
-		&data.DeletedAt,
-	)
+	row := repository.DB.QueryRow(statement,value)
+	data,err = repository.scanRow(row)
 
 	return data, err
 }

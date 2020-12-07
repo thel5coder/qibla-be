@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
-	"qibla-backend/helpers/datetime"
+	"qibla-backend/pkg/datetime"
 	"time"
 )
 

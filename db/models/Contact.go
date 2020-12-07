@@ -30,4 +30,6 @@ type Contact struct {
 	CreatedAt            string         `db:"created_at"`
 	UpdatedAt            string         `db:"updated_at"`
 	DeletedAt            sql.NullString `db:"deleted_at"`
+	LogoPath             sql.NullString `db:"path"`
+	LogoName             sql.NullString `db:"logo_name"`
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
-	"qibla-backend/helpers/enums"
+	"qibla-backend/pkg/enums"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"

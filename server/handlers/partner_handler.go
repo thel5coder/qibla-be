@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"net/http"
-	"qibla-backend/helpers/jwt"
-	"qibla-backend/helpers/messages"
+	"qibla-backend/pkg/jwt"
+	"qibla-backend/pkg/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"

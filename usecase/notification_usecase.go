@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"os"
-	"qibla-backend/helpers/amqp"
-	"qibla-backend/helpers/logruslogger"
+	"qibla-backend/pkg/amqp"
+	"qibla-backend/pkg/logruslogger"
 )
 
 // NotificationUseCase ...

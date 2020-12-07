@@ -7,9 +7,9 @@ import (
 
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
-	"qibla-backend/helpers/datetime"
-	"qibla-backend/helpers/interfacepkg"
-	"qibla-backend/helpers/str"
+	"qibla-backend/pkg/datetime"
+	"qibla-backend/pkg/interfacepkg"
+	"qibla-backend/pkg/str"
 	"qibla-backend/usecase/viewmodel"
 )
 
@@ -75,10 +75,10 @@ func (repository DisbursementRepository) Browse(filters map[string]interface{}, 
 		conditionString += ` AND LOWER(c."account_bank_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`
 	}
 	if val, ok := filters["status"]; ok {
-		conditionString += ` AND def."status" = '` + val.(string) + `'`
+		conditionString += ` AND lower(cast(def."status") as varchar) = '` + val.(string) + `'`
 	}
 	if val, ok := filters["disburse_at"]; ok {
-		conditionString += ` AND def."disburse_at"::TEXT LIKE '%` + val.(string) + `%'`
+		conditionString += ` AND cast(def."disburse_at" as varchar) LIKE '%` + val.(string) + `%'`
 	}
 	if val, ok := filters["origin_account_bank_name"]; ok {
 		conditionString += ` AND LOWER(def."origin_account_bank_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`

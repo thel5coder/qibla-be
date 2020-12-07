@@ -21,11 +21,11 @@ func (handler UserZakatHandler) Browse(ctx echo.Context) error {
 	if ctx.QueryParam("created_at") != "" {
 		filters["created_at"] = ctx.QueryParam("created_at")
 	}
-	if ctx.QueryParam("bank_name") != "" {
-		filters["bank_name"] = ctx.QueryParam("bank_name")
+	if ctx.QueryParam("transaction_bank_name") != "" {
+		filters["transaction_bank_name"] = ctx.QueryParam("transaction_bank_name")
 	}
-	if ctx.QueryParam("bank_name") != "" {
-		filters["type_zakat"] = ctx.QueryParam("bank_name")
+	if ctx.QueryParam("type_zakat") != "" {
+		filters["type_zakat"] = ctx.QueryParam("type_zakat")
 	}
 	if ctx.QueryParam("invoice_number") != "" {
 		filters["invoice_number"] = ctx.QueryParam("invoice_number")

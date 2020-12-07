@@ -3,8 +3,8 @@ package usecase
 import (
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
-	"qibla-backend/helpers/functioncaller"
-	"qibla-backend/helpers/logruslogger"
+	"qibla-backend/pkg/functioncaller"
+	"qibla-backend/pkg/logruslogger"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"strings"

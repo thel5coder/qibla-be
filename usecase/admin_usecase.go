@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"errors"
-	"qibla-backend/helpers/hashing"
-	"qibla-backend/helpers/messages"
+	"qibla-backend/pkg/hashing"
+	"qibla-backend/pkg/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 )
