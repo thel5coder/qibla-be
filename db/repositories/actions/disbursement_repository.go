@@ -66,14 +66,14 @@ func (repository DisbursementRepository) Browse(filters map[string]interface{}, 
 	if val, ok := filters["total"]; ok {
 		conditionString += ` AND def."total"::TEXT LIKE '%` + val.(string) + `%'`
 	}
-	if val, ok := filters["transaction_period"]; ok {
-		conditionString += ` AND (def."start_period < '` + val.(string) + `'`
-	}
+	//if val, ok := filters["transaction_period"]; ok {
+	//	conditionString += ` AND (def."start_period" < '` + val.(string) + `' or def."end_period" > '`+val.(string)+`')`
+	//}
 	if val, ok := filters["contact_account_bank_name"]; ok {
 		conditionString += ` AND LOWER(c."account_bank_name") LIKE '%` + strings.ToLower(val.(string)) + `%'`
 	}
 	if val, ok := filters["status"]; ok {
-		conditionString += ` AND lower(cast(def."status") as varchar) = '` + val.(string) + `'`
+		conditionString += ` AND lower(cast(def."status" as varchar)) = '` + val.(string) + `'`
 	}
 	if val, ok := filters["disburse_at"]; ok {
 		conditionString += ` AND cast(def."disburse_at" as varchar) LIKE '%` + val.(string) + `%'`
@@ -84,6 +84,7 @@ func (repository DisbursementRepository) Browse(filters map[string]interface{}, 
 
 	statement := models.DisbursementSelect + ` WHERE def."deleted_at" IS NULL ` + conditionString + `
 		ORDER BY def.` + order + ` ` + sort + ` LIMIT $1 OFFSET $2`
+	fmt.Println(statement)
 	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
 		return data, count, err

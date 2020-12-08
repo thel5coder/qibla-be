@@ -27,12 +27,10 @@ func (handler DisbursementHandler) Browse(ctx echo.Context) error {
 	if ctx.QueryParam("total") != "" {
 		filters["total"] = ctx.QueryParam("total")
 	}
-	if ctx.QueryParam("start_period") != "" {
-		filters["start_period"] = ctx.QueryParam("start_period")
+	if ctx.QueryParam("transaction_period") != "" {
+		filters["transaction_period"] = ctx.QueryParam("transaction_period")
 	}
-	if ctx.QueryParam("end_period") != "" {
-		filters["end_period"] = ctx.QueryParam("end_period")
-	}
+
 	if ctx.QueryParam("contact_account_bank_name") != "" {
 		filters["contact_account_bank_name"] = ctx.QueryParam("contact_account_bank_name")
 	}
