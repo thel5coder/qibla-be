@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS "promotion_packages"
     "deleted_at"   timestamp
 );
 -- +migrate Down
-DROP TABLE IF EXISTS "promotion_packages";
+DROP TABLE IF EXISTS master_promotions;

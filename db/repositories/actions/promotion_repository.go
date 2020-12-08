@@ -83,8 +83,8 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 	}
 
 	statement = `select count(p."id") from "promotions" p 
-                 inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
+                 inner join master_promotion_helper pp on pp."id"=p."promotion_package_id"
+                 where (lower(pp.name) like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
                  and p."deleted_at" is null`
 	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
 	if err != nil {

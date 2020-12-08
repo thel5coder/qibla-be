@@ -12,7 +12,7 @@ type UserZakat struct {
 	ContactID        sql.NullString `db:"contact_id"`
 	Contact          Contact        `db:"contact"`
 	MasterZakatID    sql.NullString `db:"master_zakat_id"`
-	MasterZakat      MasterZakat    `db:"master_zakat"`
+	MasterZakat      MasterZakat    `db:"master_zakat_helper"`
 	TypeZakat        sql.NullString `db:"type_zakat"`
 	CurrentGoldPrice sql.NullInt32  `db:"current_gold_price"`
 	GoldNishab       sql.NullInt32  `db:"gold_nishab"`

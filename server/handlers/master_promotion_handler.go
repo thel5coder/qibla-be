@@ -4,48 +4,49 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
+	"qibla-backend/helper/master_promotion_helper"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"
 )
 
-type PromotionPackageHandler struct {
+type MasterPromotionHandler struct {
 	Handler
 }
 
-func (handler PromotionPackageHandler) Browse(ctx echo.Context) error {
-	search := ctx.QueryParam("search")
+func (handler MasterPromotionHandler) Browse(ctx echo.Context) error {
 	order := ctx.QueryParam("order")
 	sort := ctx.QueryParam("sort")
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
+	filters := master_promotion_helper.SetFilterParams(ctx)
 
-	uc := usecase.PromotionPackageUseCase{UcContract: handler.UseCaseContract}
-	res, pagination, err := uc.Browse(search, order, sort, page, limit)
+	uc := usecase.MasterPromotionUseCase{UcContract: handler.UseCaseContract}
+	res, pagination, err := uc.Browse(filters, order, sort, page, limit)
 
 	return handler.SendResponse(ctx, res, pagination, err)
 }
 
-func (handler PromotionPackageHandler) BrowseAll(ctx echo.Context) error{
-	uc := usecase.PromotionPackageUseCase{UcContract: handler.UseCaseContract}
+func (handler MasterPromotionHandler) BrowseAll(ctx echo.Context) error{
+	uc := usecase.MasterPromotionUseCase{UcContract: handler.UseCaseContract}
 	res, err := uc.BrowseAll()
 
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
-func (handler PromotionPackageHandler) Read(ctx echo.Context) error {
+func (handler MasterPromotionHandler) Read(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
-	uc := usecase.PromotionPackageUseCase{UcContract: handler.UseCaseContract}
+	uc := usecase.MasterPromotionUseCase{UcContract: handler.UseCaseContract}
 	res, err := uc.ReadByPk(ID)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }
 
-func (handler PromotionPackageHandler) Edit(ctx echo.Context) error{
+func (handler MasterPromotionHandler) Edit(ctx echo.Context) error{
 	ID := ctx.Param("id")
 
-	input := new(requests.PromotionPackageRequest)
+	input := new(requests.MasterPromotionRequest)
 
 	if err := ctx.Bind(input); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
@@ -54,14 +55,14 @@ func (handler PromotionPackageHandler) Edit(ctx echo.Context) error{
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 	}
 
-	uc := usecase.PromotionPackageUseCase{UcContract: handler.UseCaseContract}
+	uc := usecase.MasterPromotionUseCase{UcContract: handler.UseCaseContract}
 	err := uc.Edit(ID,input)
 
 	return handler.SendResponse(ctx,nil,nil,err)
 }
 
-func (handler PromotionPackageHandler) Add(ctx echo.Context) error{
-	input := new(requests.PromotionPackageRequest)
+func (handler MasterPromotionHandler) Add(ctx echo.Context) error{
+	input := new(requests.MasterPromotionRequest)
 
 	if err := ctx.Bind(input); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
@@ -70,16 +71,16 @@ func (handler PromotionPackageHandler) Add(ctx echo.Context) error{
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 	}
 
-	uc := usecase.PromotionPackageUseCase{UcContract: handler.UseCaseContract}
+	uc := usecase.MasterPromotionUseCase{UcContract: handler.UseCaseContract}
 	err := uc.Add(input)
 
 	return handler.SendResponse(ctx,nil,nil,err)
 }
 
-func (handler PromotionPackageHandler) Delete(ctx echo.Context) error{
+func (handler MasterPromotionHandler) Delete(ctx echo.Context) error{
 	ID := ctx.Param("id")
 
-	uc := usecase.PromotionPackageUseCase{UcContract: handler.UseCaseContract}
+	uc := usecase.MasterPromotionUseCase{UcContract: handler.UseCaseContract}
 	err := uc.Delete(ID)
 
 	return handler.SendResponse(ctx,nil,nil,err)

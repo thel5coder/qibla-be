@@ -707,7 +707,7 @@ ALTER TABLE "faqs" ADD FOREIGN KEY ("web_content_category_id") REFERENCES "web_c
 
 ALTER TABLE "faq_lists" ADD FOREIGN KEY ("faq_id") REFERENCES "faqs" ("id");
 
-ALTER TABLE "promotions" ADD FOREIGN KEY ("promotion_package_id") REFERENCES "promotion_packages" ("id");
+ALTER TABLE "promotions" ADD FOREIGN KEY ("promotion_package_id") REFERENCES master_promotions ("id");
 
 ALTER TABLE "promotion_platforms" ADD FOREIGN KEY ("promotion_id") REFERENCES "promotions" ("id");
 

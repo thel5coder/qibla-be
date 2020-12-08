@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gosimple/slug"
 	"qibla-backend/db/repositories/actions"
 	"qibla-backend/pkg/messages"
@@ -175,7 +174,6 @@ func (uc SatisfactionCategoryUseCase) Add(parentID, name, description string, is
 func (uc SatisfactionCategoryUseCase) Store(input *requests.SatisfactionCategoryRequest) (err error) {
 	uc.TX, err = uc.DB.Begin()
 	if err != nil {
-		fmt.Println(1)
 		uc.TX.Rollback()
 
 		return err

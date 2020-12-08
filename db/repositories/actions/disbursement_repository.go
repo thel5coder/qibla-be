@@ -2,6 +2,7 @@ package actions
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -158,8 +159,9 @@ func (repository DisbursementRepository) BrowseAll(status string) (data []models
 // ReadBy ...
 func (repository DisbursementRepository) ReadBy(column, value string) (data models.Disbursement, err error) {
 	statement := models.DisbursementSelect + ` WHERE def."deleted_at" IS NULL
-	AND def."payment_details"::json ->> 'id' = $1
+	AND def."id" = $1
 	ORDER BY def."created_at" DESC LIMIT 1`
+	fmt.Println(statement)
 	row := repository.DB.QueryRow(statement, value)
 	data, err = repository.scanRow(row)
 	if err != nil {

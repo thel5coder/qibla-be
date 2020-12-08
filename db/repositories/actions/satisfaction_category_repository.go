@@ -26,11 +26,11 @@ const(
 func (repository SatisfactionCategoryRepository) BrowseAllBy(column, value string) (data []models.SatisfactionCategory, err error) {
 	var rows *sql.Rows
 	if value == "" && column == "parent_id" {
-		statement := `select * from "satisfaction_categories" where "parent_id" is null and "deleted_at" is null`
+		statement := `select * from "satisfaction_categories" where "parent_id" is null and "deleted_at" is null order by updated_at desc`
 		rows, err = repository.DB.Query(statement)
 		fmt.Println(rows)
 	} else {
-		statement := `select * from "satisfaction_categories" where ` + column + `=$1 and "deleted_at" is null`
+		statement := `select * from "satisfaction_categories" where ` + column + `=$1 and "deleted_at" is null order by updated_at desc`
 		rows, err = repository.DB.Query(statement, value)
 	}
 	if err != nil {

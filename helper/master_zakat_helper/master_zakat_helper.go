@@ -1,4 +1,4 @@
-package helper
+package master_zakat_helper
 
 import "github.com/labstack/echo"
 

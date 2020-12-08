@@ -9,7 +9,7 @@ import (
 
 const (
 	// TOPIC for setting topic of log
-	TOPIC = "legoas-log"
+	TOPIC = "qibla-log"
 	// ErrorLevel ...
 	ErrorLevel = log.ErrorLevel
 	// WarnLevel ...

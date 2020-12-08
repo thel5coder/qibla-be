@@ -71,7 +71,7 @@ func (repository UserZakatRepository) Browse(filters map[string]interface{}, ord
 
 	statement := models.UserZakatSelect + ` WHERE uz."deleted_at" IS NULL ` + conditionString + `
 		ORDER BY uz.` + order + ` ` + sort + ` LIMIT $1 OFFSET $2`
-	fmt.Println()
+	fmt.Println(statement)
 	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
 		return data, count, err

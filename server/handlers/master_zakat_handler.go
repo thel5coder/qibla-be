@@ -4,7 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
-	"qibla-backend/helper"
+	"qibla-backend/helper/master_zakat_helper"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase"
 	"strconv"
@@ -19,7 +19,7 @@ func (handler MasterZakatHandler) Browse(ctx echo.Context) error {
 	sort := ctx.QueryParam("sort")
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	page, _ := strconv.Atoi(ctx.QueryParam("page"))
-	filters := helper.SetFilterParams(ctx)
+	filters := master_zakat_helper.SetFilterParams(ctx)
 
 	uc := usecase.MasterZakatUseCase{UcContract: handler.UseCaseContract}
 	res, pagination, err := uc.Browse(filters, order, sort, page, limit)
