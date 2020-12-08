@@ -206,17 +206,19 @@ func (uc SatisfactionCategoryUseCase) DeleteBy(column, value string) (err error)
 }
 
 func (uc SatisfactionCategoryUseCase) DeleteByPk(ID string) (err error) {
-	count, err := uc.CountBy("", "id", ID)
+	count, err := uc.CountBy("", "parent_id", ID)
 	if err != nil {
 		return err
 	}
 
 	uc.TX, err = uc.DB.Begin()
 	if err != nil {
+
 		uc.TX.Rollback()
 
 		return err
 	}
+
 	if count > 0 {
 		err = uc.DeleteBy("parent_id", ID)
 		if err != nil {
@@ -224,7 +226,15 @@ func (uc SatisfactionCategoryUseCase) DeleteByPk(ID string) (err error) {
 
 			return err
 		}
+	}else{
+		err = uc.DeleteBy("id", ID)
+		if err != nil {
+			uc.TX.Rollback()
+
+			return err
+		}
 	}
+
 	uc.TX.Commit()
 
 	return nil
