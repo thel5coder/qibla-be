@@ -39,6 +39,7 @@ func (uc MasterPromotionUseCase) Browse(filters map[string]interface{}, order, s
 //browse all
 func (uc MasterPromotionUseCase) BrowseAll() (res []viewmodel.MasterPromotionVm,err error){
 	repository := actions.NewMasterPromotionRepository(uc.DB)
+
 	masterPromotions,err := repository.BrowseAll()
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functioncaller.PrintFuncName(),"query-masterPromotion-browseAll")
@@ -55,12 +56,12 @@ func (uc MasterPromotionUseCase) BrowseAll() (res []viewmodel.MasterPromotionVm,
 //read by
 func (uc MasterPromotionUseCase) ReadBy(column, value string) (res viewmodel.MasterPromotionVm, err error) {
 	repository := actions.NewMasterPromotionRepository(uc.DB)
+
 	masterPromotion, err := repository.ReadBy(column, value)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functioncaller.PrintFuncName(),"query-masterPromotion-readBy")
 		return res, err
 	}
-
 	res = uc.buildBody(masterPromotion)
 
 	return res, err

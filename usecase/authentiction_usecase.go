@@ -139,6 +139,7 @@ func (uc AuthenticationUseCase) ForgotPassword(email string) (err error) {
 	}
 
 	if count > 0 {
+
 		user, err := userUc.ReadBy("u.email", email)
 		if err != nil {
 			return err
