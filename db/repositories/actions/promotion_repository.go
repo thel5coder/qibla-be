@@ -20,10 +20,10 @@ func NewPromotionRepository(DB *sql.DB) contracts.IPromotionRepository {
 }
 
 const (
-	promotionSelectStatement = `select p.id,pp.id,pp.package_name,pp.slug,p.package_promotion,p.start_date,p.end_date,p.price,p.description,
+	promotionSelectStatement = `select p.id,pp.id,pp.name,pp.slug,p.package_promotion,p.start_date,p.end_date,p.price,p.description,
                                array_to_string(array_agg(plat.id || ':' || plat.platform || ':'),','),
                                array_to_string(array_agg(pos.id || ':' || pos.promotion_platform_id || ':' || pos.position),',')`
-	promotionJoinStatement = `inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
+	promotionJoinStatement = `inner join "master_promotions" pp on pp."id"=p."promotion_package_id"
                               inner join "promotion_platforms" plat on plat.promotion_id=p.id
                               inner join "promotion_positions" pos on pos.promotion_platform_id=plat.id`
 	promotionGroupByStatement = `GROUP BY p."id",pp."id"`
@@ -50,9 +50,9 @@ func (repository PromotionRepository) scanRow(row *sql.Row) (res models.Promotio
 }
 
 func (repository PromotionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Promotion, count int, err error) {
-	statement := `select p.*, pp."package_name" from "promotions" p
-                 inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
-                 where (lower(pp."package_name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
+	statement := `select p.*, pp."name" from "promotions" p
+                 inner join "master_promotions" pp on pp."id"=p."promotion_package_id"
+                 where (lower(pp."name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
                  and p."deleted_at" is null 
                  order by ` + order + " " + sort + " limit $2 offset $3"
 	rows, err := repository.DB.Query(statement, "%"+strings.ToLower(search)+"%", limit, offset)
@@ -83,7 +83,7 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 	}
 
 	statement = `select count(p."id") from "promotions" p 
-                 inner join master_promotion_helper pp on pp."id"=p."promotion_package_id"
+                 inner join master_promotions pp on pp."id"=p."promotion_package_id"
                  where (lower(pp.name) like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
                  and p."deleted_at" is null`
 	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%").Scan(&count)
@@ -139,8 +139,8 @@ func (repository PromotionRepository) BrowseAll(filters map[string]interface{}) 
 }
 
 func (repository PromotionRepository) ReadBy(column, value string) (data models.Promotion, err error) {
-	statement := `select p.*, pp."package_name" from "promotions" p 
-                 inner join "promotion_packages" pp on pp."id"=p."promotion_package_id"
+	statement := `select p.*, pp."name" from "promotions" p 
+                 inner join "master_promotions" pp on pp."id"=p."promotion_package_id"
                  where ` + column + `=$1
                  and p."deleted_at" is null`
 	err = repository.DB.QueryRow(statement, value).Scan(
