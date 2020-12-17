@@ -48,8 +48,7 @@ func (uc PdfUseCase) Generate(sourceFile string, replace []viewmodel.PdfReplaceV
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "generate_pdf", uc.ReqID)
 		return res, err
 	}
-
-	//defer os.Remove(htmlNew)
+	defer os.Remove(htmlNew)
 
 	return res, err
 }
