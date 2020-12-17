@@ -7,7 +7,7 @@ RUN CGO_ENABLED=0 go build -a -o /src/app
 
 FROM alpine
 
-RUN apk update && apk add --no-cache tzdata
+RUN apk update && apk add --no-cache tzdata postgresql-client wkhtmltopdf ttf-ubuntu-font-family
 
 WORKDIR /app
 
