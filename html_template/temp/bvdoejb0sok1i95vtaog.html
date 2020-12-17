@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Invoice</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap"
+            rel="stylesheet"
+        />
+        <style type="text/css" media="screen">
+              .clearfix:after {
+                content: "";
+                display: table;
+                clear: both;
+              }   
+
+          a {
+            color: #0087c3;
+            text-decoration: none;
+          }
+
+          body {
+            position: relative;
+            width: 842px;
+            height: 595px;
+            padding: 8px 16px;
+            margin: 0 auto;
+            color: #555555;
+            background: #ffffff;
+            font-size: 8px;
+            font-family: "Roboto", sans-serif;
+          }
+
+          header {
+            margin-bottom: 16px;
+          }
+
+          #logo {
+            float: left;
+            width: 25%;
+          }
+
+          #logo img {
+            margin-bottom: 8px;
+            height: 32px;
+          }
+
+          #bill-to,
+          #invoice-detail {
+            width: 30%;
+            float: right;
+          }
+
+          #bill-to {
+            font-weight: 600;
+          }
+
+          #doc-title {
+            width: 100%;
+            text-align: center;
+            font-weight: 600;
+            font-size: 11px;
+            padding: 16px 0;
+            border-top: 1px solid;
+          }
+
+          #invoice-detail {
+            margin-bottom: 8px;
+          }
+
+          #bill-to .company {
+            margin-top: 8px;
+            margin-bottom: 8px;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+            margin-bottom: 32px;
+            border-radius: 4px;
+            box-shadow: 0 0 3px 0 #eeeeee;
+          }
+
+          #table-mini {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+            margin: 16px 0;
+            border-radius: 4px;
+            box-shadow: 0 0 3px 0 #eeeeee;
+          }
+
+          
+          table th,
+          table td {
+            padding: 6px;
+            border-bottom: 1px solid lightgrey;
+          }
+
+          table th {
+            white-space: nowrap;
+            font-weight: normal;
+            text-align: left;
+            background-color: #CCCCCC;
+          }
+
+          table td {
+            border: #eeeeee;
+          }
+
+          table tbody tr:last-child td {
+            border: none;
+          }
+
+          table tbody tr:nth-child(odd) {
+            background-color: #eeeeee;
+          }
+
+
+          #detail-footer {
+            display: flex;
+            justify-content: space-between;
+          }
+
+          #detail-box-left, #detail-box-right {
+            box-shadow: 0 0 1px 1px grey;
+            border-radius: 4px;
+            padding: 4px 8px;
+            width: 30%;
+            margin-bottom: 8px;
+            margin-top: 8px;
+          }
+
+          #detail-box-right .box-text-title {
+            font-weight: 600;
+          }
+
+          #detail-box-left .box-text-title {
+            margin-top: 6px;
+            margin-bottom: 6px;
+            font-weight: 700;
+          }
+
+          #detail-box-left .box-text-detail {
+            margin-top: 6px;
+            margin-bottom: 6px;
+            font-weight: 400;
+          }
+
+          #footer {
+            display: flex;
+            justify-content: flex-end;
+          }
+
+          #footer .footer-text {
+            padding: 32px 15%;
+            font-size: 12px;
+            font-weight: 500;
+          }
+        </style>
+    </head>
+
+    <body>
+        <header class="clearfix">
+            <div id="logo">
+              <img src="127.0.0.1:3001/api/v1/html_template/invoice/logo.png">
+              <div> Jl. Jati Murni No.30, RT.8/RW.7, Jati Padang, Kec. Ps. Minggu, Kota Jakarta Selatan, DKI Jakarta 12540 </div> 
+            </div>
+            <div id="bill-to">
+              <div>To</div>
+              <div class="company">
+                  <div> Hijrah Travel </div>
+                  <div> DISINI CAFE, Jalan Besse Kajuara, Jeppee, Tanete Riattang Bar., Bone Regency, South Sulawesi, Indonesia </div>
+                  <div> - </div>
+            </div>
+              <div>Telp. 9073                </div>
+            </div>
+            </div>
+          </header>
+          <main>
+            <div id="doc-title">
+              RINCIAN BIAYA YANG SUDAH DITERUSKAN
+            </div>
+            <div id="invoice-detail">
+                <div class="invoice-text">Total Nominal : Rp 10.000.000,00</div>
+            </div>
+
+            <table border="0" cellspacing="0" cellpadding="0">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>No. Transaksi</th>
+                    <th>Total Zakat</th>
+                    <th>Jenis Zakat</th>
+                    <th>Tanggal Transaksi</th>
+                    <th>Periode Transaksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  [table]
+                </tbody>
+              </table>
+              <div id="detail-footer">
+                <div id="detail-box-left">
+                  <div class="box-text-title">Pesan</div>
+                  <div class="box-text-detail">Pesan Invoice ini bersifat elektronik dan tidak memerlukan tandatangan basah.</div>
+                </div>
+                <div id="detail-box-right">
+                  <div class="box-text-title">Total Penerusan Dana</div>
+                  <div class="box-text-detail">Rp 10.000.000,00</div>
+
+                  <table id="table-mini" border="0" cellspacing="0" cellpadding="0">
+                    <tbody>
+                      <tr>
+                        <td>Sub Total</td>
+                        <td>Rp 10.000.000,00</td>
+                      </tr>
+                      <tr>
+                        <td>Tanggal Penerusan Dana</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>Transfer Bank</td>
+                        <td>pertama</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <table id="table-mini" border="0" cellspacing="0" cellpadding="0">
+                    <tbody>
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+             <div id="footer">
+                 <div class="footer-text">
+                    QIBLA
+                 </div>
+
+             </div>
+          </main>
+          
+    </body>
+</html>

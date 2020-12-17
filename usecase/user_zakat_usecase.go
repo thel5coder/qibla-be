@@ -50,6 +50,22 @@ func (uc UserZakatUseCase) BrowseAll() (res []viewmodel.UserZakatVm, err error) 
 	return res, err
 }
 
+// BrowseAllByDisbursement ...
+func (uc UserZakatUseCase) BrowseAllByDisbursement(disbursementID string) (res []viewmodel.UserZakatVm, err error) {
+	repository := actions.NewUserZakatRepository(uc.DB)
+
+	userZakats, err := repository.BrowseAllByDisbursement(disbursementID)
+	if err != nil {
+		return res, err
+	}
+
+	for _, userZakat := range userZakats {
+		res = append(res, uc.buildBody(&userZakat))
+	}
+
+	return res, err
+}
+
 // BrowseBy ...
 func (uc UserZakatUseCase) BrowseBy(column, value, operator string) (res []viewmodel.UserZakatVm, err error) {
 	repository := actions.NewUserZakatRepository(uc.DB)

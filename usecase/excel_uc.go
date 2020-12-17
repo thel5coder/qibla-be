@@ -5,6 +5,7 @@ import (
 	"qibla-backend/pkg/logruslogger"
 )
 
+
 // ExcelUseCase ...
 type ExcelUseCase struct {
 	*UcContract
@@ -40,3 +41,4 @@ func (uc ExcelUseCase) Disbursement(ids []string) (res string, err error) {
 
 	return res, err
 }
+
