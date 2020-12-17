@@ -38,7 +38,7 @@ var (
 	def."payment_details", def."created_at", def."updated_at", def."deleted_at",
 	t."invoice_number", t."payment_method_code", t."payment_status",
 	t."due_date", t."va_number", t."bank_name",
-	c."branch_name", c."travel_agent_name", c."account_bank_name"
+	c."branch_name", c."travel_agent_name", c."account_bank_name", c."address", c."phone_number"
 	FROM "disbursements" def
 	LEFT JOIN "transactions" t ON t."id" = def."transaction_id"
 	LEFT JOIN "contacts" c ON c."id" = def."contact_id"`

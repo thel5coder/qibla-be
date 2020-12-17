@@ -14,6 +14,8 @@ type IUserZakatRepository interface {
 
 	BrowseAll() (data []models.UserZakat, err error)
 
+	BrowseAllByDisbursement(disbursementID string) (data []models.UserZakat, err error)
+
 	ReadBy(column, value string) (data models.UserZakat, err error)
 
 	Edit(input viewmodel.UserZakatVm, tx *sql.Tx) (err error)

@@ -2,18 +2,19 @@ package wkhtmltopdf
 
 import (
 	"errors"
-	wkhtmltopdf "github.com/SebastiaanKlippert/go-wkhtmltopdf"
-	"github.com/rs/xid"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	wkhtmltopdf "github.com/SebastiaanKlippert/go-wkhtmltopdf"
+	"github.com/rs/xid"
 )
 
 // Generate ...
 func Generate(location, res string) (err error) {
 	pdfg, err := wkhtmltopdf.NewPDFGenerator()
 	if err != nil {
-		return errors.New("Generator")
+		return err
 	}
 
 	f, err := os.Open(location)

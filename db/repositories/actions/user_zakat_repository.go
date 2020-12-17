@@ -71,7 +71,6 @@ func (repository UserZakatRepository) Browse(filters map[string]interface{}, ord
 
 	statement := models.UserZakatSelect + ` WHERE uz."deleted_at" IS NULL ` + conditionString + `
 		ORDER BY uz.` + order + ` ` + sort + ` LIMIT $1 OFFSET $2`
-	fmt.Println(statement)
 	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
 		return data, count, err
@@ -122,6 +121,35 @@ func (repository UserZakatRepository) BrowseBy(column, value, operator string) (
 func (repository UserZakatRepository) BrowseAll() (data []models.UserZakat, err error) {
 	statement := models.UserZakatSelect + ` WHERE uz."deleted_at" IS NULL`
 	rows, err := repository.DB.Query(statement)
+	if err != nil {
+		return data, err
+	}
+
+	for rows.Next() {
+		d, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, d)
+	}
+
+	return data, err
+}
+
+// BrowseAllByDisbursement ...
+func (repository UserZakatRepository) BrowseAllByDisbursement(disbursementID string) (data []models.UserZakat, err error) {
+	statement := `SELECT uz."id", uz."user_id", uz."transaction_id", uz."contact_id",
+	uz."master_zakat_id", uz."type_zakat", uz."current_gold_price", uz."gold_nishab",
+	uz."wealth", uz."total", uz."created_at", uz."updated_at", uz."deleted_at",
+	u."email", u."name", t."invoice_number" as transaction_invoice_number, t."payment_method_code", t."payment_status",
+	t."due_date", t."va_number", t."bank_name" as transaction_bank_name, c."branch_name", c."travel_agent_name"
+	FROM "user_zakats" uz
+	LEFT JOIN "users" u ON u."id" = uz."user_id"
+	LEFT JOIN "transactions" t ON t."id" = uz."transaction_id"
+	LEFT JOIN "contacts" c ON c."id" = uz."contact_id"
+	LEFT JOIN "disbursement_details" dd ON dd."transaction_id" = uz."transaction_id"
+	WHERE uz."deleted_at" IS NULL AND dd."disbursement_id" = $1`
+	rows, err := repository.DB.Query(statement, disbursementID)
 	if err != nil {
 		return data, err
 	}

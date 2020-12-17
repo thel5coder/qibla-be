@@ -33,7 +33,7 @@ func (repository DisbursementRepository) scanRows(rows *sql.Rows) (d models.Disb
 		&d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
 		&d.Transaction.PaymentStatus, &d.Transaction.DueDate, &d.Transaction.VaNumber,
 		&d.Transaction.BankName, &d.Contact.BranchName, &d.Contact.TravelAgentName,
-		&d.Contact.AccountBankName,
+		&d.Contact.AccountBankName, &d.Contact.Address, &d.Contact.PhoneNumber,
 	)
 
 	return d, err
@@ -48,7 +48,7 @@ func (repository DisbursementRepository) scanRow(row *sql.Row) (d models.Disburs
 		&d.Transaction.InvoiceNumber, &d.Transaction.PaymentMethodCode,
 		&d.Transaction.PaymentStatus, &d.Transaction.DueDate, &d.Transaction.VaNumber,
 		&d.Transaction.BankName, &d.Contact.BranchName, &d.Contact.TravelAgentName,
-		&d.Contact.AccountBankName,
+		&d.Contact.AccountBankName, &d.Contact.Address, &d.Contact.PhoneNumber,
 	)
 
 	return d, err

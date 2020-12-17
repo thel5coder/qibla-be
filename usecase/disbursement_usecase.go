@@ -354,6 +354,8 @@ func (uc DisbursementUseCase) buildBody(data *models.Disbursement) (res viewmode
 		ContactID:                    data.ContactID,
 		ContactBranchName:            data.Contact.BranchName.String,
 		ContactTravelAgentName:       data.Contact.TravelAgentName.String,
+		ContactAddress: data.Contact.Address.String,
+		ContactPhoneNumber: data.Contact.PhoneNumber,
 		TransactionID:                data.TransactionID.String,
 		TransactionInvoiceNumber:     data.Transaction.InvoiceNumber.String,
 		TransactionPaymentMethodCode: data.Transaction.PaymentMethodCode.Int32,

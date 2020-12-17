@@ -1,13 +1,17 @@
 package usecase
 
 import (
-	"github.com/rs/xid"
 	"io/ioutil"
 	"os"
 	"qibla-backend/pkg/logruslogger"
+	"qibla-backend/pkg/number"
+	timepkg "qibla-backend/pkg/time"
 	"qibla-backend/pkg/wkhtmltopdf"
 	"qibla-backend/usecase/viewmodel"
 	"strings"
+	"time"
+
+	"github.com/rs/xid"
 )
 
 // PdfUseCase ...
@@ -55,32 +59,62 @@ func (uc PdfUseCase) Disbursement(id string) (res string, err error) {
 	ctx := "PdfUseCase.Disbursement"
 
 	disbursementUc := DisbursementUseCase{UcContract: uc.UcContract}
-	_, err = disbursementUc.ReadByPk(id)
+	disbursement, err := disbursementUc.ReadByPk(id)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "find", uc.ReqID)
 		return res, err
 	}
 
-	// table := `<tr class="table-header"><td>Name</td><td>Email</td><td>Address</td><td>Phone</td><td>Profession</td><td>Age</td><td>Gender</td><td>Status</td></tr>`
-	// for _, d := range donor {
-	// 	age, _, _, _, _, _ := timepkg.DiffCustom(d.BirthDate, time.Now())
-	// 	table += `<tr><td>` + d.Name + `</td><td>` + d.Email + `</td><td>` + d.Address + `</td><td>` + d.Phone + `</td><td>` + d.Profession + `</td><td>` + strconv.Itoa(age) + `</td><td>` + d.Gender + `</td><td>` + helper.StatusMapping(d.Status) + `</td></tr>`
-	// }
+	userZakatUc := UserZakatUseCase{UcContract: uc.UcContract}
+	userZakat, err := userZakatUc.BrowseAllByDisbursement(id)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "find_zakat", uc.ReqID)
+		return res, err
+	}
+
+	table := ``
+	for _, u := range userZakat {
+		table += `<tr><td>` + u.TransactionInvoiceNumber + `</td><td>` + number.FormatCurrency(float64(u.Total), "Rp ", ".", ",", 2) + `</td><td>` + u.TypeZakat + `</td><td>` + timepkg.ConvertLocation(u.CreatedAt, time.RFC3339, "02-01-2006 15:04:05", DefaultLocation) + `</td><td>` + timepkg.ConvertLocation(disbursement.StartPeriod, time.RFC3339, "02-01-2006 15:04:05", DefaultLocation) + ` - ` + timepkg.ConvertLocation(disbursement.EndPeriod, time.RFC3339, "02-01-2006 15:04:05", DefaultLocation) + `</td></tr>`
+	}
 
 	sourceFile := "../html_template/invoice/template.html"
 	replace := []viewmodel.PdfReplaceVm{
 		{
-			From: "[title]",
-			To:   "Donor",
+			From: "[base-url]",
+			To:   os.Getenv("APP_BASE_URL") + "/html_template/invoice",
 		},
-		// {
-		// 	From: "[date]",
-		// 	To:   timepkg.InFormatNoErr(time.Now(), DefaultLocation, "02-01-2006 15:04:05"),
-		// },
-		// {
-		// 	From: "[table]",
-		// 	To:   table,
-		// },
+		{
+			From: "[company-name]",
+			To:   disbursement.ContactTravelAgentName,
+		},
+		{
+			From: "[company-address]",
+			To:   disbursement.ContactAddress,
+		},
+		{
+			From: "[company-province]",
+			To:   "-",
+		},
+		{
+			From: "[company-phone]",
+			To:   disbursement.ContactPhoneNumber,
+		},
+		{
+			From: "[total]",
+			To:   number.FormatCurrency(disbursement.Total, "Rp ", ".", ",", 2),
+		},
+		{
+			From: "[disbursement-date]",
+			To:   timepkg.ConvertLocation(disbursement.DisburseAt, time.RFC3339, "02-01-2006 15:04:05", DefaultLocation),
+		},
+		{
+			From: "[bank-name]",
+			To:   disbursement.AccountBankName,
+		},
+		{
+			From: "[table]",
+			To:   table,
+		},
 	}
 	res, err = uc.Generate(sourceFile, replace)
 	if err != nil {
