@@ -212,7 +212,7 @@ func main() {
 	}
 
 	bootApp.E.Static("/", "")
-	//bootApp.E.Use(echoMiddleware.Static("statics"))
+	bootApp.E.Use(echoMiddleware.Static("statics"))
 	bootApp.E.Use(echoMiddleware.Logger())
 	bootApp.E.Use(echoMiddleware.Recover())
 	bootApp.E.Use(echoMiddleware.CORS())
