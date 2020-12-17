@@ -35,21 +35,21 @@ func (uc PdfUseCase) Generate(sourceFile string, replace []viewmodel.PdfReplaceV
 		html = strings.Replace(html, r.From, r.To, -1)
 	}
 
-	htmlNew := "../html_template/temp/" + xid.New().String() + ".html"
+	htmlNew := "./../html_template/temp/" + xid.New().String() + ".html"
 	err = ioutil.WriteFile(htmlNew, []byte(html), 0644)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "write_new_html", uc.ReqID)
 		return res, err
 	}
 
-	res = "../html_template/temp/" + xid.New().String() + ".pdf"
+	res = "./../html_template/temp/" + xid.New().String() + ".pdf"
 	err = wkhtmltopdf.Generate(htmlNew, res)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "generate_pdf", uc.ReqID)
 		return res, err
 	}
 
-	os.Remove(htmlNew)
+	//defer os.Remove(htmlNew)
 
 	return res, err
 }
@@ -77,7 +77,7 @@ func (uc PdfUseCase) Disbursement(id string) (res string, err error) {
 		table += `<tr><td>` + u.TransactionInvoiceNumber + `</td><td>` + number.FormatCurrency(float64(u.Total), "Rp ", ".", ",", 2) + `</td><td>` + u.TypeZakat + `</td><td>` + timepkg.ConvertLocation(u.CreatedAt, time.RFC3339, "02-01-2006 15:04:05", DefaultLocation) + `</td><td>` + timepkg.ConvertLocation(disbursement.StartPeriod, time.RFC3339, "02-01-2006 15:04:05", DefaultLocation) + ` - ` + timepkg.ConvertLocation(disbursement.EndPeriod, time.RFC3339, "02-01-2006 15:04:05", DefaultLocation) + `</td></tr>`
 	}
 
-	sourceFile := "../html_template/invoice/template.html"
+	sourceFile := "./../html_template/invoice/template.html"
 	replace := []viewmodel.PdfReplaceVm{
 		{
 			From: "[base-url]",

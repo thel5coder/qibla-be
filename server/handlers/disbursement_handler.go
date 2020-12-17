@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
 	"net/http"
@@ -80,9 +81,9 @@ func (handler DisbursementHandler) PdfExport(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
 	uc := usecase.PdfUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.Disbursement(ID)
-
-	return handler.SendResponseFile(ctx, res, "application/pdf", err)
+	res, _ := uc.Disbursement(ID)
+	fmt.Println(res)
+	return ctx.File(res)
 }
 
 // Request ...

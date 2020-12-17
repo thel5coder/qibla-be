@@ -2,6 +2,7 @@ package wkhtmltopdf
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -14,6 +15,7 @@ import (
 func Generate(location, res string) (err error) {
 	pdfg, err := wkhtmltopdf.NewPDFGenerator()
 	if err != nil {
+		fmt.Println(1)
 		return err
 	}
 
