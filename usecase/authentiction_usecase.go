@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"errors"
-	"fmt"
 	uuid "github.com/satori/go.uuid"
 	"os"
 	"qibla-backend/pkg/facebook"
@@ -52,28 +51,33 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 
 	isExist, err := userUc.IsUserNameExist("", username)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-user-isUserNameExist")
 		return res, err
 	}
 	if !isExist {
+		logruslogger.Log(logruslogger.WarnLevel,messages.CredentialDoNotMatch,functionCaller.PrintFuncName(),"uc-user-isUserNameExist")
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
 	user, err := userUc.ReadBy("u.username", username)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-user-readByUserName")
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
 	isPasswordValid, err := userUc.IsPasswordValid(user.ID, password)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-user-isPasswordValid")
 		return res, err
 	}
 	if !isPasswordValid {
+		logruslogger.Log(logruslogger.WarnLevel,messages.CredentialDoNotMatch,functionCaller.PrintFuncName(),"uc-user-isPasswordValid")
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
 	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
-		fmt.Println(err.Error())
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-user-EditFcmDeviceToken")
 		return res, err
 	}
 
@@ -81,17 +85,19 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 	session, _ := uc.UpdateSessionLogin(user.ID)
 	token, refreshToken, tokenExpiredAt, refreshTokenExpiredAt, err := uc.GenerateJwtToken(jwePayload, username, session)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-generateJwtToken")
 		return res, err
 	}
 	if user.PIN != "" {
 		isPinSet = true
 	}
 	res = viewmodel.UserJwtTokenVm{
-		Token:           token,
-		ExpTime:         tokenExpiredAt,
-		RefreshToken:    refreshToken,
-		ExpRefreshToken: refreshTokenExpiredAt,
-		IsPinSet:        isPinSet,
+		Token:            token,
+		ExpTime:          tokenExpiredAt,
+		RefreshToken:     refreshToken,
+		ExpRefreshToken:  refreshTokenExpiredAt,
+		IsPinSet:         isPinSet,
+		IsFingerPrintSet: user.IsFingerPrintSet,
 	}
 
 	return res, nil

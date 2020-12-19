@@ -12,7 +12,8 @@ type User struct {
 	MobilePhone        sql.NullString `db:"mobile_phone"`
 	PIN                sql.NullString `db:"pin"`
 	IsActive           bool           `db:"is_active"`
-	IsAdminPanel       bool           `db:"is_admin_panel"`
+	IsAdminPanel       sql.NullBool   `db:"is_admin_panel"`
+	IsFingerprintSet   bool           `db:"is_fingerprint_set"`
 	OdooUserID         sql.NullInt32  `db:"odoo_user_id"`
 	FcmDeviceToken     sql.NullString `db:"fcm_device_token"`
 	CreatedAt          string         `db:"activation_at"`

@@ -115,6 +115,7 @@ func (uc CrmStoryUseCase) Add(input *requests.CrmStoryRequest) (err error) {
 	body := viewmodel.CrmStoryVm{
 		Slug:      slug.Make(input.Name),
 		Name:      input.Name,
+		CreatedAt: now,
 		UpdatedAt: now,
 	}
 	body.ID, err = repository.Add(body)

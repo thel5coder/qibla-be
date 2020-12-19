@@ -25,4 +25,7 @@ func (route AuthenticationRoutes) RegisterRoute() {
 	setPinRoute := authenticationRoute.Group("/set-pin")
 	setPinRoute.Use(jwtMiddleware.JWTWithConfig)
 	setPinRoute.POST("", authenticationHandler.SetPin)
+	setFingerPrintRoute := authenticationRoute.Group("/set-fingerprint")
+	setFingerPrintRoute.Use(jwtMiddleware.JWTWithConfig)
+	setFingerPrintRoute.POST("",authenticationHandler.SetFingerPrintStatus)
 }

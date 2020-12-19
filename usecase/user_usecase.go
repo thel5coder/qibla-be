@@ -12,11 +12,11 @@ type UserUseCase struct {
 	*UcContract
 }
 
-func (uc UserUseCase) Browse(isAdminPanel bool,search, order, sort string, page, limit int) (res []viewmodel.UserVm, pagination viewmodel.PaginationVm, err error) {
+func (uc UserUseCase) Browse(isAdminPanel bool, search, order, sort string, page, limit int) (res []viewmodel.UserVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewUserRepository(uc.DB)
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
-	users, count, err := repository.Browse(isAdminPanel,search, order, sort, limit, offset)
+	users, count, err := repository.Browse(isAdminPanel, search, order, sort, limit, offset)
 	if err != nil {
 		return res, pagination, err
 	}
@@ -92,6 +92,17 @@ func (uc UserUseCase) EditPin(ID, PIN string) (err error) {
 
 	encryptedPin, _ := hashing.HashAndSalt(PIN)
 	_, err = repository.EditPIN(ID, encryptedPin, now)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc UserUseCase) EditFingerPrintStatus(ID string, fingerPrintStatus bool) (err error) {
+	repository := actions.NewUserRepository(uc.DB)
+	now := time.Now().UTC().Format(time.RFC3339)
+	_, err = repository.EditFingerPrintStatus(ID, now, fingerPrintStatus)
 	if err != nil {
 		return err
 	}
@@ -207,25 +218,26 @@ func (uc UserUseCase) buildBody(model models.User) (res viewmodel.UserVm) {
 		isPINSet = true
 	}
 	res = viewmodel.UserVm{
-		ID:             model.ID,
-		UserName:       model.UserName,
-		Name:           model.Name.String,
-		Email:          model.Email.String,
-		MobilePhone:    model.MobilePhone.String,
-		PIN:            model.PIN.String,
-		IsActive:       model.IsActive,
-		IsAdminPanel:   model.IsAdminPanel,
-		IsPINSet:       isPINSet,
-		OdooUserID:     model.OdooUserID.Int32,
-		FcmDeviceToken: model.FcmDeviceToken.String,
-		CreatedAt:      model.CreatedAt,
-		UpdatedAt:      model.UpdatedAt,
+		ID:               model.ID,
+		UserName:         model.UserName,
+		Name:             model.Name.String,
+		Email:            model.Email.String,
+		MobilePhone:      model.MobilePhone.String,
+		PIN:              model.PIN.String,
+		IsActive:         model.IsActive,
+		IsAdminPanel:     model.IsAdminPanel.Bool,
+		IsPINSet:         isPINSet,
+		IsFingerPrintSet: model.IsFingerprintSet,
+		OdooUserID:       model.OdooUserID.Int32,
+		FcmDeviceToken:   model.FcmDeviceToken.String,
+		CreatedAt:        model.CreatedAt,
+		UpdatedAt:        model.UpdatedAt,
 		Role: viewmodel.RoleVm{
 			ID:   model.RoleModel.ID,
 			Name: model.RoleModel.Name,
 			Slug: model.RoleModel.Slug,
 		},
-		File:            file,
+		File: file,
 	}
 
 	return res

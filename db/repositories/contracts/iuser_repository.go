@@ -15,6 +15,8 @@ type IUserRepository interface {
 
 	EditPIN(ID, pin, updatedAt string) (res string, err error)
 
+	EditFingerPrintStatus(ID,updatedAt string, status bool) (res string,err error)
+
 	EditPassword(ID, password, updatedAt string) (res string, err error)
 
 	EditUserName(ID, userName, updatedAt string, tx *sql.Tx) (err error)

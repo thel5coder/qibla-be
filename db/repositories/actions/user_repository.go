@@ -24,7 +24,7 @@ func NewUserRepository(DB *sql.DB) contracts.IUserRepository {
 
 const (
 	selectUser = `select u."id",u."username",u."email",u."password",u."is_active",u."created_at",u."updated_at",u."odo_user_id",u."name",
-                  u."mobile_phone",u."pin",u."is_admin_panel",u."fcm_device_token",r."id",r."slug",r."name",f."id",f."path",f."name",
+                  u."mobile_phone",u."pin",u."is_admin_panel",u."fcm_device_token",u.is_fingerprint_set,r."id",r."slug",r."name",f."id",f."path",f."name",
                   array_to_string(array_agg(mu."id" || ':' || mu."menu_id"),','),array_to_string(array_agg(mup."menu_id" || ':' || mup."menu_permission_id"),',')`
 	joinUser = `inner join "roles" r on r."id"=u."role_id" and r."deleted_at" is null
                 left join "files" f on f."id"=u."profile_picture" and f."deleted_at" is null
@@ -42,7 +42,7 @@ var (
 
 func (repository UserRepository) scanRow(row *sql.Row) (res models.User, err error) {
 	err = row.Scan(&res.ID, &res.UserName, &res.Email, &res.Password, &res.IsActive, &res.CreatedAt, &res.UpdatedAt, &res.OdooUserID, &res.Name, &res.MobilePhone, &res.PIN,
-		&res.IsAdminPanel, &res.FcmDeviceToken, &res.RoleModel.ID, &res.RoleModel.Slug, &res.RoleModel.Name, &res.ProfilePictureID, &res.FileModel.Path, &res.FileModel.Name,
+		&res.IsAdminPanel, &res.FcmDeviceToken, &res.IsFingerprintSet, &res.RoleModel.ID, &res.RoleModel.Slug, &res.RoleModel.Name, &res.ProfilePictureID, &res.FileModel.Path, &res.FileModel.Name,
 		&res.MenuUser, &res.MenuPermissionUser)
 	if err != nil {
 		return res, err
@@ -53,7 +53,7 @@ func (repository UserRepository) scanRow(row *sql.Row) (res models.User, err err
 
 func (repository UserRepository) scanRows(rows *sql.Rows) (res models.User, err error) {
 	err = rows.Scan(&res.ID, &res.UserName, &res.Email, &res.Password, &res.IsActive, &res.CreatedAt, &res.UpdatedAt, &res.OdooUserID, &res.Name, &res.MobilePhone, &res.PIN,
-		&res.IsAdminPanel, &res.FcmDeviceToken, &res.RoleModel.ID, &res.RoleModel.Slug, &res.RoleModel.Name, &res.ProfilePictureID, &res.FileModel.Path, &res.FileModel.Name,
+		&res.IsAdminPanel, &res.FcmDeviceToken, &res.IsFingerprintSet, &res.RoleModel.ID, &res.RoleModel.Slug, &res.RoleModel.Name, &res.ProfilePictureID, &res.FileModel.Path, &res.FileModel.Name,
 		&res.MenuUser, &res.MenuPermissionUser)
 	if err != nil {
 		return res, err
@@ -79,7 +79,7 @@ func (repository UserRepository) Browse(isAdminPanel bool, search, order, sort s
 	}
 
 	statement = `select distinct count(u."id") from "users" u ` + joinUser + ` ` + whereStatementUser + ` ` + groupByUser
-	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%",isAdminPanel).Scan(&count)
+	err = repository.DB.QueryRow(statement, "%"+strings.ToLower(search)+"%", isAdminPanel).Scan(&count)
 	if err != nil {
 		return data, count, err
 	}
@@ -119,6 +119,13 @@ func (repository UserRepository) Edit(input viewmodel.UserVm, password string, t
 func (repository UserRepository) EditPIN(ID, pin, updatedAt string) (res string, err error) {
 	statement := `update "users" set "pin"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
 	err = repository.DB.QueryRow(statement, pin, datetime.StrParseToTime(updatedAt, time.RFC3339), ID).Scan(&res)
+
+	return res, err
+}
+
+func (repository UserRepository) EditFingerPrintStatus(ID, updatedAt string, status bool) (res string, err error) {
+	statement := `update "users" set "is_fingerprint_set"=$1, "updated_at"=$2 where "id"=$3 returning "id"`
+	err = repository.DB.QueryRow(statement, status, datetime.StrParseToTime(updatedAt, time.RFC3339), ID).Scan(&res)
 
 	return res, err
 }

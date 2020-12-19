@@ -98,3 +98,12 @@ func (handler AuthenticationHandler) SetPin(ctx echo.Context) error {
 
 	return handler.SendResponse(ctx, nil, nil, err)
 }
+
+func(handler AuthenticationHandler) SetFingerPrintStatus(ctx echo.Context) error{
+	uc := usecase.UserUseCase{UcContract: handler.UseCaseContract}
+	user := ctx.Get("user").(*jwt.CustomClaims)
+
+	err := uc.EditFingerPrintStatus(user.Id,true)
+
+	return handler.SendResponse(ctx, nil, nil, err)
+}
