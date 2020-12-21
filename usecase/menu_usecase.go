@@ -69,7 +69,7 @@ func (uc MenuUseCase) ReadBy(column, value, operator string) (res viewmodel.Menu
 	if err != nil {
 		return res, err
 	}
-	res = uc.buildBody(menu, true)
+	res = uc.buildBody(menu, false)
 
 	return res, err
 }

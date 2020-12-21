@@ -28,7 +28,7 @@ func (handler MenuHandler) Browse(ctx echo.Context) error {
 }
 
 func (handler MenuHandler) BrowseAllTree(ctx echo.Context) error {
-	isActive := ctx.Param("is_active")
+	isActive := ctx.QueryParam("is_active")
 	var isActiveBool bool
 	if isActive == "true" {
 		isActiveBool = true
