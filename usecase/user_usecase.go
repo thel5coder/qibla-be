@@ -227,7 +227,7 @@ func (uc UserUseCase) buildBody(model models.User) (res viewmodel.UserVm) {
 		IsActive:         model.IsActive,
 		IsAdminPanel:     model.IsAdminPanel.Bool,
 		IsPINSet:         isPINSet,
-		IsFingerPrintSet: model.IsFingerprintSet,
+		IsFingerPrintSet: model.IsFingerprintSet.Bool,
 		OdooUserID:       model.OdooUserID.Int32,
 		FcmDeviceToken:   model.FcmDeviceToken.String,
 		CreatedAt:        model.CreatedAt,

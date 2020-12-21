@@ -28,8 +28,15 @@ func (handler MenuHandler) Browse(ctx echo.Context) error {
 }
 
 func (handler MenuHandler) BrowseAllTree(ctx echo.Context) error {
+	isActive := ctx.Param("is_active")
+	var isActiveBool bool
+	if isActive == "true" {
+		isActiveBool = true
+	}else{
+		isActiveBool = false
+	}
 	uc := usecase.MenuUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.BrowseAllBy("m.parent_id", "", "=")
+	res, err := uc.BrowseAllBy("m.parent_id", "", "=",isActiveBool)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }

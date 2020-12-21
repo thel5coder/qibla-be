@@ -51,33 +51,33 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 
 	isExist, err := userUc.IsUserNameExist("", username)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-user-isUserNameExist")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "uc-user-isUserNameExist")
 		return res, err
 	}
 	if !isExist {
-		logruslogger.Log(logruslogger.WarnLevel,messages.CredentialDoNotMatch,functionCaller.PrintFuncName(),"uc-user-isUserNameExist")
+		logruslogger.Log(logruslogger.WarnLevel, messages.CredentialDoNotMatch, functionCaller.PrintFuncName(), "uc-user-isUserNameExist")
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
 	user, err := userUc.ReadBy("u.username", username)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-user-readByUserName")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "uc-user-readByUserName")
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
 	isPasswordValid, err := userUc.IsPasswordValid(user.ID, password)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-user-isPasswordValid")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "uc-user-isPasswordValid")
 		return res, err
 	}
 	if !isPasswordValid {
-		logruslogger.Log(logruslogger.WarnLevel,messages.CredentialDoNotMatch,functionCaller.PrintFuncName(),"uc-user-isPasswordValid")
+		logruslogger.Log(logruslogger.WarnLevel, messages.CredentialDoNotMatch, functionCaller.PrintFuncName(), "uc-user-isPasswordValid")
 		return res, errors.New(messages.CredentialDoNotMatch)
 	}
 
 	err = userUc.EditFcmDeviceToken(user.ID, fcmDeviceToken)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-user-EditFcmDeviceToken")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "uc-user-EditFcmDeviceToken")
 		return res, err
 	}
 
@@ -85,7 +85,7 @@ func (uc AuthenticationUseCase) Login(username, password, fcmDeviceToken string)
 	session, _ := uc.UpdateSessionLogin(user.ID)
 	token, refreshToken, tokenExpiredAt, refreshTokenExpiredAt, err := uc.GenerateJwtToken(jwePayload, username, session)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-generateJwtToken")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "uc-generateJwtToken")
 		return res, err
 	}
 	if user.PIN != "" {
@@ -189,6 +189,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	var user viewmodel.UserVm
 	var userID string
 	var isPinSet bool
+	var isFingerPrint bool
 	userUc := UserUseCase{UcContract: uc.UcContract}
 	jamaahUc := JamaahUseCase{UcContract: uc.UcContract}
 
@@ -208,6 +209,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 		if user.PIN != "" {
 			isPinSet = true
 		}
+		isFingerPrint = user.IsFingerPrintSet
 	} else {
 		uc.TX, err = uc.DB.Begin()
 		if err != nil {
@@ -229,6 +231,7 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 		}
 		uc.TX.Commit()
 		isPinSet = false
+		isFingerPrint = user.IsFingerPrintSet
 	}
 
 	//edit fcm token
@@ -246,11 +249,12 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	}
 
 	res = viewmodel.UserJwtTokenVm{
-		Token:           token,
-		ExpTime:         tokenExpiredAt,
-		RefreshToken:    refreshToken,
-		ExpRefreshToken: refreshTokenExpiredAt,
-		IsPinSet:        isPinSet,
+		Token:            token,
+		ExpTime:          tokenExpiredAt,
+		RefreshToken:     refreshToken,
+		ExpRefreshToken:  refreshTokenExpiredAt,
+		IsPinSet:         isPinSet,
+		IsFingerPrintSet: isFingerPrint,
 	}
 
 	return res, nil

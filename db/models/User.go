@@ -13,7 +13,7 @@ type User struct {
 	PIN                sql.NullString `db:"pin"`
 	IsActive           bool           `db:"is_active"`
 	IsAdminPanel       sql.NullBool   `db:"is_admin_panel"`
-	IsFingerprintSet   bool           `db:"is_fingerprint_set"`
+	IsFingerprintSet   sql.NullBool   `db:"is_fingerprint_set"`
 	OdooUserID         sql.NullInt32  `db:"odoo_user_id"`
 	FcmDeviceToken     sql.NullString `db:"fcm_device_token"`
 	CreatedAt          string         `db:"activation_at"`
