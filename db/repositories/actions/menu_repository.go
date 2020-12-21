@@ -81,13 +81,14 @@ func (repository MenuRepository) Browse(parentID, search, order, sort string, li
 	return data, count, err
 }
 
-func (repository MenuRepository) BrowseAllBy(column, value, operator string) (data []models.Menu, err error) {
-	menuSelectStatementParams = []interface{}{}
-	whereStatement := `where ` + column + ` is null and m."deleted_at" is null and m."is_active"=true`
+func (repository MenuRepository) BrowseAllBy(column, value, operator string,isActive bool) (data []models.Menu, err error) {
+	menuSelectStatementParams = []interface{}{isActive}
+	whereStatement := `where ` + column + ` is null and m."deleted_at" is null and m."is_active"=$1`
 	if value != "" {
-		menuSelectStatementParams = []interface{}{value}
-		whereStatement = `where ` + column + `` + operator + `$1 and m."deleted_at" is null and m."is_active"=true`
+		menuSelectStatementParams = []interface{}{value,isActive}
+		whereStatement = `where ` + column + `` + operator + `$1 and m."deleted_at" is null and m."is_active"=$2`
 	}
+
 	statement := menuSelect + ` from "menus" m ` + menuJoin + ` ` + whereStatement + ` ` + menuGroupBy
 	rows, err := repository.DB.Query(statement, menuSelectStatementParams...)
 	if err != nil {

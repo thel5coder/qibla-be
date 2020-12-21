@@ -27,35 +27,35 @@ func (uc MenuUseCase) Browse(parentID, search, order, sort string, page, limit i
 	}
 
 	for _, menu := range menus {
-		res = append(res, uc.buildBody(menu))
+		res = append(res, uc.buildBody(menu, true))
 	}
 	pagination = uc.setPaginationResponse(page, limit, count)
 
 	return res, pagination, err
 }
 
-func (uc MenuUseCase) BrowseAllBy(column, value, operator string) (res []viewmodel.MenuVm, err error) {
+func (uc MenuUseCase) BrowseAllBy(column, value, operator string, isActive bool) (res []viewmodel.MenuVm, err error) {
 	repository := actions.NewMenuRepository(uc.DB)
-	menus, err := repository.BrowseAllBy(column, value, operator)
+	menus, err := repository.BrowseAllBy(column, value, operator, isActive)
 	if err != nil {
 		return res, err
 	}
 
 	for _, menu := range menus {
-		res = append(res, uc.buildBody(menu))
+		res = append(res, uc.buildBody(menu, isActive))
 	}
 
 	return res, nil
 }
 
-func (uc MenuUseCase) browseChild(parentID string) (res []viewmodel.MenuVm) {
-	menus, err := uc.BrowseAllBy("m.parent_id", parentID, "=")
+func (uc MenuUseCase) browseChild(parentID string, isActive bool) (res []viewmodel.MenuVm) {
+	menus, err := uc.BrowseAllBy("m.parent_id", parentID, "=", isActive)
 	if err != nil {
 		return res
 	}
 
-	for _,menu := range menus {
-		menu.ChildMenus = uc.browseChild(menu.ID)
+	for _, menu := range menus {
+		menu.ChildMenus = uc.browseChild(menu.ID, isActive)
 	}
 	res = menus
 
@@ -69,7 +69,7 @@ func (uc MenuUseCase) ReadBy(column, value, operator string) (res viewmodel.Menu
 	if err != nil {
 		return res, err
 	}
-	res = uc.buildBody(menu)
+	res = uc.buildBody(menu, true)
 
 	return res, err
 }
@@ -264,7 +264,7 @@ func (uc MenuUseCase) isMenuExist(ID, column, value string) (res bool, err error
 	return count > 0, err
 }
 
-func (uc MenuUseCase) buildBody(model models.Menu) viewmodel.MenuVm {
+func (uc MenuUseCase) buildBody(model models.Menu, isActive bool) viewmodel.MenuVm {
 	var menuPermissions []viewmodel.SelectedMenuPermissionVm
 
 	if model.Permissions.String != "" {
@@ -288,6 +288,6 @@ func (uc MenuUseCase) buildBody(model models.Menu) viewmodel.MenuVm {
 		CreatedAt:       model.CreatedAt,
 		UpdatedAt:       model.UpdatedAt,
 		MenuPermissions: menuPermissions,
-		ChildMenus:      uc.browseChild(model.ID),
+		ChildMenus:      uc.browseChild(model.ID, isActive),
 	}
 }

@@ -9,7 +9,7 @@ import (
 type IMenuRepository interface {
 	Browse(parentID,search, order, sort string, limit, offset int) (data []models.Menu, count int, err error)
 
-	BrowseAllBy(column,value,operator string) (data []models.Menu,err error)
+	BrowseAllBy(column,value,operator string,isActive bool) (data []models.Menu,err error)
 
 	ReadBy(column, value,operator string) (data models.Menu, err error)
 
