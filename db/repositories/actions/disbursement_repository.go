@@ -67,8 +67,12 @@ func (repository DisbursementRepository) Browse(filters map[string]interface{}, 
 		conditionString += ` AND def."total"::TEXT LIKE '%` + val.(string) + `%'`
 	}
 
-	if val, ok := filters["transaction_period"]; ok {
-		conditionString += ` AND (def."start_period" < '` + val.(string) + `' or def."end_period" > '`+val.(string)+`')`
+	if val, ok := filters["start_date"]; ok {
+		conditionString += ` AND def."start_period" <= '` + val.(string) + `'`
+	}
+
+	if val,ok := filters["end_date"]; ok {
+		conditionString += `AND def."end_period" >= '`+val.(string)+`'`
 	}
 
 	if val, ok := filters["contact_account_bank_name"]; ok {
