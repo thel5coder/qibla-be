@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/pkg/functioncaller"
+	"qibla-backend/pkg/logruslogger"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 )
@@ -51,8 +53,12 @@ func (uc PartnerExtraProductUseCase) ReadBy(column, value string) (res viewmodel
 func (uc PartnerExtraProductUseCase) Add(partnerID, productID string) (err error) {
 	repository := actions.NewPartnerExtraProductRepository(uc.DB)
 	err = repository.Add(partnerID, productID, uc.TX)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functioncaller.PrintFuncName(),"query-partnerExtraProduct-add")
+		return err
+	}
 
-	return err
+	return nil
 }
 
 func (uc PartnerExtraProductUseCase) DeleteBy(column, value string) (err error) {
@@ -63,21 +69,22 @@ func (uc PartnerExtraProductUseCase) DeleteBy(column, value string) (err error) 
 }
 
 func (uc PartnerExtraProductUseCase) Store(partnerID string, extraProducts []requests.ExtraProductRequest) (err error) {
-	count,err := uc.CountBy("partner_id",partnerID)
-	if err != nil {
-		return err
-	}
-
-	if count > 0 {
-		err = uc.DeleteBy("partner_id",partnerID)
-		if err != nil{
-			return err
-		}
-	}
+	//count,err := uc.CountBy("partner_id",partnerID)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//if count > 0 {
+	//	err = uc.DeleteBy("partner_id",partnerID)
+	//	if err != nil{
+	//		return err
+	//	}
+	//}
 
 	for _, product := range extraProducts {
 		err = uc.Add(partnerID,product.ID)
 		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel,err.Error(), functioncaller.PrintFuncName(),"uc-partnerExtraProduct-add")
 			return err
 		}
 	}
