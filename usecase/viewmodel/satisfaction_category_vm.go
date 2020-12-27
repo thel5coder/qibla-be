@@ -9,6 +9,5 @@ type SatisfactionCategoryVm struct {
 	IsActive    bool                     `json:"is_active"`
 	CreatedAt   string                   `json:"created_at"`
 	UpdatedAt   string                   `json:"updated_at"`
-	DeletedAt   string                   `json:"deleted_at"`
 	Child       []SatisfactionCategoryVm `json:"child"`
 }

@@ -17,8 +17,7 @@ func (route SatisfactionCategoryRoutes) RegisterRoute(){
 
 	satisfactionCategoryRoute := route.RouteGroup.Group("/satisfaction-category")
 	satisfactionCategoryRoute.Use(jwtMiddleware.JWTWithConfig)
-	satisfactionCategoryRoute.GET("/all/parent",handler.BrowseAllParent)
-	satisfactionCategoryRoute.GET("/all/tree",handler.BrowseAllTree)
+	satisfactionCategoryRoute.GET("/all/tree",handler.Browse)
 	satisfactionCategoryRoute.GET("/:id",handler.ReadByPk)
 	satisfactionCategoryRoute.POST("",handler.Store)
 	satisfactionCategoryRoute.DELETE("/:id",handler.DeleteByPk)

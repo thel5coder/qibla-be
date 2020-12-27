@@ -7,11 +7,13 @@ import (
 )
 
 type ISatisfactionCategoryRepository interface {
-	BrowseAllBy(column, value string) (data []models.SatisfactionCategory, err error)
+	BrowseAllBy(filters map[string]interface{},order,sort string) (data []models.SatisfactionCategory, err error)
 
-	ReadBy(column, value string) (data models.SatisfactionCategory, err error)
+	ReadBy(column, value string) (data []models.SatisfactionCategory, err error)
 
 	Edit(input viewmodel.SatisfactionCategoryVm, tx *sql.Tx) (err error)
+
+	EditUpdatedAt(model models.SatisfactionCategory,tx *sql.Tx) (err error)
 
 	Add(input viewmodel.SatisfactionCategoryVm, tx *sql.Tx) (err error)
 

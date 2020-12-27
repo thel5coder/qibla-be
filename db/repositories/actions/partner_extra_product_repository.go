@@ -43,7 +43,6 @@ func (repository PartnerExtraProductRepository) BrowseByPartnerID(partnerID stri
 		}
 		data = append(data, dataTemp)
 	}
-
 	return data, err
 }
 

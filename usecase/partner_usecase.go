@@ -2,9 +2,12 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/pkg/functioncaller"
 	"qibla-backend/pkg/hashing"
+	"qibla-backend/pkg/logruslogger"
 	"qibla-backend/pkg/messages"
 	"qibla-backend/pkg/str"
 	"qibla-backend/server/requests"
@@ -318,7 +321,12 @@ func (uc PartnerUseCase) buildBody(data models.Partner) (res viewmodel.PartnerVm
 
 	file, _ := fileUc.ReadByPk(data.Contact.Logo)
 	product, _ := settingProductUc.ReadBy("product_id", data.ProductID)
-	partnerExtraProducts, _ := partnerExtraProductUc.BrowseByPartnerID(data.ID)
+	fmt.Println(data.ID)
+	partnerExtraProducts, err := partnerExtraProductUc.BrowseByPartnerID(data.ID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functioncaller.PrintFuncName(),"uc-partnerExtraProduct-browseByPartnerID")
+	}
+	fmt.Println(partnerExtraProducts)
 
 	return viewmodel.PartnerVm{
 		ID:                          data.ID,

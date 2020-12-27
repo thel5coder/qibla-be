@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 	"qibla-backend/pkg/datetime"
@@ -19,59 +18,84 @@ func NewSatisfactionCategoryRepository(db *sql.DB) contracts.ISatisfactionCatego
 	return &SatisfactionCategoryRepository{DB: db}
 }
 
-const(
-	satisfactionCategorySelectStatement = ``
-)
-
-func (repository SatisfactionCategoryRepository) BrowseAllBy(column, value string) (data []models.SatisfactionCategory, err error) {
-	var rows *sql.Rows
-	if value == "" && column == "parent_id" {
-		statement := `select * from "satisfaction_categories" where "parent_id" is null and "deleted_at" is null order by updated_at desc`
-		rows, err = repository.DB.Query(statement)
-		fmt.Println(rows)
-	} else {
-		statement := `select * from "satisfaction_categories" where ` + column + `=$1 and "deleted_at" is null order by updated_at desc`
-		rows, err = repository.DB.Query(statement, value)
+func (repository SatisfactionCategoryRepository) scanRows(rows *sql.Rows) (res models.SatisfactionCategory, err error) {
+	err = rows.Scan(&res.ID, &res.ParentID, &res.Slug, &res.Name, &res.IsActive, &res.Description, &res.CreatedAt, &res.UpdatedAt)
+	if err != nil {
+		return res, err
 	}
+
+	return res, nil
+}
+
+func (repository SatisfactionCategoryRepository) scanRow(row *sql.Row) (res models.SatisfactionCategory, err error) {
+	err = row.Scan(&res.ID, &res.ParentID, &res.Slug, &res.Name, &res.IsActive, &res.Description, &res.CreatedAt, &res.UpdatedAt)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (repository SatisfactionCategoryRepository) BrowseAllBy(filters map[string]interface{}, order, sort string) (data []models.SatisfactionCategory, err error) {
+	filterStatement := ``
+
+	if val, ok := filters["name"]; ok {
+		filterStatement += ` and lower(sc.name) like '%` + val.(string) + `%'`
+	}
+
+	if val, ok := filters["description"]; ok {
+		filterStatement += ` and lower(sc.description) like '%` + val.(string) + `%'`
+	}
+
+	if val, ok := filters["updated_at"]; ok {
+		filterStatement += ` and cast(sc.updated_at as varchar)='` + val.(string) + `'`
+	}
+
+	statement := `WITH RECURSIVE satisfactions AS (
+                  select id,parent_id,slug,name,is_active,description,created_at,updated_at
+	              from satisfaction_categories
+	              where parent_id is null
+	              UNION 
+		          SELECT sc.id,sc.parent_id,sc.slug,sc.name,sc.is_active,sc.description,sc.created_at,sc.updated_at
+                  from satisfaction_categories sc inner join satisfactions s on s.id=sc.parent_id
+				  where sc.deleted_at is null ` + filterStatement + `
+                  )select * from satisfactions order by ` + order + ` ` + sort
+	rows, err := repository.DB.Query(statement)
 	if err != nil {
 		return data, err
 	}
-
 	for rows.Next() {
-		dataTemp := models.SatisfactionCategory{}
-		err = rows.Scan(
-			&dataTemp.ID,
-			&dataTemp.ParentID,
-			&dataTemp.Slug,
-			&dataTemp.Name,
-			&dataTemp.IsActive,
-			&dataTemp.CreatedAt,
-			&dataTemp.UpdatedAt,
-			&dataTemp.DeletedAt,
-			&dataTemp.Description,
-		)
+		temp, err := repository.scanRows(rows)
 		if err != nil {
 			return data, err
 		}
-		data = append(data, dataTemp)
+		data = append(data, temp)
 	}
 
 	return data, err
 }
 
-func (repository SatisfactionCategoryRepository) ReadBy(column, value string) (data models.SatisfactionCategory, err error) {
-	statement := `select * from "satisfaction_categories" where ` + column + `=$1 and "deleted_at" is null`
-	err = repository.DB.QueryRow(statement, value).Scan(
-		&data.ID,
-		&data.ParentID,
-		&data.Slug,
-		&data.Name,
-		&data.IsActive,
-		&data.CreatedAt,
-		&data.UpdatedAt,
-		&data.DeletedAt,
-		&data.Description,
-	)
+func (repository SatisfactionCategoryRepository) ReadBy(column, value string) (data []models.SatisfactionCategory, err error) {
+	statement := `WITH RECURSIVE satisfactions AS (
+                  select id,parent_id,slug,name,is_active,description,created_at,updated_at
+	              from satisfaction_categories
+	              where parent_id is null and ` + column + `=$1
+	              UNION 
+		          SELECT sc.id,sc.parent_id,sc.slug,sc.name,sc.is_active,sc.description,sc.created_at,sc.updated_at
+                  from satisfaction_categories sc inner join satisfactions s on s.id=sc.parent_id
+				  where sc.deleted_at is null
+                  )select * from satisfactions`
+	rows, err := repository.DB.Query(statement,value)
+	if err != nil {
+		return data, err
+	}
+	for rows.Next() {
+		temp, err := repository.scanRows(rows)
+		if err != nil {
+			return data, err
+		}
+		data = append(data, temp)
+	}
 
 	return data, err
 }
@@ -90,6 +114,16 @@ func (SatisfactionCategoryRepository) Edit(input viewmodel.SatisfactionCategoryV
 	)
 
 	return err
+}
+
+func (SatisfactionCategoryRepository) EditUpdatedAt(model models.SatisfactionCategory, tx *sql.Tx) (err error) {
+	statement := `update satisfaction_categories set updated_at=$1 where id=$2`
+	_, err = tx.Exec(statement, datetime.StrParseToTime(model.UpdatedAt, time.RFC3339), model.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (SatisfactionCategoryRepository) Add(input viewmodel.SatisfactionCategoryVm, tx *sql.Tx) (err error) {

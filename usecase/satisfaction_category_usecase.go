@@ -3,7 +3,10 @@ package usecase
 import (
 	"errors"
 	"github.com/gosimple/slug"
+	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/pkg/functioncaller"
+	"qibla-backend/pkg/logruslogger"
 	"qibla-backend/pkg/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
@@ -14,107 +17,33 @@ type SatisfactionCategoryUseCase struct {
 	*UcContract
 }
 
-func (uc SatisfactionCategoryUseCase) BrowseAllBy(column, value string) (res []viewmodel.SatisfactionCategoryVm, err error) {
+func (uc SatisfactionCategoryUseCase) BrowseAllBy(filters map[string]interface{},order,sort string) (res []viewmodel.SatisfactionCategoryVm, err error) {
 	repository := actions.NewSatisfactionCategoryRepository(uc.DB)
-	satisfactionCategories, err := repository.BrowseAllBy(column, value)
+	if order == "" {
+		order = "name"
+	}
+	if sort == ""{
+		sort = "asc"
+	}
+	satisfactionCategories, err := repository.BrowseAllBy(filters,order,sort)
 	if err != nil {
 		return res, err
 	}
 
-	for _, satisfactionCategory := range satisfactionCategories {
-		res = append(res, viewmodel.SatisfactionCategoryVm{
-			ID:          satisfactionCategory.ID,
-			ParentID:    satisfactionCategory.ParentID.String,
-			Slug:        satisfactionCategory.Slug,
-			Name:        satisfactionCategory.Name,
-			Description: satisfactionCategory.Description.String,
-			IsActive:    satisfactionCategory.IsActive,
-			CreatedAt:   satisfactionCategory.CreatedAt,
-			UpdatedAt:   satisfactionCategory.UpdatedAt,
-			DeletedAt:   satisfactionCategory.DeletedAt.String,
-			Child:       nil,
-		})
-	}
+	res = uc.buildBody(satisfactionCategories)
+
 
 	return res, err
 }
 
-func (uc SatisfactionCategoryUseCase) BrowseParent() (res []viewmodel.SatisfactionCategoryVm, err error) {
-	res, err = uc.BrowseAllBy("parent_id", "")
-	if err != nil {
-		return res, err
-	}
-
-	return res, err
-}
-
-func (uc SatisfactionCategoryUseCase) BrowseChild(parentID string) (res []viewmodel.SatisfactionCategoryVm) {
-	satisfactionCategories, err := uc.BrowseAllBy("parent_id", parentID)
-	if err != nil {
-		return res
-	}
-
-	for _, satisfactionCategory := range satisfactionCategories {
-		res = append(res, viewmodel.SatisfactionCategoryVm{
-			ID:          satisfactionCategory.ID,
-			ParentID:    satisfactionCategory.ParentID,
-			Slug:        satisfactionCategory.Slug,
-			Name:        satisfactionCategory.Name,
-			Description: satisfactionCategory.Description,
-			IsActive:    satisfactionCategory.IsActive,
-			CreatedAt:   satisfactionCategory.CreatedAt,
-			UpdatedAt:   satisfactionCategory.UpdatedAt,
-			DeletedAt:   satisfactionCategory.DeletedAt,
-			Child:       uc.BrowseChild(satisfactionCategory.ID),
-		})
-	}
-
-	return res
-}
-
-func (uc SatisfactionCategoryUseCase) BrowseAllTree() (res []viewmodel.SatisfactionCategoryVm, err error) {
-	parents, err := uc.BrowseParent()
-	if err != nil {
-		return res, err
-	}
-
-	for _, parent := range parents {
-		res = append(res, viewmodel.SatisfactionCategoryVm{
-			ID:          parent.ID,
-			ParentID:    parent.ParentID,
-			Slug:        parent.Slug,
-			Name:        parent.Name,
-			Description: parent.Description,
-			IsActive:    parent.IsActive,
-			CreatedAt:   parent.CreatedAt,
-			UpdatedAt:   parent.UpdatedAt,
-			DeletedAt:   parent.DeletedAt,
-			Child:       uc.BrowseChild(parent.ID),
-		})
-	}
-
-	return res, err
-}
-
-func (uc SatisfactionCategoryUseCase) ReadBy(column, value string) (res viewmodel.SatisfactionCategoryVm, err error) {
+func (uc SatisfactionCategoryUseCase) ReadBy(column, value string) (res []viewmodel.SatisfactionCategoryVm, err error) {
 	repository := actions.NewSatisfactionCategoryRepository(uc.DB)
-	satisfactionCategory, err := repository.ReadBy(column, value)
+	satisfactionCategory,err := repository.ReadBy(column,value)
 	if err != nil {
-		return res, err
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functioncaller.PrintFuncName(),"query-satisfactionCategory-readBy")
+		return res,err
 	}
-
-	res = viewmodel.SatisfactionCategoryVm{
-		ID:          satisfactionCategory.ID,
-		ParentID:    satisfactionCategory.ParentID.String,
-		Slug:        satisfactionCategory.Slug,
-		Name:        satisfactionCategory.Name,
-		Description: satisfactionCategory.Description.String,
-		IsActive:    satisfactionCategory.IsActive,
-		CreatedAt:   satisfactionCategory.CreatedAt,
-		UpdatedAt:   satisfactionCategory.UpdatedAt,
-		DeletedAt:   satisfactionCategory.DeletedAt.String,
-		Child:       uc.BrowseChild(satisfactionCategory.ID),
-	}
+	res = uc.buildBody(satisfactionCategory)
 
 	return res, err
 }
@@ -143,6 +72,23 @@ func (uc SatisfactionCategoryUseCase) Edit(ID, parentID, name, description strin
 	err = repository.Edit(body, uc.TX)
 
 	return err
+}
+
+//edit updated at
+func (uc SatisfactionCategoryUseCase) EditUpdatedAt(ID string) (err error) {
+	repository := actions.NewSatisfactionCategoryRepository(uc.DB)
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	model := models.SatisfactionCategory{
+		ID:        ID,
+		UpdatedAt: now,
+	}
+	err = repository.EditUpdatedAt(model, uc.TX)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (uc SatisfactionCategoryUseCase) Add(parentID, name, description string, isActive bool) (err error) {
@@ -191,6 +137,14 @@ func (uc SatisfactionCategoryUseCase) Store(input *requests.SatisfactionCategory
 			return err
 		}
 	}
+
+	err = uc.EditUpdatedAt(input.ParentID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-satisfactionCategory-editUpdatedAtParent")
+		uc.TX.Rollback()
+
+		return err
+	}
 	uc.TX.Commit()
 
 	return nil
@@ -226,7 +180,7 @@ func (uc SatisfactionCategoryUseCase) DeleteByPk(ID string) (err error) {
 
 			return err
 		}
-	}else{
+	} else {
 		err = uc.DeleteBy("id", ID)
 		if err != nil {
 			uc.TX.Rollback()
@@ -258,4 +212,46 @@ func (uc SatisfactionCategoryUseCase) CountByParentID(parentID, ID, slug string)
 	}
 
 	return res, err
+}
+
+func (uc SatisfactionCategoryUseCase) buildBody(model []models.SatisfactionCategory) []viewmodel.SatisfactionCategoryVm {
+	var parents []viewmodel.SatisfactionCategoryVm
+
+	for _,data := range model {
+		if data.ParentID.String == "" {
+			parents = append(parents, viewmodel.SatisfactionCategoryVm{
+				ID:          data.ID,
+				ParentID:    data.ParentID.String,
+				Slug:        data.Slug,
+				Name:        data.Name,
+				Description: data.Description.String,
+				IsActive:    data.IsActive,
+				CreatedAt:   data.CreatedAt,
+				UpdatedAt:   data.UpdatedAt,
+				Child:       nil,
+			})
+		}
+	}
+
+	if len(parents) > 0 {
+		for i := 0; i < len(parents); i ++ {
+			for _,data := range model {
+				if parents[i].ID == data.ParentID.String {
+					parents[i].Child = append(parents[i].Child, viewmodel.SatisfactionCategoryVm{
+						ID:          data.ID,
+						ParentID:    data.ParentID.String,
+						Slug:        data.Slug,
+						Name:        data.Name,
+						Description: data.Description.String,
+						IsActive:    data.IsActive,
+						CreatedAt:   data.CreatedAt,
+						UpdatedAt:   data.UpdatedAt,
+						Child:       nil,
+					})
+				}
+			}
+		}
+	}
+
+	return parents
 }

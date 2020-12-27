@@ -12,16 +12,25 @@ type SatisfactionCategoryHandler struct {
 	Handler
 }
 
-func (handler SatisfactionCategoryHandler) BrowseAllParent(ctx echo.Context) error {
-	uc := usecase.SatisfactionCategoryUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.BrowseParent()
+func (handler SatisfactionCategoryHandler) Browse(ctx echo.Context) error {
+	order := ctx.QueryParam("order")
+	sort := ctx.QueryParam("sort")
+	filters := make(map[string]interface{})
 
-	return handler.SendResponse(ctx, res, nil, err)
-}
+	if ctx.QueryParam("name") != ""{
+		filters["name"]=ctx.QueryParam("name")
+	}
 
-func (handler SatisfactionCategoryHandler) BrowseAllTree(ctx echo.Context) error {
+	if ctx.QueryParam("description") !=""{
+		filters["description"] = ctx.QueryParam("description")
+	}
+
+	if ctx.QueryParam("updated_at") != ""{
+		filters["updated_at"]=ctx.QueryParam("updated_at")
+	}
+
 	uc := usecase.SatisfactionCategoryUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.BrowseAllTree()
+	res, err := uc.BrowseAllBy(filters,order,sort)
 
 	return handler.SendResponse(ctx, res, nil, err)
 }
