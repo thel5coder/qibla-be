@@ -36,10 +36,16 @@ func (cred YoutubeCred) GetYoutubeService() (res *youtube.Service,err error){
 
 
 func(cred YoutubeCred) getClient(scope string) *http.Client {
+	fmt.Println("disini")
 	ctx := context.Background()
+	cacheFile, err := tokenCacheFile()
+	if err != nil {
+		log.Fatalf("Unable to get path to cached credential file. %v", err)
+	}
 
 	b, err := ioutil.ReadFile(cred.SecretFile)
 	if err != nil {
+		fmt.Println("1")
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
 
@@ -47,11 +53,14 @@ func(cred YoutubeCred) getClient(scope string) *http.Client {
 	// at ~/.credentials/youtube-go.json
 	config, err := google.ConfigFromJSON(b, scope)
 	if err != nil {
+		fmt.Println(2)
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 
 	tok, err := tokenFromFile(cred.TokenFile)
 	if err != nil {
+		tok = getTokenFromWeb(config)
+		saveToken(cacheFile,tok)
 		fmt.Println(err.Error())
 	}
 	return config.Client(ctx, tok)
@@ -119,4 +128,23 @@ func saveToken(file string, token *oauth2.Token) {
 	}
 	defer f.Close()
 	json.NewEncoder(f).Encode(token)
+}
+
+// getTokenFromWeb uses Config to request a Token.
+// It returns the retrieved Token.
+func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
+	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	fmt.Printf("Go to the following link in your browser then type the "+
+		"authorization code: \n%v\n", authURL)
+
+	var code string
+	if _, err := fmt.Scan(&code); err != nil {
+		log.Fatalf("Unable to read authorization code %v", err)
+	}
+
+	tok, err := config.Exchange(oauth2.NoContext, code)
+	if err != nil {
+		log.Fatalf("Unable to retrieve token from web %v", err)
+	}
+	return tok
 }

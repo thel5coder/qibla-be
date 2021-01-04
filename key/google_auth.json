@@ -1,23 +1,23 @@
 {
   "web": {
-    "client_id": "147253454212-fn7k3q4avgarj26an6ak1nio7nqn9v8e.apps.googleusercontent.com",
-    "project_id": "qibla-283800",
+    "client_id": "979075131704-9gkpanmfictvo7nb4cmpgureho9qa14g.apps.googleusercontent.com",
+    "project_id": "paslon",
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
     "token_uri": "https://oauth2.googleapis.com/token",
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_secret": "HxgfsmbV6LgrhT8KFDo7vpxP",
+    "client_secret": "S5s-mFYElIEHGRfkd_E4ZNJY",
     "redirect_uris": [
-      "https://qibla-283800.firebaseapp.com/__/auth/handler",
-      "http://localhost:8090"
+      "http://localhost:3000",
+      "http://localhost:3001/auth/google/redirect",
+      "http://localhost:8090",
+      "https://stg-api.qibla.co.id/auth/google/redirect",
+      "https://dev-api.qibla.co.id/auth/google/redirect"
     ],
     "javascript_origins": [
+      "https://dev-api.qibla.co.id",
+      "https://stg-api.qibla.co.id",
       "http://localhost",
-      "http://localhost:5000",
-      "https://qibla-283800.firebaseapp.com",
-      "https://api.qibla.co.id",
-      "http://localhost:3001",
-      "http://127.0.0.1",
-      "http://127.0.0.1:3001"
+      "http://localhost:3001"
     ]
   }
 }

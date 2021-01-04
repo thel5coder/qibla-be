@@ -1,7 +1,11 @@
 package usecase
 
 import (
+	"errors"
 	"qibla-backend/db/repositories/actions"
+	"qibla-backend/pkg/functioncaller"
+	"qibla-backend/pkg/logruslogger"
+	"qibla-backend/pkg/messages"
 	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 	"strings"
@@ -91,10 +95,12 @@ func (uc VideoContentUseCase) Edit(ID string, input *requests.VideoContentReques
 
 	count, err := uc.CountBy(ID, "channel_id", channelID)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-videoContent-countByChannelID")
 		return err
 	}
 	if count > 0 {
-		return err
+		logruslogger.Log(logruslogger.WarnLevel, messages.DataAlreadyExist, functioncaller.PrintFuncName(), "uc-videoContentDetail-dataAlreadyExist")
+		return errors.New(messages.DataAlreadyExist)
 	}
 
 	body := viewmodel.VideoContentVm{
@@ -107,7 +113,15 @@ func (uc VideoContentUseCase) Edit(ID string, input *requests.VideoContentReques
 	}
 	_, err = repository.Edit(body)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, messages.DataAlreadyExist, functioncaller.PrintFuncName(), "query-videoContent-edit")
 		return err
+	}
+
+	//fetch data from youtube and store to db
+	err = uc.YoutubeStore(ID, channelID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-videoContent-youtubeStore")
+		err = nil
 	}
 
 	return nil
@@ -121,10 +135,12 @@ func (uc VideoContentUseCase) Add(input *requests.VideoContentRequest) (err erro
 
 	count, err := uc.CountBy("", "channel_id", channelID)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-videoContent-countByChannelID")
 		return err
 	}
 	if count > 0 {
-		return err
+		logruslogger.Log(logruslogger.WarnLevel, messages.DataAlreadyExist, functioncaller.PrintFuncName(), "uc-videoContentDetail-dataAlreadyExist")
+		return errors.New(messages.DataAlreadyExist)
 	}
 
 	body := viewmodel.VideoContentVm{
@@ -135,9 +151,17 @@ func (uc VideoContentUseCase) Add(input *requests.VideoContentRequest) (err erro
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
-	_, err = repository.Add(body)
+	body.ID, err = repository.Add(body)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, messages.DataAlreadyExist, functioncaller.PrintFuncName(), "query-videoContent-add")
 		return err
+	}
+
+	//fetch data from youtube and store to db
+	err = uc.YoutubeStore(body.ID, channelID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-videoContent-youtubeStore")
+		err = nil
 	}
 
 	return nil
@@ -149,12 +173,20 @@ func (uc VideoContentUseCase) Delete(ID string) (err error) {
 
 	count, err := uc.CountBy("", "id", ID)
 	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-videoContent-countByID")
 		return err
 	}
 	if count > 0 {
 		_, err = repository.Delete(ID, now, now)
 		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-videoContent-delete")
 			return err
+		}
+
+		videoKajianUc := VideoKajianUseCase{UcContract:uc.UcContract}
+		err = videoKajianUc.DeleteBy("video_content_id",ID,"=")
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-videoKajian-deleteByVideoContentID")
 		}
 	}
 
@@ -169,4 +201,23 @@ func (uc VideoContentUseCase) CountBy(ID, column, value string) (res int, err er
 	}
 
 	return res, err
+}
+
+//youtube usecase, fetch data from youtube and save to postgres
+func (uc VideoContentUseCase) YoutubeStore(ID, channelID string) (err error) {
+	//fetch video by channel id
+	youtubeUc := YoutubeUseCase{UcContract: uc.UcContract}
+	videoKajianRequest, err := youtubeUc.GetVideoIDByChannelID([]string{channelID}, ID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, messages.DataAlreadyExist, functioncaller.PrintFuncName(), "uc-youtube-getVideoByChannelID")
+	}
+
+	//store video to db
+	videoKajianUc := VideoKajianUseCase{UcContract: uc.UcContract}
+	err = videoKajianUc.Store(videoKajianRequest)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, messages.DataAlreadyExist, functioncaller.PrintFuncName(), "uc-videoKajian-store")
+	}
+
+	return err
 }

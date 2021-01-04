@@ -42,7 +42,7 @@ const (
 	MaxOtpSubmitRetry = 3
 	// StaticBaseURL ...
 	StaticBaseURL               = "/statics"
-	defaultMaxResultYoutubeData = 10
+	defaultMaxResultYoutubeData = 3
 	defaultYoutubeSearchType    = "video"
 	defaultYoutubeOrder         = "date"
 	defaultFaspayTerminal       = 10

@@ -1,8 +1,10 @@
 package usecase
 
 import (
-	"encoding/json"
 	"fmt"
+	"qibla-backend/pkg/functioncaller"
+	"qibla-backend/pkg/logruslogger"
+	"qibla-backend/server/requests"
 	"qibla-backend/usecase/viewmodel"
 )
 
@@ -11,7 +13,7 @@ type YoutubeUseCase struct {
 }
 
 //get video from youtube by channel id
-func (uc YoutubeUseCase) GetVideoIDByChannelID(channelIDs []string) (res []viewmodel.ChannelVideoVm, err error) {
+func (uc YoutubeUseCase) GetVideoIDByChannelID(channelIDs []string,videoContentID string) (res []requests.VideoKajianRequest, err error) {
 	parts := []string{"snippet"}
 
 	for _, channelID := range channelIDs {
@@ -29,17 +31,21 @@ func (uc YoutubeUseCase) GetVideoIDByChannelID(channelIDs []string) (res []viewm
 		}
 
 		for _, item := range response.Items {
-			var thumbnails map[string]interface{}
-			jsonThumbnail, _ := item.Snippet.Thumbnails.MarshalJSON()
-			json.Unmarshal(jsonThumbnail, &thumbnails)
+			video,err := uc.GetVideo(item.Id.VideoId)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel,err.Error(),functioncaller.PrintFuncName(),"uc-youtube-getVideo")
+				err = nil
+			}
 
-			res = append(res, viewmodel.ChannelVideoVm{
-				ID:          item.Id.VideoId,
-				Title:       item.Snippet.Title,
-				ChannelName: item.Snippet.ChannelTitle,
-				Thumbnails:  thumbnails,
-				Description: item.Snippet.Description,
-				PublishedAt: item.Snippet.PublishedAt,
+			res = append(res,requests.VideoKajianRequest{
+				YoutubeVideoID: item.Id.VideoId,
+				VideoContentID: videoContentID,
+				Title:          video.Title,
+				ChannelName:    video.ChannelName,
+				Description:    video.Description,
+				EmbeddedPlayer: video.EmbeddedPlayer,
+				Thumbnails:     item.Snippet.Thumbnails,
+				PublishedAt:    video.PublishedAt,
 			})
 		}
 	}
