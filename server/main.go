@@ -20,6 +20,7 @@ import (
 	"log"
 	"os"
 	"qibla-backend/db"
+	"qibla-backend/pkg/aes"
 	"qibla-backend/pkg/amqp"
 	awsHelper "qibla-backend/pkg/aws"
 	"qibla-backend/pkg/env"
@@ -166,7 +167,6 @@ func main() {
 	usecase.AmqpConnection = amqpConn
 	usecase.AmqpChannel = amqpChannel
 
-
 	// Flip
 	flipCredential := flip.Credential{
 		BaseURL:         os.Getenv("FLIP_BASE_URL"),
@@ -174,30 +174,34 @@ func main() {
 		ValidationToken: envConfig["FLIP_VALIDATION_TOKEN"],
 	}
 
+	//aes
+	aesCred := aes.Credential{Key: os.Getenv("AES_KEY")}
+
 	//init validator
 	validatorInit()
 
 	e := echo.New()
 
 	ucContract := usecase.UcContract{
-		ReqID:              xid.New().String(),
-		E:                  e,
-		DB:                 database,
-		RedisClient:        redisClient,
-		Jwe:                jweCredential,
-		Validate:           validatorDriver,
-		Translator:         translator,
-		JwtConfig:          jwtConfig,
-		JwtCred:            jwtCred,
-		Odoo:               c,
-		AWSS3:              awsS3,
-		Pusher:             pusherCredential,
-		GoMailConfig:       goMailConfig,
-		YoutubeService:     youtubeService,
-		Fcm:                fcmConnection,
-		AmqpConn:           amqpConn,
-		AmqpChannel:        amqpChannel,
-		Flip:               flipCredential,
+		ReqID:          xid.New().String(),
+		E:              e,
+		DB:             database,
+		RedisClient:    redisClient,
+		Jwe:            jweCredential,
+		Validate:       validatorDriver,
+		Translator:     translator,
+		JwtConfig:      jwtConfig,
+		JwtCred:        jwtCred,
+		Odoo:           c,
+		AWSS3:          awsS3,
+		Pusher:         pusherCredential,
+		GoMailConfig:   goMailConfig,
+		YoutubeService: youtubeService,
+		Fcm:            fcmConnection,
+		AmqpConn:       amqpConn,
+		AmqpChannel:    amqpChannel,
+		Flip:           flipCredential,
+		AES:            aesCred,
 	}
 
 	bootApp := bootstrap.Bootstrap{

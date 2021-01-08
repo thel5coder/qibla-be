@@ -3,7 +3,9 @@ package usecase
 import (
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/actions"
+	functionCaller "qibla-backend/pkg/functioncaller"
 	"qibla-backend/pkg/hashing"
+	"qibla-backend/pkg/logruslogger"
 	"qibla-backend/usecase/viewmodel"
 	"time"
 )
@@ -116,6 +118,19 @@ func (uc UserUseCase) EditFcmDeviceToken(ID, fcmDeviceToken string) (err error) 
 
 	_, err = repository.EditFcmDeviceToken(ID, fcmDeviceToken, now)
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc UserUseCase) EditIsActiveStatus(email string, isActive bool) (err error) {
+	repository := actions.NewUserRepository(uc.DB)
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	_, err = repository.EditIsActiveStatus(email, now, isActive)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(), functionCaller.PrintFuncName(),"query-user-editIsActiveStatus")
 		return err
 	}
 

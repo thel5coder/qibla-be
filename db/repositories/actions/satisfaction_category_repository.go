@@ -59,7 +59,7 @@ func (repository SatisfactionCategoryRepository) BrowseAllBy(filters map[string]
 		          SELECT sc.id,sc.parent_id,sc.slug,sc.name,sc.is_active,sc.description,sc.created_at,sc.updated_at
                   from satisfaction_categories sc inner join satisfactions s on s.id=sc.parent_id
 				  where sc.deleted_at is null ` + filterStatement + `
-                  )select * from satisfactions order by ` + order + ` ` + sort
+                  ) select * from satisfactions order by ` + order + ` ` + sort
 	rows, err := repository.DB.Query(statement)
 	if err != nil {
 		return data, err

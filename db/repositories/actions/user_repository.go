@@ -151,6 +151,13 @@ func (repository UserRepository) EditFcmDeviceToken(ID, deviceToken, updatedAt s
 	return res, err
 }
 
+func (repository UserRepository) EditIsActiveStatus(email, updatedAt string, status bool) (res string, err error) {
+	statement := `update "users" set "is_active"=$1, "updated_at"=$2 where "email"=$3 returning "id"`
+	err = repository.DB.QueryRow(statement, status, datetime.StrParseToTime(updatedAt, time.RFC3339), email).Scan(&res)
+
+	return res, err
+}
+
 func (repository UserRepository) Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error) {
 	statement := `insert into "users" 
                  ("username","name","profile_picture","email","mobile_phone","password","role_id","odo_user_id","is_active","is_admin_panel","created_at","updated_at") 

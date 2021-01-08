@@ -107,3 +107,12 @@ func(handler AuthenticationHandler) SetFingerPrintStatus(ctx echo.Context) error
 
 	return handler.SendResponse(ctx, nil, nil, err)
 }
+
+func(handler AuthenticationHandler) ActivationUserByCode(ctx echo.Context) error{
+	code := ctx.QueryParam("code")
+
+	uc := usecase.AuthenticationUseCase{UcContract: handler.UseCaseContract}
+	err := uc.ActivationUserByCode(code)
+
+	return handler.SendResponse(ctx,nil,nil,err)
+}

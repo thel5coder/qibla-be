@@ -133,6 +133,12 @@ func (uc AuthenticationUseCase) RegisterByEmail(input *requests.RegisterByMailRe
 	}
 	uc.TX.Commit()
 
+	err = uc.generateActivationKey(input.Email)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "uc-authentication-generateActivationKey")
+		return nil
+	}
+
 	return nil
 }
 
@@ -258,4 +264,43 @@ func (uc AuthenticationUseCase) registerUserByOauth(email, name, fcmDeviceToken 
 	}
 
 	return res, nil
+}
+
+//generate activation key
+func (uc AuthenticationUseCase) generateActivationKey(email string) (err error) {
+	code, err := uc.GenerateKeyFromAES(email)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functionCaller.PrintFuncName(), "uc-contract-generateKeyFromAes")
+		return err
+	}
+	url := os.Getenv("APP_FE_URL") + `/activation?code` + code
+	body := `klik link ini untuk melakukan aktivasi ` + url
+	uc.GoMailConfig.SendGoMail(email, "Aktivasi User Qibla", body)
+
+	return nil
+}
+
+//activation user from code/key
+func(uc AuthenticationUseCase) ActivationUserByCode(code string) (err error){
+	callBack := map[string]interface{}{}
+	err = uc.RedisClient.GetFromRedis("code-"+code,&callBack)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,messages.InvalidKey,functionCaller.PrintFuncName(),"uc-redis-getCodeActivation")
+		return errors.New(messages.InvalidKey)
+	}
+
+	userUc := UserUseCase{UcContract:uc.UcContract}
+	email := callBack["email"].(string)
+	err = userUc.EditIsActiveStatus(email,true)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-user-editIsActiveStatus")
+		return err
+	}
+
+	err = uc.RedisClient.RemoveFromRedis("code-"+code)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel,err.Error(),functionCaller.PrintFuncName(),"uc-redis-removeFromRedis")
+	}
+
+	return nil
 }

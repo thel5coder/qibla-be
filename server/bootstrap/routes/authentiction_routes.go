@@ -19,13 +19,14 @@ func (route AuthenticationRoutes) RegisterRoute() {
 	authenticationRoute.POST("/login", authenticationHandler.Login)
 	authenticationRoute.POST("/register", authenticationHandler.RegisterJamaahByEmail)
 	authenticationRoute.POST("/forgot", authenticationHandler.ForgotPassword)
-	authenticationRoute.POST("/register-by-gmail",authenticationHandler.RegisterByOauth)
-	authenticationRoute.POST("/oauth",authenticationHandler.RegisterByOauth)
+	authenticationRoute.POST("/register-by-gmail", authenticationHandler.RegisterByOauth)
+	authenticationRoute.POST("/oauth", authenticationHandler.RegisterByOauth)
+	authenticationRoute.GET("/code", authenticationHandler.ActivationUserByCode)
 
 	setPinRoute := authenticationRoute.Group("/set-pin")
 	setPinRoute.Use(jwtMiddleware.JWTWithConfig)
 	setPinRoute.POST("", authenticationHandler.SetPin)
 	setFingerPrintRoute := authenticationRoute.Group("/set-fingerprint")
 	setFingerPrintRoute.Use(jwtMiddleware.JWTWithConfig)
-	setFingerPrintRoute.POST("",authenticationHandler.SetFingerPrintStatus)
+	setFingerPrintRoute.POST("", authenticationHandler.SetFingerPrintStatus)
 }

@@ -7,6 +7,7 @@ import (
 	"google.golang.org/api/youtube/v3"
 	"math/rand"
 	"os"
+	"qibla-backend/pkg/aes"
 	queue "qibla-backend/pkg/amqp"
 	"qibla-backend/pkg/aws"
 	"qibla-backend/pkg/fcm"
@@ -80,27 +81,28 @@ var xRequestID interface{}
 
 // UcContract ...
 type UcContract struct {
-	ReqID              string
-	E                  *echo.Echo
-	DB                 *sql.DB
-	TX                 *sql.Tx
-	AmqpConn           *amqp.Connection
-	AmqpChannel        *amqp.Channel
-	RedisClient        redis.RedisClient
-	Jwe                jwe.Credential
-	Validate           *validator.Validate
-	Translator         ut.Translator
-	JwtConfig          middleware.JWTConfig
-	JwtCred            jwt.JwtCredential
-	Odoo               *odoo.Client
-	AWSS3              aws.AWSS3
-	Pusher             pusher.Credential
-	GoMailConfig       mailing.GoMailConfig
-	YoutubeService     *youtube.Service
-	UserID             string
-	Fcm                fcm.Connection
-	OdooDBConn         *sql.DB
-	Flip               flip.Credential
+	ReqID          string
+	E              *echo.Echo
+	DB             *sql.DB
+	TX             *sql.Tx
+	AmqpConn       *amqp.Connection
+	AmqpChannel    *amqp.Channel
+	RedisClient    redis.RedisClient
+	Jwe            jwe.Credential
+	Validate       *validator.Validate
+	Translator     ut.Translator
+	JwtConfig      middleware.JWTConfig
+	JwtCred        jwt.JwtCredential
+	Odoo           *odoo.Client
+	AWSS3          aws.AWSS3
+	Pusher         pusher.Credential
+	GoMailConfig   mailing.GoMailConfig
+	YoutubeService *youtube.Service
+	UserID         string
+	Fcm            fcm.Connection
+	OdooDBConn     *sql.DB
+	Flip           flip.Credential
+	AES            aes.Credential
 }
 
 func (uc UcContract) setPaginationParameter(page, limit int, order, sort string) (int, int, int, string, string) {
@@ -231,4 +233,22 @@ func (uc UcContract) InitDBTransaction() (err error) {
 	}
 
 	return nil
+}
+
+//code from aes
+func (uc UcContract) GenerateKeyFromAES(email string) (res string, err error) {
+	res, err = uc.AES.Encrypt(email)
+	if err != nil {
+		return res, err
+	}
+
+	redisBody := map[string]interface{}{
+		"email": email,
+	}
+	err = uc.RedisClient.StoreToRedistWithExpired("code-"+res, redisBody, "24h")
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
 }

@@ -23,6 +23,8 @@ type IUserRepository interface {
 
 	EditFcmDeviceToken(ID, fcmDeviceToken, updatedAt string) (res string, err error)
 
+	EditIsActiveStatus(email,updatedAt string,status bool) (res string,err error)
+
 	Add(input viewmodel.UserVm, password string, tx *sql.Tx) (res string, err error)
 
 	Delete(ID, updatedAt, deletedAt string, tx *sql.Tx) (err error)
