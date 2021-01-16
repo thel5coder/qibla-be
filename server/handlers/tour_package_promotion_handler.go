@@ -27,7 +27,7 @@ func (handler TourPackagePromotionHandler) ReadByPk(ctx echo.Context) error {
 	ID := ctx.Param("id")
 
 	uc := usecase.TourPackagePromotionUseCase{UcContract: handler.UseCaseContract}
-	res, err := uc.ReadBy("tpp.id", ID, "=")
+	res, err := uc.ReadBy("tpp.tour_package_id", ID, "=")
 
 	return handler.SendResponse(ctx, res, nil, err)
 }
