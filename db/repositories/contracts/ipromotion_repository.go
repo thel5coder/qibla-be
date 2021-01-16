@@ -13,9 +13,9 @@ type IPromotionRepository interface {
 
 	ReadBy(column, value string) (data models.Promotion, err error)
 
-	Edit(input viewmodel.PromotionVm, tx *sql.Tx) (res string, err error)
+	Edit(input viewmodel.PromotionTodayVm, tx *sql.Tx) (res string, err error)
 
-	Add(input viewmodel.PromotionVm, tx *sql.Tx) (res string, err error)
+	Add(input viewmodel.PromotionTodayVm, tx *sql.Tx) (res string, err error)
 
 	Delete(ID, updatedAt, deletedAt string, tx *sql.Tx) (res string, err error)
 

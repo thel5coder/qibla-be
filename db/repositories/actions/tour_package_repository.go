@@ -31,21 +31,13 @@ const (
 )
 
 func (repository TourPackageRepository) scanRows(rows *sql.Rows) (res models.TourPackage, err error) {
-	err = rows.Scan(&res.ID, &res.OdooPackageID, &res.Name, &res.DepartureDate, &res.ReturnDate, &res.PackageProgram, &res.OdooPackageProgramID, &res.ProgramDay, &res.Description, &res.Notes,
-		&res.CreatedAt, &res.UpdatedAt, &res.Hotels, &res.Meals, &res.Busses, &res.Airlines, &res.Prices)
-	if err != nil {
-		return res, err
-	}
+
 
 	return res, nil
 }
 
 func (repository TourPackageRepository) scanRow(row *sql.Row) (res models.TourPackage, err error) {
-	err = row.Scan(&res.ID, &res.OdooPackageID, &res.Name, &res.DepartureDate, &res.ReturnDate, &res.PackageProgram, &res.OdooPackageProgramID, &res.ProgramDay, &res.Description, &res.Notes,
-		&res.CreatedAt, &res.UpdatedAt, &res.Hotels, &res.Meals, &res.Busses, &res.Airlines, &res.Prices)
-	if err != nil {
-		return res, err
-	}
+
 
 	return res, nil
 }
@@ -80,23 +72,13 @@ func (repository TourPackageRepository) ReadBy(column, value, operator string) (
 }
 
 func (TourPackageRepository) Edit(input models.TourPackage, tx *sql.Tx) (err error) {
-	statement := `update "tour_packages" set name=$1, departure_date=$2, return_date=$3, description=$4, odoo_package_program_id=$5, package_program=$6, program_day=$7, notes=$8, updated_at=$9 where id=$10`
-	_, err = tx.Exec(statement, input.Name, input.DepartureDate, input.ReturnDate, input.Description, input.OdooPackageProgramID, input.PackageProgram, input.ProgramDay, input.Notes, input.UpdatedAt, input.ID)
-	if err != nil {
-		return err
-	}
+
 
 	return nil
 }
 
 func (TourPackageRepository) Add(input models.TourPackage, tx *sql.Tx) (res string, err error) {
-	statement := `insert into tour_packages (odoo_package_id,name,departure_date,return_date,description,partner_id,odoo_package_program_id,package_program,program_day,notes,created_at,
-                  updated_at) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning "id"`
-	err = tx.QueryRow(statement, input.OdooPackageID, input.Name, input.DepartureDate, input.ReturnDate, input.Description, input.PartnerID, input.OdooPackageProgramID, input.PackageProgram,
-		input.ProgramDay, input.Notes, input.CreatedAt, input.UpdatedAt).Scan(&res)
-	if err != nil {
-		return res, err
-	}
+
 
 	return res, nil
 }

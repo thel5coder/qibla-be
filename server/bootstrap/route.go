@@ -294,4 +294,11 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	zakatRoutes.RegisterRoute()
 
+	//promotion today
+	tourPackagePromotionRoutes := routes.TourPackagePromotionRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	tourPackagePromotionRoutes.RegisterRoute()
+
 }

@@ -1,6 +1,6 @@
 package viewmodel
 
-type PromotionVm struct {
+type PromotionTodayVm struct {
 	ID                   string                        `json:"id"`
 	PromotionPackageID   string                        `json:"promotion_package_id"`
 	PromotionPackageName string                        `json:"promotion_package_name"`
@@ -8,7 +8,7 @@ type PromotionVm struct {
 	StartDate            string                        `json:"start_date"`
 	EndDate              string                        `json:"end_date"`
 	Positions            []PromotionPlatformPositionVm `json:"positions"`
-	Platform             []PromotionPlatformVm         `json:"platform"`
+	Platform             []PromotionTodayPlatformVm    `json:"platform"`
 	Price                int                           `json:"price"`
 	Description          string                        `json:"description"`
 	IsActive             bool                          `json:"is_active"`
@@ -17,13 +17,13 @@ type PromotionVm struct {
 	DeletedAt            string                        `json:"deleted_at"`
 }
 
-type PromotionPlatformVm struct {
-	ID       string               `json:"id"`
-	Platform string               `json:"platform"`
-	Position []PlatformPositionVm `json:"position"`
+type PromotionTodayPlatformVm struct {
+	ID       string                             `json:"id"`
+	Platform string                             `json:"platform"`
+	Position []PromotionTodayPlatformPositionVm `json:"position"`
 }
 
-type PlatformPositionVm struct {
+type PromotionTodayPlatformPositionVm struct {
 	ID       string `json:"id"`
 	Position string `json:"position"`
 }

@@ -161,7 +161,7 @@ func (repository PromotionRepository) ReadBy(column, value string) (data models.
 	return data, err
 }
 
-func (PromotionRepository) Edit(input viewmodel.PromotionVm, tx *sql.Tx) (res string, err error) {
+func (PromotionRepository) Edit(input viewmodel.PromotionTodayVm, tx *sql.Tx) (res string, err error) {
 	statement := `update "promotions" set "promotion_package_id"=$1, "package_promotion"=$2, "start_date"=$3, "end_date"=$4, "price"=$5, "description"=$6, "updated_at"=$7, "is_active"=$8
                  where "id"=$9 returning "id"`
 	_, err = tx.Exec(
@@ -180,7 +180,7 @@ func (PromotionRepository) Edit(input viewmodel.PromotionVm, tx *sql.Tx) (res st
 	return res, err
 }
 
-func (PromotionRepository) Add(input viewmodel.PromotionVm, tx *sql.Tx) (res string, err error) {
+func (PromotionRepository) Add(input viewmodel.PromotionTodayVm, tx *sql.Tx) (res string, err error) {
 	statement := `insert into "promotions" ("promotion_package_id","package_promotion","start_date","end_date","price","description","created_at","updated_at","is_active")
                  values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning "id"`
 	err = tx.QueryRow(

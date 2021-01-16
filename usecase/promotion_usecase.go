@@ -15,7 +15,7 @@ type PromotionUseCase struct {
 	*UcContract
 }
 
-func (uc PromotionUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.PromotionVm, pagination viewmodel.PaginationVm, err error) {
+func (uc PromotionUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.PromotionTodayVm, pagination viewmodel.PaginationVm, err error) {
 	repository := actions.NewPromotionRepository(uc.DB)
 	promotionPlatformPositionUc := PromotionPlatformUseCase{UcContract: uc.UcContract}
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
@@ -27,7 +27,7 @@ func (uc PromotionUseCase) Browse(search, order, sort string, page, limit int) (
 
 	for _, promotion := range promotions {
 		promotionPlatforms, _ := promotionPlatformPositionUc.Browse(promotion.ID)
-		res = append(res, viewmodel.PromotionVm{
+		res = append(res, viewmodel.PromotionTodayVm{
 			ID:                   promotion.ID,
 			PromotionPackageID:   promotion.PromotionPackageID,
 			PromotionPackageName: promotion.PackageName,
@@ -49,7 +49,7 @@ func (uc PromotionUseCase) Browse(search, order, sort string, page, limit int) (
 	return res, pagination, err
 }
 
-func (uc PromotionUseCase) BrowseAll(filters map[string]interface{}) (res []viewmodel.PromotionVm,err error){
+func (uc PromotionUseCase) BrowseAll(filters map[string]interface{}) (res []viewmodel.PromotionTodayVm,err error){
 	repository := actions.NewPromotionRepository(uc.DB)
 
 	promotions,err := repository.BrowseAll(filters)
@@ -65,7 +65,7 @@ func (uc PromotionUseCase) BrowseAll(filters map[string]interface{}) (res []view
 	return res,err
 }
 
-func (uc PromotionUseCase) ReadBy(column, value string) (res viewmodel.PromotionVm, err error) {
+func (uc PromotionUseCase) ReadBy(column, value string) (res viewmodel.PromotionTodayVm, err error) {
 	repository := actions.NewPromotionRepository(uc.DB)
 	promotionPlatformPositionUc := PromotionPlatformUseCase{UcContract: uc.UcContract}
 
@@ -74,7 +74,7 @@ func (uc PromotionUseCase) ReadBy(column, value string) (res viewmodel.Promotion
 		return res, err
 	}
 	promotionPlatforms, _ := promotionPlatformPositionUc.Browse(promotion.ID)
-	res = viewmodel.PromotionVm{
+	res = viewmodel.PromotionTodayVm{
 		ID:                   promotion.ID,
 		PromotionPackageID:   promotion.PromotionPackageID,
 		PromotionPackageName: promotion.PackageName,
@@ -93,7 +93,7 @@ func (uc PromotionUseCase) ReadBy(column, value string) (res viewmodel.Promotion
 	return res, err
 }
 
-func (uc PromotionUseCase) ReadByPk(ID string) (res viewmodel.PromotionVm, err error) {
+func (uc PromotionUseCase) ReadByPk(ID string) (res viewmodel.PromotionTodayVm, err error) {
 	res, err = uc.ReadBy("p.id", ID)
 	if err != nil {
 		return res, err
@@ -124,7 +124,7 @@ func (uc PromotionUseCase) Edit(ID string, input *requests.PromotionRequest) (er
 		return err
 	}
 
-	body := viewmodel.PromotionVm{
+	body := viewmodel.PromotionTodayVm{
 		ID:                 ID,
 		PromotionPackageID: input.PromotionPackageID,
 		PackagePromotion:   input.PackagePromotion,
@@ -183,7 +183,7 @@ func (uc PromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
 		return err
 	}
 
-	body := viewmodel.PromotionVm{
+	body := viewmodel.PromotionTodayVm{
 		PromotionPackageID: input.PromotionPackageID,
 		PackagePromotion:   input.PackagePromotion,
 		StartDate:          input.StartDate,
@@ -282,13 +282,13 @@ func (uc PromotionUseCase) CountBy(ID, promotionPackageID, column, value string)
 	return res, err
 }
 
-func (uc PromotionUseCase) buildBody(model models.Promotion) viewmodel.PromotionVm {
-	var platformVm []viewmodel.PromotionPlatformVm
+func (uc PromotionUseCase) buildBody(model models.Promotion) viewmodel.PromotionTodayVm {
+	var platformVm []viewmodel.PromotionTodayPlatformVm
 
 	platforms := strings.Split(model.Platform, ",")
 	for _, platform := range platforms {
 		platformArr := strings.Split(platform, ":")
-		platformVm = append(platformVm, viewmodel.PromotionPlatformVm{
+		platformVm = append(platformVm, viewmodel.PromotionTodayPlatformVm{
 			ID:       platformArr[0],
 			Platform: platformArr[1],
 			Position: nil,
@@ -300,7 +300,7 @@ func (uc PromotionUseCase) buildBody(model models.Promotion) viewmodel.Promotion
 		positionArr := strings.Split(position, ":")
 		for i := 0; i < len(platformVm); i++ {
 			if positionArr[1] == platformVm[i].ID {
-				platformVm[i].Position = append(platformVm[i].Position, viewmodel.PlatformPositionVm{
+				platformVm[i].Position = append(platformVm[i].Position, viewmodel.PromotionTodayPlatformPositionVm{
 					ID:       positionArr[0],
 					Position: positionArr[2],
 				})
@@ -308,7 +308,7 @@ func (uc PromotionUseCase) buildBody(model models.Promotion) viewmodel.Promotion
 		}
 	}
 
-	return viewmodel.PromotionVm{
+	return viewmodel.PromotionTodayVm{
 		ID:                   model.ID,
 		PromotionPackageID:   model.PromotionPackageID,
 		PromotionPackageName: model.PackageName,

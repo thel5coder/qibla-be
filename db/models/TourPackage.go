@@ -6,25 +6,23 @@ import (
 )
 
 type TourPackage struct {
-	ID                     string       `db:"id"`
-	OdooPackageID          int32        `db:"odoo_package_id"`
-	OdooPackageProgramID   int32        `db:"odoo_package_program_id"`
-	PackageProgram         string       `db:"package_program"`
-	OdooPackageProgramName string       `db:"odoo_package_program_name"`
-	Name                   string       `db:"name"`
-	DepartureDate          time.Time    `db:"departure_date"`
-	ReturnDate             time.Time    `db:"return_date"`
-	ProgramDay             int32        `db:"program_day"`
-	Description            string       `db:"description"`
-	Notes                  string       `db:"notes"`
-	PartnerID              string       `db:"partner_id"`
-	PartnerName            string       `db:"partner_name"`
-	Hotels                 string       `db:"hotels"`
-	Meals                  string       `db:"meals"`
-	Airlines               string       `db:"airlines"`
-	Busses                 string       `db:"busses"`
-	Prices                 string       `db:"prices"`
-	CreatedAt              time.Time    `db:"created_at"`
-	UpdatedAt              time.Time    `db:"updated_at"`
-	DeletedAt              sql.NullTime `db:"deleted_at"`
+	ID                       string         `json:"id"`
+	OdooPackageID            string         `json:"odoo_package_id"`
+	Name                     string         `json:"name"`
+	DepartureDate            time.Time      `json:"departure_date"`
+	ReturnDate               time.Time      `json:"return_date"`
+	Description              sql.NullString `json:"description"`
+	CreatedAt                time.Time      `json:"created_at"`
+	UpdatedAt                time.Time      `json:"updated_at"`
+	DeletedAt                sql.NullTime   `json:"deleted_at"`
+	PartnerID                string         `json:"partner_id"`
+	PackageType              string         `json:"package_type"`
+	ProgramDay               int            `json:"program_day"`
+	Notes                    sql.NullString `json:"notes"`
+	Image                    sql.NullString `json:"image"`
+	DepartureAirport         string         `json:"departure_airport"`
+	DestinationAirport       string         `json:"destination_airport"`
+	ReturnDepartureAirport   string         `json:"return_departure_airport"`
+	ReturnDestinationAirport string         `json:"return_destination_airport"`
+	Quota                    int            `json:"quota"`
 }
