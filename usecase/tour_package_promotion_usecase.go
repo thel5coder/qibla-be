@@ -96,7 +96,7 @@ func (uc TourPackagePromotionUseCase) buildBody(model models.TourPackagePromotio
 	}
 
 	return viewmodel.TourPackagePromotionVm{
-		ID: model.ID,
+		ID: model.TourPackageID,
 		TravelAgent: viewmodel.TourPackagePromotionTravelAgentVm{
 			ID:     model.TravelAgentID,
 			Name:   model.TravelAgentName,

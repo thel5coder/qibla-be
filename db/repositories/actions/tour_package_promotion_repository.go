@@ -2,7 +2,6 @@ package actions
 
 import (
 	"database/sql"
-	"fmt"
 	"qibla-backend/db/models"
 	"qibla-backend/db/repositories/contracts"
 )
@@ -19,7 +18,7 @@ const (
 	tourPackagePromotionSelectStatement = `select tpp.id,tpp.tour_package_id,tpp.created_at,tpp.updated_at,tpp.deleted_at,tp.odoo_package_id,tp.name,tp.departure_date,tp.return_date,tp.description,tp.created_at,tp.updated_at,tp.deleted_at,
                                            tp.package_type,tp.program_day,tp.notes,tp.image,tp.departure_airport,tp.destination_airport,tp.return_departure_airport, tp.return_destination_airport,tp.quota,
                                            c.id,c.travel_agent_name,c.branch_name,c.area_code,c.phone_number,
-                                           array_to_string(array_agg(tph.id || ':' || tph.name || ':' || tph.rating || ':' || tph.location),','),
+                                           array_to_string(array_agg(tph.id || ':' || tph.name || ':' || tph.rating || ':' || coalesce(tph.location,'')),','),
                                            array_to_string(array_agg(tpr.id || ':' || tpr.room_type ||':'|| tpr.room_capacity ||':'|| tpr.price ||':'|| tpr.promo_price ||':'|| tpr.airline_class),',')`
 	tourPackagePromotionJoinStatement = `inner join promotion_purchases pp on pp.tour_package_promotion_id = tpp.id and pp.deleted_at is null
                                          inner join tour_packages tp on tp.id = tpp.tour_package_id and tp.deleted_at is null
@@ -55,7 +54,6 @@ func (repository TourPackagePromotionRepository) scanRow(row *sql.Row) (res mode
 
 func (repository TourPackagePromotionRepository) Browse(filters map[string]interface{}, order, sort string, limit, offset int) (data []models.TourPackagePromotion, count int, err error) {
 	statement := tourPackagePromotionSelectStatement + ` from tour_package_promotions tpp ` + tourPackagePromotionJoinStatement + ` ` + tourPackagePromotionWhereStatement + ` ` + tourPackagePromotionGroupByStatement + ` order by tp.created_at asc limit $1 offset $2`
-	fmt.Println(statement)
 	rows, err := repository.DB.Query(statement, limit, offset)
 	if err != nil {
 		return data, count, err
