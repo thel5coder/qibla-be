@@ -321,4 +321,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		Handler:    handlerType,
 	}
 	tripPlanRoutes.RegisterRoute()
+
+	//meet point routes
+	meetPointRoutes := routes.MeetPointRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	meetPointRoutes.RegisterRoute()
 }
