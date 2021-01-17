@@ -308,4 +308,17 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	userTourPurchaseRoutes.RegisterRoute()
 
+	//travel information routes
+	travelInformationRoutes := routes.TravelInformationRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	travelInformationRoutes.RegisterRoute()
+
+	//trip plan
+	tripPlanRoutes := routes.TripPlanRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	tripPlanRoutes.RegisterRoute()
 }

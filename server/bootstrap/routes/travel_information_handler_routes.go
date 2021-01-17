@@ -6,12 +6,12 @@ import (
 	"qibla-backend/server/middleware"
 )
 
-type TravelInformationHandlerRoutes struct {
+type TravelInformationRoutes struct {
 	RouteGroup *echo.Group
 	Handler    handlers.Handler
 }
 
-func (route TravelInformationHandlerRoutes) RegisterRoute() {
+func (route TravelInformationRoutes) RegisterRoute() {
 	handler := handlers.TravelInformationHandler{Handler: route.Handler}
 	jwtMiddleware := middleware.JwtVerify{UcContract: route.Handler.UseCaseContract}
 
