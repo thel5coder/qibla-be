@@ -23,4 +23,5 @@ func (route UserTourPurchaseRoutes) RegisterRoute() {
 	userTourPurchaseRoutes.POST("/registrant", handler.CreatePassenger)
 	userTourPurchaseRoutes.POST("/passenger-document", handler.CreateDocument)
 	userTourPurchaseRoutes.POST("/payment", handler.CreatePayment)
+	userTourPurchaseRoutes.POST("/request-cancel",handler.RequestCancelPurchase)
 }
