@@ -301,4 +301,11 @@ func (boot *Bootstrap) RegisterRouters() {
 	}
 	tourPackagePromotionRoutes.RegisterRoute()
 
+	//user tour purchase
+	userTourPurchaseRoutes := routes.UserTourPurchaseRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	userTourPurchaseRoutes.RegisterRoute()
+
 }
