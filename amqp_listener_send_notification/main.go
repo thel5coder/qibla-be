@@ -100,12 +100,16 @@ func main() {
 		Password: os.Getenv("DB_PASSWORD"),
 		Port:     os.Getenv("DB_PORT"),
 		SslMode:  os.Getenv("DB_SSL_MODE"),
+		MaxConnection:         str.StringToInt(os.Getenv("DB_MAX_CONNECTION")),
+		MaxIdleConnection:     str.StringToInt(os.Getenv("DB_MAX_IDLE_CONNECTION")),
+		MaxLifeTimeConnection: str.StringToInt(os.Getenv("DB_MAX_LIFETIME_CONNECTION")),
 	}
 
 	database, err := dbInfo.DbConnect()
 	if err != nil {
 		panic(err)
 	}
+	defer database.Close()
 
 	_, err = redisClient.Client.Ping().Result()
 	if err != nil {

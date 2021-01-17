@@ -10,21 +10,24 @@ import (
 )
 
 type Connection struct {
-	Host        string
-	DbName      string
-	User        string
-	Password    string
-	Port        string
-	Location    *time.Location
-	SslMode     string
-	SslCert     string
-	SslKey      string
-	SslRootCert string
+	Host                  string
+	DbName                string
+	User                  string
+	Password              string
+	Port                  string
+	Location              *time.Location
+	SslMode               string
+	SslCert               string
+	SslKey                string
+	SslRootCert           string
+	MaxConnection         int
+	MaxIdleConnection     int
+	MaxLifeTimeConnection int
 }
 
 func (c Connection) DbConnect() (*sql.DB, error) {
 	connStr := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=%s&TimeZone=UTC", c.User, c.Password, c.Host,c.Port, c.DbName, c.SslMode,
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s&TimeZone=UTC", c.User, c.Password, c.Host, c.Port, c.DbName, c.SslMode,
 	)
 
 	if c.SslMode == "require" {
@@ -34,6 +37,9 @@ func (c Connection) DbConnect() (*sql.DB, error) {
 		)
 	}
 	db, err := sql.Open("postgres", connStr)
+	db.SetMaxOpenConns(c.MaxConnection)
+	db.SetMaxIdleConns(c.MaxIdleConnection)
+	db.SetConnMaxLifetime(time.Duration(c.MaxLifeTimeConnection) * time.Second)
 
 	// migrations := &migrate.FileMigrationSource{
 	// 	Dir: "../db/migrations",

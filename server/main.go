@@ -84,12 +84,15 @@ func main() {
 
 	//setup db connection
 	dbInfo := db.Connection{
-		Host:     os.Getenv("DB_HOST"),
-		DbName:   os.Getenv("DB_NAME"),
-		User:     os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Port:     os.Getenv("DB_PORT"),
-		SslMode:  os.Getenv("DB_SSL_MODE"),
+		Host:                  os.Getenv("DB_HOST"),
+		DbName:                os.Getenv("DB_NAME"),
+		User:                  os.Getenv("DB_USER"),
+		Password:              os.Getenv("DB_PASSWORD"),
+		Port:                  os.Getenv("DB_PORT"),
+		SslMode:               os.Getenv("DB_SSL_MODE"),
+		MaxConnection:         str.StringToInt(os.Getenv("DB_MAX_CONNECTION")),
+		MaxIdleConnection:     str.StringToInt(os.Getenv("DB_MAX_IDLE_CONNECTION")),
+		MaxLifeTimeConnection: str.StringToInt(os.Getenv("DB_MAX_LIFETIME_CONNECTION")),
 	}
 	database, err := dbInfo.DbConnect()
 	if err != nil {
