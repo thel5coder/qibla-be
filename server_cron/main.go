@@ -76,7 +76,7 @@ func main() {
 	}
 
 	//setup db connection
-	dbInfo := db.Connection{
+	dbInfo := db.Connection {
 		Host:     os.Getenv("DB_HOST"),
 		DbName:   os.Getenv("DB_NAME"),
 		User:     os.Getenv("DB_USER"),

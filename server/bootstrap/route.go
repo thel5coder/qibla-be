@@ -328,4 +328,11 @@ func (boot *Bootstrap) RegisterRouters() {
 		Handler:    handlerType,
 	}
 	meetPointRoutes.RegisterRoute()
+
+	//jamaah routes
+	jamaahRoutes := routes.JamaahRoutes{
+		RouteGroup: apiV1,
+		Handler:    handlerType,
+	}
+	jamaahRoutes.RegisterRoute()
 }
