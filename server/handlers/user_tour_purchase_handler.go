@@ -3,9 +3,9 @@ package handlers
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo"
-	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"qibla-backend/server/requests"
+	"qibla-backend/usecase"
 )
 
 type UserTourPurchaseHandler struct {
@@ -23,14 +23,8 @@ func (handler UserTourPurchaseHandler) Read(ctx echo.Context) error {
 }
 
 //create tour purchase
-func (handler UserTourPurchaseHandler) CreatePurchase(ctx echo.Context) error {
-
-	return handler.SendResponse(ctx, uuid.NewV4(), nil, nil)
-}
-
-//create passenger/participant
-func (handler UserTourPurchaseHandler) CreatePassenger(ctx echo.Context) error {
-	input := new(requests.TourPurchaseCreatePassengerRequest)
+func (handler UserTourPurchaseHandler) CreatePurchase(ctx echo.Context) (err error) {
+	input := new(requests.CreatePurchaseRequest)
 
 	if err := ctx.Bind(input); err != nil {
 		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
@@ -39,15 +33,39 @@ func (handler UserTourPurchaseHandler) CreatePassenger(ctx echo.Context) error {
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 	}
 
-	var res []map[string]interface{}
-	for _, passenger := range input.Passengers {
-		res = append(res, map[string]interface{}{
-			"id":   uuid.NewV4(),
-			"name": passenger.Name,
-		})
+	handler.UseCaseContract.TX, err = handler.Db.Begin()
+	if err != nil {
+		handler.UseCaseContract.TX.Rollback()
+
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
 	}
+	uc := usecase.UserTourPurchaseUseCase{UcContract: handler.UseCaseContract}
+	res, err := uc.Add(input)
+	if err != nil {
+		handler.UseCaseContract.TX.Rollback()
+
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	handler.UseCaseContract.TX.Commit()
 
 	return handler.SendResponse(ctx, res, nil, nil)
+}
+
+//create passenger/participant
+func (handler UserTourPurchaseHandler) CreatePassenger(ctx echo.Context) error {
+	//input := new(requests.TourPurchaseCreatePassengerRequest)
+	//
+	//if err := ctx.Bind(input); err != nil {
+	//	return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	//}
+	//if err := handler.Validate.Struct(input); err != nil {
+	//	return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
+	//}
+	//
+	//uc := usecase.UserTourPurchaseUseCase{UcContract:handler.UseCaseContract}
+	//res,err := uc.Add(input)
+
+	return handler.SendResponse(ctx, nil, nil, nil)
 }
 
 //create document

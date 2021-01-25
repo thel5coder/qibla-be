@@ -757,7 +757,7 @@ ALTER TABLE "crm_boards" ADD FOREIGN KEY ("crm_story_id") REFERENCES "crm_storie
 
 ALTER TABLE "crm_boards" ADD FOREIGN KEY ("contact_id") REFERENCES "contacts" ("id");
 
-ALTER TABLE "user_tour_purchase_participants" ADD FOREIGN KEY ("tour_package_id") REFERENCES "tour_packages" ("id");
+ALTER TABLE "user_tour_purchase_participants" ADD FOREIGN KEY (user_tour_purchase__id) REFERENCES "tour_packages" ("id");
 
 ALTER TABLE "user_tour_purchases" ADD FOREIGN KEY ("tour_package_id") REFERENCES "tour_packages" ("id");
 
