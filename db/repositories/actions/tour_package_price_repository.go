@@ -27,7 +27,7 @@ func (repository TourPackagePriceRepository) scanRow(row *sql.Row) (res models.T
 }
 
 func (repository TourPackagePriceRepository) ReadBy(column, value, operator string) (data models.TourPackagePrice, err error) {
-	statement := tourPackagePriceSelectStatement + ` from tour_package_prices where ` + column + `` + operator + `$1 deleted_at is null`
+	statement := tourPackagePriceSelectStatement + ` from tour_package_prices where ` + column + `` + operator + `$1 and deleted_at is null`
 	row := repository.DB.QueryRow(statement, value)
 	data, err = repository.scanRow(row)
 	if err != nil {

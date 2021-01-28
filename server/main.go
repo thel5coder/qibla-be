@@ -209,6 +209,7 @@ func main() {
 
 	bootApp := bootstrap.Bootstrap{
 		E:               e,
+		Db:              database,
 		UseCaseContract: ucContract,
 		Jwe:             jweCredential,
 		Translator:      translator,
