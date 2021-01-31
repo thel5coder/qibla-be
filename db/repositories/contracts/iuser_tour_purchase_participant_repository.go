@@ -16,7 +16,7 @@ type IUserTourPurchaseParticipantRepository interface {
 
 	EditStatus(input viewmodel.UserTourPurchaseParticipantVm, tx *sql.Tx) (err error)
 
-	Add(input viewmodel.UserTourPurchaseParticipantVm, tx *sql.Tx) (res string, err error)
+	Add(model models.UserTourPurchaseParticipant, tx *sql.Tx) (res string, err error)
 
 	Delete(ID, updatedAt, deletedAt string, tx *sql.Tx) (err error)
 

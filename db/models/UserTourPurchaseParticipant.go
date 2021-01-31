@@ -1,6 +1,9 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+	"time"
+)
 
 // UserTourPurchaseParticipant ...
 type UserTourPurchaseParticipant struct {
@@ -13,7 +16,7 @@ type UserTourPurchaseParticipant struct {
 	IdentityNumber            sql.NullString `db:"identity_number"`
 	FullName                  sql.NullString `db:"full_name"`
 	Sex                       sql.NullString `db:"sex"`
-	BirthDate                 sql.NullString `db:"birth_date"`
+	BirthDate                 time.Time      `db:"birth_date"`
 	BirthPlace                sql.NullString `db:"birth_place"`
 	PhoneNumber               sql.NullString `db:"phone_number"`
 	CityID                    sql.NullString `db:"city_id"`
@@ -33,7 +36,7 @@ type UserTourPurchaseParticipant struct {
 	PassportFile              sql.NullString `db:"passport_file"`
 	IsDepart                  sql.NullBool   `db:"is_depart"`
 	Status                    sql.NullString `db:"status"`
-	CreatedAt                 string         `db:"created_at"`
-	UpdatedAt                 string         `db:"updated_at"`
-	DeletedAt                 sql.NullString `db:"deleted_at"`
+	CreatedAt                 time.Time      `db:"created_at"`
+	UpdatedAt                 time.Time      `db:"updated_at"`
+	DeletedAt                 sql.NullTime   `db:"deleted_at"`
 }

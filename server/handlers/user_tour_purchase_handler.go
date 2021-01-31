@@ -52,20 +52,33 @@ func (handler UserTourPurchaseHandler) CreatePurchase(ctx echo.Context) (err err
 }
 
 //create passenger/participant
-func (handler UserTourPurchaseHandler) CreatePassenger(ctx echo.Context) error {
-	//input := new(requests.TourPurchaseCreatePassengerRequest)
-	//
-	//if err := ctx.Bind(input); err != nil {
-	//	return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
-	//}
-	//if err := handler.Validate.Struct(input); err != nil {
-	//	return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
-	//}
-	//
-	//uc := usecase.UserTourPurchaseUseCase{UcContract:handler.UseCaseContract}
-	//res,err := uc.Add(input)
+func (handler UserTourPurchaseHandler) CreatePassenger(ctx echo.Context) (err error) {
+	input := new(requests.CreatePassengerRequest)
 
-	return handler.SendResponse(ctx, nil, nil, nil)
+	if err := ctx.Bind(input); err != nil {
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	if err := handler.Validate.Struct(input); err != nil {
+		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
+	}
+
+
+	handler.UseCaseContract.TX, err = handler.Db.Begin()
+	if err != nil {
+		handler.UseCaseContract.TX.Rollback()
+
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	uc := usecase.UserTourPurchaseUseCase{UcContract:handler.UseCaseContract}
+	res,err := uc.CreatePassenger(input)
+	if err != nil {
+		handler.UseCaseContract.TX.Rollback()
+
+		return handler.SendResponseBadRequest(ctx, http.StatusBadRequest, err.Error())
+	}
+	handler.UseCaseContract.TX.Commit()
+
+	return handler.SendResponse(ctx, res, nil, nil)
 }
 
 //create document

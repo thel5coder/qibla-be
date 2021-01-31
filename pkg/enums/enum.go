@@ -103,3 +103,5 @@ const KeyTransactionType6 = "pengecekan_status_pembayaran"
 
 var InvoiceStatusEnum = []string{"open","close","overdue"}
 
+var StatusUserTourParticipant = []string{"waiting-approval","approved","paid","cancel","re-schedule","replace"}
+

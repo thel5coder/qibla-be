@@ -77,31 +77,21 @@ func (repository UserTourPurchaseParticipantRepository) ReadBy(column, value str
 }
 
 // Add ...
-func (UserTourPurchaseParticipantRepository) Add(input viewmodel.UserTourPurchaseParticipantVm, tx *sql.Tx) (res string, err error) {
-	//statement := `INSERT INTO "user_tour_purchase_participants" (
-	//	"user_tour_purchase_id", "user_id", "is_new_jamaah", "identity_type", "identity_number", "full_name",
-	//	"sex", "birth_date", "birth_place", "phone_number", "city_id", "address", "kk_number",
-	//	"passport_number", "passport_name", "immigration_office", "passport_validity_period",
-	//	"national_id_file", "kk_file", "birth_certificate", "marriage_certificate", "photo_3x4", "photo_4x6",
-	//	"meningitis_free_certificate", "passport_file", "is_depart", "status", "created_at", "updated_at"
-	//) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29) returning "id"`
-	//err = tx.QueryRow(statement,
-	//	input.UserTourPurchaseID, input.UserID, input.IsNewJamaah, input.IdentityType, input.IdentityNumber,
-	//	input.FullName, input.Sex, input.BirthDate, input.PhoneNumber, str.EmptyString(input.CityID),
-	//	input.Address, input.KkNumber, input.PassportNumber, input.PassportName, input.ImmigrationOffice,
-	//	input.PassportValidityPeriod, str.EmptyString(input.NationalIDFile), str.EmptyString(input.KkFile),
-	//	str.EmptyString(input.BirthCertificate), str.EmptyString(input.MarriageCertificate),
-	//	str.EmptyString(input.Photo3x4), str.EmptyString(input.Photo4x6),
-	//	str.EmptyString(input.MeningitisFreeCertificate), str.EmptyString(input.PassportFile),
-	//	input.IsDepart, input.Status, datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
-	//	datetime.StrParseToTime(input.UpdatedAt, time.RFC3339),
-	//).Scan(&res)
+func (UserTourPurchaseParticipantRepository) Add(model models.UserTourPurchaseParticipant, tx *sql.Tx) (res string, err error) {
+	statement := `INSERT INTO "user_tour_purchase_participants" (
+		user_tour_purchase_id, "user_id", "identity_type", "identity_number", "full_name",
+		"sex", "birth_date", "birth_place", "phone_number", "city_id", "address", status,"created_at", "updated_at"
+	) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$12,$13,$14) returning "id"`
+	err = tx.QueryRow(statement,
+		model.UserTourPurchaseID, model.UserID, model.IdentityType, model.IdentityNumber, model.FullName, model.Sex, model.BirthDate, model.BirthPlace, model.PhoneNumber, model.CityID.String,
+		model.Address, model.Status, model.CreatedAt,model.UpdatedAt,
+	).Scan(&res)
 
 	return res, err
 }
 
 // Edit ...
-func (UserTourPurchaseParticipantRepository) Edit(input viewmodel.UserTourPurchaseParticipantVm, tx *sql.Tx) (err error) {
+func (UserTourPurchaseParticipantRepository) Edit(model viewmodel.UserTourPurchaseParticipantVm, tx *sql.Tx) (err error) {
 	//statement := `UPDATE "user_tour_purchase_participants" set "user_tour_purchase_id" = $1, "user_id" = $2,
 	//"is_new_jamaah" = $3, "identity_type" = $4, "identity_number" = $5, "full_name" = $6,
 	//"sex" = $7, "birth_date" = $8, "birth_place" = $9, "phone_number" = $10, "city_id" = $11, "address" = $12,
@@ -111,26 +101,26 @@ func (UserTourPurchaseParticipantRepository) Edit(input viewmodel.UserTourPurcha
 	//"passport_file" = $24, "is_depart" = $25, "status" = $26, "updated_at" = $27 WHERE "id" = $28
 	//AND "deleted_at" IS NULL`
 	//_, err = tx.Exec(statement,
-	//	input.UserTourPurchaseID, input.UserID, input.IsNewJamaah, input.IdentityType, input.IdentityNumber,
-	//	input.FullName, input.Sex, input.BirthDate, input.PhoneNumber, str.EmptyString(input.CityID),
-	//	input.Address, input.KkNumber, input.PassportNumber, input.PassportName, input.ImmigrationOffice,
-	//	input.PassportValidityPeriod, str.EmptyString(input.NationalIDFile), str.EmptyString(input.KkFile),
-	//	str.EmptyString(input.BirthCertificate), str.EmptyString(input.MarriageCertificate),
-	//	str.EmptyString(input.Photo3x4), str.EmptyString(input.Photo4x6),
-	//	str.EmptyString(input.MeningitisFreeCertificate), str.EmptyString(input.PassportFile),
-	//	input.IsDepart, input.Status, datetime.StrParseToTime(input.CreatedAt, time.RFC3339),
-	//	datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID,
+	//	model.UserTourPurchaseID, model.UserID, model.IsNewJamaah, model.IdentityType, model.IdentityNumber,
+	//	model.FullName, model.Sex, model.BirthDate, model.PhoneNumber, str.EmptyString(model.CityID),
+	//	model.Address, model.KkNumber, model.PassportNumber, model.PassportName, model.ImmigrationOffice,
+	//	model.PassportValidityPeriod, str.EmptyString(model.NationalIDFile), str.EmptyString(model.KkFile),
+	//	str.EmptyString(model.BirthCertificate), str.EmptyString(model.MarriageCertificate),
+	//	str.EmptyString(model.Photo3x4), str.EmptyString(model.Photo4x6),
+	//	str.EmptyString(model.MeningitisFreeCertificate), str.EmptyString(model.PassportFile),
+	//	model.IsDepart, model.Status, datetime.StrParseToTime(model.CreatedAt, time.RFC3339),
+	//	datetime.StrParseToTime(model.UpdatedAt, time.RFC3339), model.ID,
 	//)
 
 	return err
 }
 
 // EditStatus ...
-func (UserTourPurchaseParticipantRepository) EditStatus(input viewmodel.UserTourPurchaseParticipantVm, tx *sql.Tx) (err error) {
+func (UserTourPurchaseParticipantRepository) EditStatus(model viewmodel.UserTourPurchaseParticipantVm, tx *sql.Tx) (err error) {
 	//statement := `UPDATE "user_tour_purchase_participants" set "status"=$1, "updated_at"=$2
 	//WHERE "id"=$3 AND "deleted_at" IS NULL`
 	//_, err = tx.Exec(statement,
-	//	input.Status, datetime.StrParseToTime(input.UpdatedAt, time.RFC3339), input.ID,
+	//	model.Status, datetime.StrParseToTime(model.UpdatedAt, time.RFC3339), model.ID,
 	//)
 
 	return err

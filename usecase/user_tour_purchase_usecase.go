@@ -8,6 +8,7 @@ import (
 	"qibla-backend/pkg/functioncaller"
 	"qibla-backend/pkg/logruslogger"
 	"qibla-backend/server/requests"
+	"qibla-backend/usecase/viewmodel"
 	"time"
 )
 
@@ -40,8 +41,8 @@ func (uc UserTourPurchaseUseCase) Add(input *requests.CreatePurchaseRequest) (re
 		return res, err
 	}
 
-	userTourPurchaseRoomUc := UserTourPurchaseRoomUseCase{UcContract:uc.UcContract}
-	err = userTourPurchaseRoomUc.Store(res,input.RoomRates)
+	userTourPurchaseRoomUc := UserTourPurchaseRoomUseCase{UcContract: uc.UcContract}
+	err = userTourPurchaseRoomUc.Store(res, input.RoomRates)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-userTourPurchaseRoom-store")
 		return res, err
@@ -50,8 +51,8 @@ func (uc UserTourPurchaseUseCase) Add(input *requests.CreatePurchaseRequest) (re
 	return res, nil
 }
 
-// Update ...
-func (uc UserTourPurchaseUseCase) Update(input *requests.CreatePassengerRequest) (res map[string]interface{}, err error) {
+// CreatePassenger ...
+func (uc UserTourPurchaseUseCase) CreatePassenger(input *requests.CreatePassengerRequest) (res []viewmodel.UserTourParticipantResVm, err error) {
 	repository := actions.NewUserTourPurchaseRepository(uc.DB)
 	now := time.Now().UTC()
 
@@ -72,12 +73,33 @@ func (uc UserTourPurchaseUseCase) Update(input *requests.CreatePassengerRequest)
 	err = repository.Edit(model, uc.TX)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-userTourPurchase-edit")
-		return
+		return res,err
 	}
 
-	res = map[string]interface{}{
-		"package_purchase_id": input.PackagePurchaseID,
-		"passengers":          []string{""},
+	for i := 0; i < len(input.Passengers); i++ {
+		if input.Passengers[i].IsRegistrant {
+			input.Passengers[i] = requests.PassengerRequest{
+				IsRegistrant:   input.Passengers[i].IsRegistrant,
+				Email:          input.Passengers[i].Email,
+				TypeOfIdentity: input.Registrant.TypeOfIdentity,
+				IdentityNumber: input.Registrant.IdentityNumber,
+				Name:           input.Registrant.Name,
+				Sex:            input.Registrant.Sex,
+				BirthDate:      input.Registrant.BirthDate,
+				BirthPlace:     input.Registrant.BirthPlace,
+				Phone:          input.Registrant.Phone,
+				Address:        input.Registrant.Address,
+				CityID:         input.Registrant.CityID,
+				MaritalStatus:  input.Registrant.MaritalStatus,
+			}
+		}
+	}
+
+	userTourPurchaseParticipantUc := UserTourPurchaseParticipantUseCase{UcContract:uc.UcContract}
+	res,err = userTourPurchaseParticipantUc.Store(input.Passengers,input.PackagePurchaseID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-userTourPurchaseParticipant-store")
+		return res,err
 	}
 
 	return res, nil
