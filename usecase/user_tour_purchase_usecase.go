@@ -119,3 +119,8 @@ func (uc UserTourPurchaseUseCase) CreatePassenger(input *requests.CreatePassenge
 
 	return res, nil
 }
+
+//create document
+func(uc UserTourPurchaseUseCase) CreateDocument() {
+
+}
