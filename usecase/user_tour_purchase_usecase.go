@@ -18,7 +18,7 @@ type UserTourPurchaseUseCase struct {
 }
 
 // Add ...
-func (uc UserTourPurchaseUseCase) Add(input *requests.CreatePurchaseRequest) (res string, err error) {
+func (uc UserTourPurchaseUseCase) Add(input *requests.CreatePurchaseRequest) (res viewmodel.UserTourPurchaseRespVm, err error) {
 	repository := actions.NewUserTourPurchaseRepository(uc.DB)
 	now := time.Now().UTC()
 
@@ -35,18 +35,33 @@ func (uc UserTourPurchaseUseCase) Add(input *requests.CreatePurchaseRequest) (re
 		CreatedAt:     now,
 		UpdatedAt:     now,
 	}
-	res, err = repository.Add(model, uc.TX)
+	res.UserTourPurchaseID, err = repository.Add(model, uc.TX)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-userTourPurchase-add")
 		return res, err
 	}
 
 	userTourPurchaseRoomUc := UserTourPurchaseRoomUseCase{UcContract: uc.UcContract}
-	err = userTourPurchaseRoomUc.Store(res, input.RoomRates)
+	err = userTourPurchaseRoomUc.Store(res.UserTourPurchaseID, input.RoomRates)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-userTourPurchaseRoom-store")
 		return res, err
 	}
+
+	var roomRatesRespVm []viewmodel.RoomRatesRespVM
+	for _,roomRate := range input.RoomRates {
+		roomRateRes,err := tourPackagePriceUc.ReadBy("id",roomRate.ID,"=")
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel,err.Error(),functioncaller.PrintFuncName(),"uc-tourPackagePrice-readByID")
+			return res,err
+		}
+		roomRatesRespVm = append(roomRatesRespVm,viewmodel.RoomRatesRespVM{
+			ID:       roomRate.ID,
+			Name:     roomRateRes.RoomType,
+			Quantity: roomRate.Quantity,
+		})
+	}
+	res.RoomRates = roomRatesRespVm
 
 	return res, nil
 }
