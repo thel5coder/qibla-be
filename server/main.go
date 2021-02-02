@@ -188,6 +188,7 @@ func main() {
 	ucContract := usecase.UcContract{
 		ReqID:          xid.New().String(),
 		E:              e,
+		TX:             nil,
 		DB:             database,
 		RedisClient:    redisClient,
 		Jwe:            jweCredential,

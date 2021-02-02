@@ -43,7 +43,7 @@ func (uc UserTourPurchaseParticipantUseCase) add(input requests.PassengerRequest
 
 	//set user
 	roleUc := RoleUseCase{UcContract: uc.UcContract}
-	role, err := roleUc.ReadBy("jamaah", "=")
+	role, err := roleUc.ReadBy("slug", "jamaah")
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-role-readBySlug")
 		return res, err

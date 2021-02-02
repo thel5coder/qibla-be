@@ -79,12 +79,12 @@ func (repository UserTourPurchaseParticipantRepository) ReadBy(column, value str
 // Add ...
 func (UserTourPurchaseParticipantRepository) Add(model models.UserTourPurchaseParticipant, tx *sql.Tx) (res string, err error) {
 	statement := `INSERT INTO "user_tour_purchase_participants" (
-		user_tour_purchase_id, "user_id", "identity_type", "identity_number", "full_name",
-		"sex", "birth_date", "birth_place", "phone_number", "city_id", "address", status,"created_at", "updated_at"
-	) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$12,$13,$14) returning "id"`
+		"user_tour_purchase_id", "user_id", "identity_type", "identity_number", "full_name",
+		"sex", "birth_date", "birth_place", "phone_number", "city_id", "address", "status","created_at", "updated_at"
+	) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) returning "id"`
 	err = tx.QueryRow(statement,
-		model.UserTourPurchaseID, model.UserID, model.IdentityType, model.IdentityNumber, model.FullName, model.Sex, model.BirthDate, model.BirthPlace, model.PhoneNumber, model.CityID.String,
-		model.Address, model.Status, model.CreatedAt,model.UpdatedAt,
+		model.UserTourPurchaseID.String, model.UserID.String, model.IdentityType.String, model.IdentityNumber.String, model.FullName.String, model.Sex.String, model.BirthDate, model.BirthPlace.String, model.PhoneNumber.String, model.CityID.String,
+		model.Address.String, model.Status.String, model.CreatedAt,model.UpdatedAt,
 	).Scan(&res)
 
 	return res, err

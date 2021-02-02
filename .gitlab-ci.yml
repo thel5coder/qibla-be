@@ -212,6 +212,7 @@ finish:five:
   script:
     - ssh -tq ${SERVER_DEV} "cd ${SRC_DEV}/${SRC_DISBURSEMENT_MUTATION} && docker-compose up -d"
   only:
+
     - dev
 
 finish:six:

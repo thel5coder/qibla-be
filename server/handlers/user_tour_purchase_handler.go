@@ -62,7 +62,6 @@ func (handler UserTourPurchaseHandler) CreatePassenger(ctx echo.Context) (err er
 		return handler.SendResponseErrorValidation(ctx, err.(validator.ValidationErrors))
 	}
 
-
 	handler.UseCaseContract.TX, err = handler.Db.Begin()
 	if err != nil {
 		handler.UseCaseContract.TX.Rollback()
