@@ -122,7 +122,7 @@ func (repository SettingPromotionRepository) BrowseAll(filters map[string]interf
 		filterStatement += ` and lower(p.package_promotion) = '`+val.(string)+`'`
 	}
 
-	statement := promotionSelectStatement +` from "promotions" p `+promotionJoinStatement+` where p."deleted_at" is nullO`+filterStatement+` `+promotionGroupByStatement
+	statement := promotionSelectStatement +` from "promotions" p `+promotionJoinStatement+` where p."deleted_at" is null `+filterStatement+` `+promotionGroupByStatement
 	rows,err := repository.DB.Query(statement)
 	if err != nil {
 		return data,err
