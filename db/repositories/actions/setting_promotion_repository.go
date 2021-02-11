@@ -11,12 +11,12 @@ import (
 	"time"
 )
 
-type PromotionRepository struct {
+type SettingPromotionRepository struct {
 	DB *sql.DB
 }
 
-func NewPromotionRepository(DB *sql.DB) contracts.IPromotionRepository {
-	return &PromotionRepository{DB: DB}
+func NewSettingPromotionRepository(DB *sql.DB) contracts.ISettingPromotionRepository {
+	return &SettingPromotionRepository{DB: DB}
 }
 
 const (
@@ -29,7 +29,7 @@ const (
 	promotionGroupByStatement = `GROUP BY p."id",pp."id"`
 )
 
-func (repository PromotionRepository) scanRows(rows *sql.Rows) (res models.Promotion,err error){
+func (repository SettingPromotionRepository) scanRows(rows *sql.Rows) (res models.Promotion,err error){
 	err = rows.Scan(&res.ID,&res.PromotionPackageID,&res.PackageName,&res.PackagePromotionSlug,&res.PackagePromotion,&res.StartDate,&res.EndDate,&res.Price,&res.Description,&res.Platform,
 		&res.Position)
 	if err != nil {
@@ -39,7 +39,7 @@ func (repository PromotionRepository) scanRows(rows *sql.Rows) (res models.Promo
 	return res,nil
 }
 
-func (repository PromotionRepository) scanRow(row *sql.Row) (res models.Promotion,err error){
+func (repository SettingPromotionRepository) scanRow(row *sql.Row) (res models.Promotion,err error){
 	err = row.Scan(&res.ID,&res.PromotionPackageID,&res.PackagePromotion,&res.PackagePromotionSlug,&res.PackageName,&res.StartDate,&res.EndDate,&res.Price,&res.Description,&res.Platform,
 		&res.Position)
 	if err != nil {
@@ -49,7 +49,7 @@ func (repository PromotionRepository) scanRow(row *sql.Row) (res models.Promotio
 	return res,nil
 }
 
-func (repository PromotionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Promotion, count int, err error) {
+func (repository SettingPromotionRepository) Browse(search, order, sort string, limit, offset int) (data []models.Promotion, count int, err error) {
 	statement := `select p.*, pp."name" from "promotions" p
                  inner join "master_promotions" pp on pp."id"=p."promotion_package_id"
                  where (lower(pp."name") like $1 or lower(p."package_promotion") like $1 or cast(p."price" as varchar) like $1 or lower("description") like $1) 
@@ -94,7 +94,7 @@ func (repository PromotionRepository) Browse(search, order, sort string, limit, 
 	return data, count, err
 }
 
-func (repository PromotionRepository) BrowseAll(filters map[string]interface{}) (data []models.Promotion, err error) {
+func (repository SettingPromotionRepository) BrowseAll(filters map[string]interface{}) (data []models.Promotion, err error) {
 	var filterStatement string
 	if val,ok := filters["position"];ok {
 		filterStatement += ` and lower(pos.position) = '`+val.(string)+`'`
@@ -138,7 +138,7 @@ func (repository PromotionRepository) BrowseAll(filters map[string]interface{}) 
 	return data,err
 }
 
-func (repository PromotionRepository) ReadBy(column, value string) (data models.Promotion, err error) {
+func (repository SettingPromotionRepository) ReadBy(column, value string) (data models.Promotion, err error) {
 	statement := `select p.*, pp."name" from "promotions" p 
                  inner join "master_promotions" pp on pp."id"=p."promotion_package_id"
                  where ` + column + `=$1
@@ -161,7 +161,7 @@ func (repository PromotionRepository) ReadBy(column, value string) (data models.
 	return data, err
 }
 
-func (PromotionRepository) Edit(input viewmodel.PromotionTodayVm, tx *sql.Tx) (res string, err error) {
+func (SettingPromotionRepository) Edit(input viewmodel.PromotionTodayVm, tx *sql.Tx) (res string, err error) {
 	statement := `update "promotions" set "promotion_package_id"=$1, "package_promotion"=$2, "start_date"=$3, "end_date"=$4, "price"=$5, "description"=$6, "updated_at"=$7, "is_active"=$8
                  where "id"=$9 returning "id"`
 	_, err = tx.Exec(
@@ -180,7 +180,7 @@ func (PromotionRepository) Edit(input viewmodel.PromotionTodayVm, tx *sql.Tx) (r
 	return res, err
 }
 
-func (PromotionRepository) Add(input viewmodel.PromotionTodayVm, tx *sql.Tx) (res string, err error) {
+func (SettingPromotionRepository) Add(input viewmodel.PromotionTodayVm, tx *sql.Tx) (res string, err error) {
 	statement := `insert into "promotions" ("promotion_package_id","package_promotion","start_date","end_date","price","description","created_at","updated_at","is_active")
                  values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning "id"`
 	err = tx.QueryRow(
@@ -199,14 +199,14 @@ func (PromotionRepository) Add(input viewmodel.PromotionTodayVm, tx *sql.Tx) (re
 	return res, err
 }
 
-func (PromotionRepository) Delete(ID, updatedAt, deletedAt string, tx *sql.Tx) (res string, err error) {
+func (SettingPromotionRepository) Delete(ID, updatedAt, deletedAt string, tx *sql.Tx) (res string, err error) {
 	statement := `update "promotions" set "updated_at"=$1, "deleted_at"=$2 where "id"=$3 returning "id"`
 	_, err = tx.Exec(statement, datetime.StrParseToTime(updatedAt, time.RFC3339), datetime.StrParseToTime(deletedAt, time.RFC3339), ID)
 
 	return res, err
 }
 
-func (repository PromotionRepository) CountBy(ID, promotionPackageID, column, value string) (res int, err error) {
+func (repository SettingPromotionRepository) CountBy(ID, promotionPackageID, column, value string) (res int, err error) {
 	if ID == "" {
 		if promotionPackageID == ""{
 			statement := `select count(p."id") from "promotions" p 

@@ -11,12 +11,12 @@ import (
 	"time"
 )
 
-type PromotionUseCase struct {
+type SettingPromotionUseCase struct {
 	*UcContract
 }
 
-func (uc PromotionUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.PromotionTodayVm, pagination viewmodel.PaginationVm, err error) {
-	repository := actions.NewPromotionRepository(uc.DB)
+func (uc SettingPromotionUseCase) Browse(search, order, sort string, page, limit int) (res []viewmodel.PromotionTodayVm, pagination viewmodel.PaginationVm, err error) {
+	repository := actions.NewSettingPromotionRepository(uc.DB)
 	promotionPlatformPositionUc := PromotionPlatformUseCase{UcContract: uc.UcContract}
 	offset, limit, page, order, sort := uc.setPaginationParameter(page, limit, order, sort)
 
@@ -49,8 +49,8 @@ func (uc PromotionUseCase) Browse(search, order, sort string, page, limit int) (
 	return res, pagination, err
 }
 
-func (uc PromotionUseCase) BrowseAll(filters map[string]interface{}) (res []viewmodel.PromotionTodayVm,err error){
-	repository := actions.NewPromotionRepository(uc.DB)
+func (uc SettingPromotionUseCase) BrowseAll(filters map[string]interface{}) (res []viewmodel.PromotionTodayVm,err error){
+	repository := actions.NewSettingPromotionRepository(uc.DB)
 
 	promotions,err := repository.BrowseAll(filters)
 	if err != nil {
@@ -65,8 +65,8 @@ func (uc PromotionUseCase) BrowseAll(filters map[string]interface{}) (res []view
 	return res,err
 }
 
-func (uc PromotionUseCase) ReadBy(column, value string) (res viewmodel.PromotionTodayVm, err error) {
-	repository := actions.NewPromotionRepository(uc.DB)
+func (uc SettingPromotionUseCase) ReadBy(column, value string) (res viewmodel.PromotionTodayVm, err error) {
+	repository := actions.NewSettingPromotionRepository(uc.DB)
 	promotionPlatformPositionUc := PromotionPlatformUseCase{UcContract: uc.UcContract}
 
 	promotion, err := repository.ReadBy(column, value)
@@ -93,7 +93,7 @@ func (uc PromotionUseCase) ReadBy(column, value string) (res viewmodel.Promotion
 	return res, err
 }
 
-func (uc PromotionUseCase) ReadByPk(ID string) (res viewmodel.PromotionTodayVm, err error) {
+func (uc SettingPromotionUseCase) ReadByPk(ID string) (res viewmodel.PromotionTodayVm, err error) {
 	res, err = uc.ReadBy("p.id", ID)
 	if err != nil {
 		return res, err
@@ -102,8 +102,8 @@ func (uc PromotionUseCase) ReadByPk(ID string) (res viewmodel.PromotionTodayVm, 
 	return res, err
 }
 
-func (uc PromotionUseCase) Edit(ID string, input *requests.PromotionRequest) (err error) {
-	repository := actions.NewPromotionRepository(uc.DB)
+func (uc SettingPromotionUseCase) Edit(ID string, input *requests.PromotionRequest) (err error) {
+	repository := actions.NewSettingPromotionRepository(uc.DB)
 	promotionPlatformUc := PromotionPlatformUseCase{UcContract: uc.UcContract}
 	now := time.Now().UTC().Format(time.RFC3339)
 	var promotionPlatformBody []viewmodel.PromotionPlatformPositionVm
@@ -160,8 +160,8 @@ func (uc PromotionUseCase) Edit(ID string, input *requests.PromotionRequest) (er
 	return nil
 }
 
-func (uc PromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
-	repository := actions.NewPromotionRepository(uc.DB)
+func (uc SettingPromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
+	repository := actions.NewSettingPromotionRepository(uc.DB)
 	promotionPlatformUc := PromotionPlatformUseCase{UcContract: uc.UcContract}
 	now := time.Now().UTC().Format(time.RFC3339)
 	var promotionPlatformBody []viewmodel.PromotionPlatformPositionVm
@@ -220,8 +220,8 @@ func (uc PromotionUseCase) Add(input *requests.PromotionRequest) (err error) {
 	return nil
 }
 
-func (uc PromotionUseCase) Delete(ID string) (err error) {
-	repository := actions.NewPromotionRepository(uc.DB)
+func (uc SettingPromotionUseCase) Delete(ID string) (err error) {
+	repository := actions.NewSettingPromotionRepository(uc.DB)
 	promotionPlatformUc := PromotionPlatformUseCase{UcContract: uc.UcContract}
 	promotionPositionUc := PromotionPositionUseCase{UcContract: uc.UcContract}
 	now := time.Now().UTC().Format(time.RFC3339)
@@ -272,8 +272,8 @@ func (uc PromotionUseCase) Delete(ID string) (err error) {
 	return nil
 }
 
-func (uc PromotionUseCase) CountBy(ID, promotionPackageID, column, value string) (res int, err error) {
-	repository := actions.NewPromotionRepository(uc.DB)
+func (uc SettingPromotionUseCase) CountBy(ID, promotionPackageID, column, value string) (res int, err error) {
+	repository := actions.NewSettingPromotionRepository(uc.DB)
 	res, err = repository.CountBy(ID, promotionPackageID, column, value)
 	if err != nil {
 		return res, err
@@ -282,7 +282,7 @@ func (uc PromotionUseCase) CountBy(ID, promotionPackageID, column, value string)
 	return res, err
 }
 
-func (uc PromotionUseCase) buildBody(model models.Promotion) viewmodel.PromotionTodayVm {
+func (uc SettingPromotionUseCase) buildBody(model models.Promotion) viewmodel.PromotionTodayVm {
 	var platformVm []viewmodel.PromotionTodayPlatformVm
 
 	platforms := strings.Split(model.Platform, ",")

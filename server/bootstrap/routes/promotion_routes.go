@@ -12,7 +12,7 @@ type PromotionRoutes struct {
 }
 
 func (route PromotionRoutes) RegisterRoute() {
-	handler := handlers.PromotionHandler{Handler: route.Handler}
+	handler := handlers.SettingPromotionHandler{Handler: route.Handler}
 	jwtMiddleware := middleware.JwtVerify{UcContract: route.Handler.UseCaseContract}
 
 	promotionRoute := route.RouteGroup.Group("/promotion")
