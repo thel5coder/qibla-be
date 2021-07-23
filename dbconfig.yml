@@ -1,4 +1,0 @@
-development:
-  dialect: postgres
-  datasource: postgres://postgres:v1d14ry4@127.0.0.1:5432/db_qibla_panel?sslmode=disable&TimeZone=UTC
-  dir: db/migrations

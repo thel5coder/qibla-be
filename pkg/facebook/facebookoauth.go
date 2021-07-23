@@ -9,7 +9,7 @@ import (
 )
 
 // OauthFacebookURLAPI ...
-const OauthFacebookURLAPI = "https://graph.facebook.com/me?fields=id,name,email&access_token="
+const OauthFacebookURLAPI = "https://graph.facebook.com/me?fields=id,name,email,gender&access_token="
 
 // GetFacebookProfile ...
 func GetFacebookProfile(token string) (res map[string]interface{}, err error) {
